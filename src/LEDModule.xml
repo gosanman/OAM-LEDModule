@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<KNX xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" CreatedBy="KNX MT" ToolVersion="5.6.241.33672" xmlns="http://knx.org/xml/project/14">
+  <ManufacturerData>
+    <Manufacturer RefId="M-00FA">
+      <Catalog>
+        <CatalogSection Id="M-00FA_CS-1" Name="Geräte" Number="1" defaultLanguage="de">
+          <CatalogItem Id="M-00FA_H-0-0_HP-0000-0A-0000_CI-0-1" Name="HDC1008 TPC" Number="1" ProductRefId="M-00FA_H-0-0_P-0" Hardware2ProgramRefId="M-00FA_H-0-0_HP-0000-0A-0000" defaultLanguage="de" />
+        </CatalogSection>
+      </Catalog>
+      <ApplicationPrograms>
+        <ApplicationProgram Id="M-00FA_A-0000-0A-0000" ApplicationNumber="0" ApplicationVersion="10" ProgramType="ApplicationProgram" MaskVersion="MV-07B0" Name="TP" LoadProcedureStyle="MergedProcedure" PeiType="0" defaultLanguage="de" DynamicTableManagemdet="false" Linkable="false" MinEtsVersion="4.0">
+          <Static>
+            <Code>
+              <RelativeSegmdet Id="M-00FA_A-0000-0A-0000_RS-04-00000" Name="Parameters" Offset="0" Size="256" LoadStateMachine="4" />
+            </Code>
+			
+			
+			
+			<ParameterTypes>
+              <ParameterType Id="M-00FA_A-AF00-01-4C63_PT-PT.5FOperatingMode" Name="PT_OperatingMode">
+                <TypeRestriction Base="Value" SizeInBit="3">
+                  <Enumeration Text="5x Einzelkanal" Value="1" Id="M-00FA_A-AF00-01-4C63_PT-PT.5FOperatingMode_EN-1" />
+                  <Enumeration Text="1x RGBCCT" Value="2" Id="M-00FA_A-AF00-01-4C63_PT-PT.5FOperatingMode_EN-2" />
+                  <Enumeration Text="1x RGBW + 1x EK" Value="3" Id="M-00FA_A-AF00-01-4C63_PT-PT.5FOperatingMode_EN-3" />
+                  <Enumeration Text="1x RGB + 2x EK" Value="4" Id="M-00FA_A-AF00-01-4C63_PT-PT.5FOperatingMode_EN-4" />
+                  <Enumeration Text="1x RGB + 1x TW" Value="5" Id="M-00FA_A-AF00-01-4C63_PT-PT.5FOperatingMode_EN-5" />
+                  <Enumeration Text="2x TW + 1x EK" Value="6" Id="M-00FA_A-AF00-01-4C63_PT-PT.5FOperatingMode_EN-6" />
+                  <Enumeration Text="1x TW + 3x EK" Value="7" Id="M-00FA_A-AF00-01-4C63_PT-PT.5FOperatingMode_EN-7" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-AF00-01-4C63_PT-PT.5FPwmFrequenz" Name="PT_PwmFrequenz">
+                <TypeRestriction Base="Value" SizeInBit="11">
+                  <Enumeration Text="211" Value="211" Id="M-00FA_A-AF00-01-4C63_PT-PT.5FPwmFrequenz_EN-211" />
+                  <Enumeration Text="488" Value="488" Id="M-00FA_A-AF00-01-4C63_PT-PT.5FPwmFrequenz_EN-488" />
+                  <Enumeration Text="600" Value="600" Id="M-00FA_A-AF00-01-4C63_PT-PT.5FPwmFrequenz_EN-600" />
+                  <Enumeration Text="832" Value="832" Id="M-00FA_A-AF00-01-4C63_PT-PT.5FPwmFrequenz_EN-832" />
+                  <Enumeration Text="1000" Value="1000" Id="M-00FA_A-AF00-01-4C63_PT-PT.5FPwmFrequenz_EN-1000" />
+                  <Enumeration Text="1200" Value="1200" Id="M-00FA_A-AF00-01-4C63_PT-PT.5FPwmFrequenz_EN-1200" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-AF00-01-4C63_PT-PT.5FDimCurve" Name="PT_DimCurve">
+                <TypeRestriction Base="Value" SizeInBit="3">
+                  <Enumeration Text="A" Value="1" Id="M-00FA_A-AF00-01-4C63_PT-PT.5FDimCurve_EN-1" />
+                  <Enumeration Text="B" Value="2" Id="M-00FA_A-AF00-01-4C63_PT-PT.5FDimCurve_EN-2" />
+                  <Enumeration Text="C" Value="3" Id="M-00FA_A-AF00-01-4C63_PT-PT.5FDimCurve_EN-3" />
+                  <Enumeration Text="D" Value="4" Id="M-00FA_A-AF00-01-4C63_PT-PT.5FDimCurve_EN-4" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-AF00-01-4C63_PT-PT.5FSendMeasuredValues" Name="PT_SendMeasuredValues">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="Ja" Value="1" Id="M-00FA_A-AF00-01-4C63_PT-PT.5FSendMeasuredValues_EN-1" />
+                  <Enumeration Text="Nein" Value="0" Id="M-00FA_A-AF00-01-4C63_PT-PT.5FSendMeasuredValues_EN-0" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-AF00-01-4C63_PT-PT.5FMeasurementInterval" Name="PT_MeasurementInterval">
+                <TypeNumber Type="unsignedInt" minInclusive="5" maxInclusive="1000" SizeInBit="10" />
+              </ParameterType>
+            </ParameterTypes>
+			
+			
+			
+			
+            <ParameterTypes>
+              <ParameterType Id="M-00FA_A-0000-0A-0000_PT-Int" Name="Int">
+                <Typdeumber SizeInBit="32" Type="signedInt" minInclusive="0" maxInclusive="1000" />
+              </ParameterType>
+            </ParameterTypes>
+            <Parameters>
+              <Parameter Id="M-00FA_A-0000-0A-0000_P-1" Name="Zyklisch Sdeden" ParameterType="M-00FA_A-0000-0A-0000_PT-Int" Text="Sdedeinterval (*1s)" Value="20">
+                <Memory CodeSegmdet="M-00FA_A-0000-0A-0000_RS-04-00000" Offset="0" BitOffset="0" />
+              </Parameter>
+            </Parameters>
+            <ParameterRefs>
+              <ParameterRef Id="M-00FA_A-0000-0A-0000_P-1_R-1" RefId="M-00FA_A-0000-0A-0000_P-1" />
+            </ParameterRefs>
+            <ComObjectTable>
+              <ComObject Id="M-00FA_A-0000-0A-0000_O-2" Name="Spannung" Text="Spannung" Number="2" FunctionText="Spannung lesde" ObjectSize="4 Bytes" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-14-27" />
+              <ComObject Id="M-00FA_A-0000-0A-0000_O-4" Name="Strom" Text="Strom" Number="4" FunctionText="Strom lesde" ObjectSize="4 Bytes" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-14-19" />
+              <ComObject Id="M-00FA_A-0000-0A-0000_O-6" Name="Leistung" Text="Leistung" Number="6" FunctionText="Leistung lesde" ObjectSize="4 Bytes" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-14-56" />
+
+              <ComObject Id="M-00FA_A-0000-0A-0000_O-10" Name="CH0 Set" Text="CH0 Set Text" Number="10" FunctionText="CH0 Set FuncText" ObjectSize="1 Byte" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-5-1" />
+              <ComObject Id="M-00FA_A-0000-0A-0000_O-11" Name="CH0 Status" Text="CH0 Status Text" Number="11" FunctionText="CH0 Status FuncText" ObjectSize="1 Byte" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-5-1" />
+
+            </ComObjectTable>
+            <ComObjectRefs>
+              <ComObjectRef Id="M-00FA_A-0000-0A-0000_O-2_R-2" RefId="M-00FA_A-0000-0A-0000_O-2" />
+              <ComObjectRef Id="M-00FA_A-0000-0A-0000_O-4_R-4" RefId="M-00FA_A-0000-0A-0000_O-4" />
+              <ComObjectRef Id="M-00FA_A-0000-0A-0000_O-6_R-6" RefId="M-00FA_A-0000-0A-0000_O-6" />
+
+              <ComObjectRef Id="M-00FA_A-0000-0A-0000_O-3_R-10" RefId="M-00FA_A-0000-0A-0000_O-10" />
+              <ComObjectRef Id="M-00FA_A-0000-0A-0000_O-3_R-11" RefId="M-00FA_A-0000-0A-0000_O-11" />
+
+            </ComObjectRefs>
+            <AddressTable Maxdetries="255" />
+            <AssociationTable Maxdetries="255" />
+            <LoadProcedures>
+              <LoadProcedure MergeId="2">
+                <LdCtrlRelSegmdet AppliesTo="full" LsmIdx="4" Size="4" Mode="0" Fill="0" />
+              </LoadProcedure>
+              <LoadProcedure MergeId="4">
+                <LdCtrlWriteRelMem ObjIdx="4" Offset="0" Size="4" Verify="true" />
+              </LoadProcedure>
+            </LoadProcedures>
+            <Options />
+          </Static>
+          <Dynamic>
+            <ChannelIndepdedentBlock>
+              <ParameterBlock Id="M-00FA_A-0000-0A-0000_PB-1" Name="ParameterPage" Text="Allgemeine Parameter">
+                <ParameterRefRef RefId="M-00FA_A-0000-0A-0000_P-1_R-1" />
+                <ComObjectRefRef RefId="M-00FA_A-0000-0A-0000_O-2_R-2" />
+                <ComObjectRefRef RefId="M-00FA_A-0000-0A-0000_O-4_R-4" />
+                <ComObjectRefRef RefId="M-00FA_A-0000-0A-0000_O-6_R-6" />
+
+                <ComObjectRefRef RefId="M-00FA_A-0000-0A-0000_O-3_R-10" />
+                <ComObjectRefRef RefId="M-00FA_A-0000-0A-0000_O-3_R-11" />
+
+              </ParameterBlock>
+            </ChannelIndepdedentBlock>
+          </Dynamic>
+        </ApplicationProgram>
+      </ApplicationPrograms>
+      <Hardware>
+        <Hardware Id="M-00FA_H-0-0" Name="HDC1008 TP" SerialNumber="0" VersionNumber="0" BusCurrdet="10" HasIndividualAddress="true" HasApplicationProgram="true">
+          <Products>
+            <Product Id="M-00FA_H-0-0_P-0" Text="HDC1008 TPC" OrderNumber="0" IsRailMounted="false" defaultLanguage="de" />
+          </Products>
+          <Hardware2Programs>
+            <Hardware2Program Id="M-00FA_H-0-0_HP-0000-0A-0000" MediumTypes="MT-0">
+              <ApplicationProgramRef RefId="M-00FA_A-0000-0A-0000" />
+            </Hardware2Program>
+          </Hardware2Programs>
+        </Hardware>
+      </Hardware>
+    </Manufacturer>
+  </ManufacturerData>
+</KNX>
