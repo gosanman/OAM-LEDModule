@@ -11,7 +11,7 @@
 #include <LibDimControl.h>
 #include <DimChannel_EK.h>
 //#include <DimChannel_TW.h>
-//#include <DimChannel_RGB.h>
+#include <DimChannel_RGB.h>
 
 void setChannelValue(byte channel, byte value);
 
@@ -32,7 +32,7 @@ public:
     void dimDown(uint8_t channel);
     void dimChannel(uint8_t channel, uint8_t brightness);
     void dimCCT(uint8_t startChannel, uint8_t brightness, uint16_t kelvin, uint16_t colortempww, uint16_t colortempkw);
-    void dimRGB(uint8_t startChannel, uint8_t brightness, uint8_t r, uint8_t g, uint8_t b);
+    void dimRGB(uint8_t startChannel, uint8_t r, uint8_t g, uint8_t b);
     void processInputKo(GroupObject &iKo);
     static LEDControl *sInstance;
 
@@ -43,6 +43,7 @@ public:
 
 private:
     DimChannel_EK *channels_ek[0];
+    DimChannel_RGB *channels_rgb[0];
 
     GroupObject *getKo(uint16_t iKo);
 

@@ -74,6 +74,12 @@ void LEDControl::setup()
     break;
     case 3: // 1xRGB and 2xEK
     {
+        channels_rgb[0] = new DimChannel_RGB(0);
+        channels_rgb[0]->setup(0, 1, 2, KO_ChannelRGBSwitch);
+        channels_ek[1] = new DimChannel_EK(3);
+        channels_ek[1]->setup(3, KO_ChannelDSwitch);
+        channels_ek[2] = new DimChannel_EK(4);
+        channels_ek[2]->setup(4, KO_ChannelESwitch);
     }
     break;
     case 4: // 1xRGB and 1xTW
@@ -157,6 +163,9 @@ void LEDControl::processInputKo(GroupObject &iKo)
     break;
     case 3: // 1xRGB and 2xEK
     {
+        channels_rgb[0]->processInputKo(iKo);
+        channels_ek[1]->processInputKo(iKo);
+        channels_ek[2]->processInputKo(iKo);
     }
     break;
     case 4: // 1xRGB and 1xTW
@@ -260,14 +269,15 @@ void LEDControl::dimCCT(uint8_t startChannel, uint8_t brightness, uint16_t kelvi
     channels[startChannel + 1].taskNewValue(percentKW); // KW
 }
 
-void LEDControl::dimRGB(uint8_t startChannel, uint8_t brightness, uint8_t r, uint8_t g, uint8_t b)
+void LEDControl::dimRGB(uint8_t startChannel, uint8_t r, uint8_t g, uint8_t b)
 {
     // consider gamma value in percentage to make sure the temperature is the same at each dim level and according to gamma
     //uint16_t percent = pgm_read_word(&(curves[brightness][curve]));
 
-    channels[startChannel].taskNewValue(r * brightness / 100);     // RED
-    channels[startChannel + 1].taskNewValue(g * brightness / 100); // GREEN
-    channels[startChannel + 2].taskNewValue(b * brightness / 100); // BLUE
+    //channels[startChannel].taskNewValue(r * brightness / 100);     // RED
+    //channels[startChannel + 1].taskNewValue(g * brightness / 100); // GREEN
+    //channels[startChannel + 2].taskNewValue(b * brightness / 100); // BLUE
+
 }
 
 
