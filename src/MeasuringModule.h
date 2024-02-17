@@ -1,10 +1,14 @@
 #ifndef MEASURINGMODULE_H
 #define MEASURINGMODULE_H
 
-#include <LIB_INA226.h>
-#include <LIB_TEMP100.h>
-#include "OpenKNX.h"
+#include "LIB_INA226.h"
+#include "LIB_TEMP100.h"
+#include <OpenKNX.h>
 #include "hardware.h"
+
+#ifndef OPENKNX_DUALCORE
+    #pragma warn "MeasuringModule needs OPENKNX_DUALCORE"
+#endif
 
 class MeasuringModule : public OpenKNX::Module
 {
@@ -15,7 +19,6 @@ public:
     void loop1() override;
     const std::string name() override;
     const std::string version() override;
-    bool usesDualCore() override;
     static MeasuringModule *instance();
 
     void getSingleMeasurement();

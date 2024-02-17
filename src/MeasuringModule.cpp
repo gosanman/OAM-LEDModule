@@ -1,4 +1,4 @@
-#include <MeasuringModule.h>
+#include "MeasuringModule.h"
 
 MeasuringModule *MeasuringModule::_instance = nullptr;
 
@@ -18,10 +18,6 @@ const std::string MeasuringModule::version() {
     return "0.1dev";
 }
 
-bool MeasuringModule::usesDualCore() {
-    return true;
-}
-
 void MeasuringModule::setup() 
 {
     // save default values from PA
@@ -38,19 +34,22 @@ void MeasuringModule::setup()
     logInfoP("Max current in A: %f", maxcurrent);
     logInfoP("Temp sensor present: %i", tempSensorPresent);
 
-    // Init Libs
-    _tmp100 = TMP100_WE(&Wire1, I2C_TMP100_DEVICE_ADDRESS);
-    _ina226 = INA226_WE(&Wire1, I2C_INA226_DEVICE_ADDRESS);
-    
-    // Call dependend init for sensor
-    if (!_tmp100.init()) {
-        logErrorP("ERROR: initialization for TMP100 failed...");
+    // Init TMP100 Lib if present
+    if (tempSensorPresent) {
+        _tmp100 = TMP100_WE(&Wire1, I2C_TMP100_DEVICE_ADDRESS);
+        // Call dependend init for sensor
+        if (!_tmp100.init()) {
+            logErrorP("ERROR: initialization for TMP100 failed...");
+        }
+        // Set default values for sensor
+        _tmp100.setResolution(RES025);
     }
-    // Set default values for sensor
-    _tmp100.setResolution(RES025);
-
+    
     delay(100);
 
+    // Init INA226 Lib
+    _ina226 = INA226_WE(&Wire1, I2C_INA226_DEVICE_ADDRESS);
+    // Call dependend init for sensor
     if (!_ina226.init()) {
         logErrorP("ERROR: initialization for INA226 failed...");
     }
@@ -86,9 +85,9 @@ void MeasuringModule::getSingleMeasurement()
     current_A = round(_ina226.getCurrent_A() * 100) / 100;      // rounded to two decimal places
     power_W = round(_ina226.getBusPower_W() * 100) / 100;       // rounded to two decimal places
 
-    logInfoP("BusVoltage: %f", busVoltage_V);
-    logInfoP("Current: %f", current_A);
-    logInfoP("Power: %f", power_W);
+    // logInfoP("BusVoltage: %f", busVoltage_V);
+    // logInfoP("Current: %f", current_A);
+    // logInfoP("Power: %f", power_W);
 
     KoAPP_KO_VoltageV.value(busVoltage_V, DPT_Value_Electric_Potential);
     KoAPP_KO_CurrentA.value(current_A, DPT_Value_Electric_Current);
@@ -102,9 +101,10 @@ void MeasuringModule::getSingleMeasurement()
         // logInfoP("Overflow! Choose higher current range");
     }
 
-    temperatur_C = _tmp100.getTemperature();
-
-    logInfoP("Temperatur: %f", temperatur_C);
-
-    KoAPP_KO_TempC.value(temperatur_C, DPT_Value_Common_Temperature);
+    // run Temp Measurment if sensor present
+    if (tempSensorPresent) {
+        temperatur_C = _tmp100.getTemperature();
+        // logInfoP("Temperatur: %f", temperatur_C);
+        KoAPP_KO_TempC.value(temperatur_C, DPT_Value_Common_Temperature);
+    }
 }

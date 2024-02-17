@@ -1,4 +1,4 @@
-#include <DimChannel_EK.h>
+#include "DimChannel_EK.h"
 
 DimChannel_EK::DimChannel_EK(uint8_t index) {
   _channelIndex = index;
@@ -55,7 +55,7 @@ void DimChannel_EK::processInputKoEK(GroupObject &ko) {
     {
         bool value = ko.value(DPT_Switch);
         if (_lastbrightness == 0) { _setbrightness = m_onbrightness; } else {_setbrightness = _lastbrightness;}
-        logInfoP("Switch - Value: %i", value);
+        // logInfoP("Switch - Value: %i", value);
         if (value) {
             hwchannels[m_hwchannel]->taskNewValue(_setbrightness);
         }
@@ -71,7 +71,7 @@ void DimChannel_EK::processInputKoEK(GroupObject &ko) {
     else if (asap == calc_ko_dimrelativ) {
         uint8_t direction = ko.value(Dpt(3,7,0));
         uint8_t step = ko.value(Dpt(3,7,1));
-        logInfoP("Dim Relativ - Direction: %i, Step: %i", direction, step);
+        // logInfoP("Dim Relativ - Direction: %i, Step: %i", direction, step);
         //direction true = dim up, false = dim down, step = 0 then stop
         if (step == 0) {
             hwchannels[m_hwchannel]->taskStop();

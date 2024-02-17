@@ -6,8 +6,6 @@ if(-Not (Test-Path -Path platformio.ini)) {
     timeout /T 20
     exit 1
 }
-$projectDir = Get-Location
 
-$files = Get-ChildItem -Path $projectDir/*.ae-manu
-$filePath = $projectDir/$files[0].Name
-~/bin/Kaenx.Creator.Console publish $filePath
+./Build-KnxProd.ps1
+./Upload-Firmware.ps1

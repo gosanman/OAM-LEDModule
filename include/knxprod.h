@@ -5,30 +5,73 @@
             (time & 0xC000) == 0x0000 ? (time & 0x3FFF) * 1000 : \
             (time & 0xC000) == 0x4000 ? (time & 0x3FFF) * 60000 : \
             (time & 0xC000) == 0x8000 ? ((time & 0x3FFF) > 1000 ? 3600000 : \
-                                         (time & 0x3FFF) * 3600000 ) : 0 )
+                                            (time & 0x3FFF) * 3600000 ) : 0 )
+
+#define PT_PT_OperatingMode_PT_OperatingMode_EN_0               0
+#define PT_PT_OperatingMode_PT_OperatingMode_EN_1               1
+#define PT_PT_OperatingMode_PT_OperatingMode_EN_2               2
+#define PT_PT_OperatingMode_PT_OperatingMode_EN_3               3
+#define PT_PT_OperatingMode_PT_OperatingMode_EN_4               4
+#define PT_PT_OperatingMode_PT_OperatingMode_EN_5               5
+#define PT_PT_PwmFrequenz_PT_PwmFrequenz_EN_211                 211
+#define PT_PT_PwmFrequenz_PT_PwmFrequenz_EN_488                 488
+#define PT_PT_PwmFrequenz_PT_PwmFrequenz_EN_600                 600
+#define PT_PT_PwmFrequenz_PT_PwmFrequenz_EN_832                 832
+#define PT_PT_PwmFrequenz_PT_PwmFrequenz_EN_1000                1000
+#define PT_PT_PwmFrequenz_PT_PwmFrequenz_EN_1200                1200
+#define PT_PT_ChxDimCurve_PT_DimCurve_EN_0                      0
+#define PT_PT_ChxDimCurve_PT_DimCurve_EN_1                      1
+#define PT_PT_ChxDimCurve_PT_DimCurve_EN_2                      2
+#define PT_PT_ChxDimCurve_PT_DimCurve_EN_3                      3
+#define PT_PT_SendMeasuredValues_PT_SendMeasuredValues_EN_1     1
+#define PT_PT_SendMeasuredValues_PT_SendMeasuredValues_EN_0     0
+#define PT_PT_MeasurementInterval_PT_MeasurementInterval_EN_0   0
+#define PT_PT_MeasurementInterval_PT_MeasurementInterval_EN_1   1
+#define PT_PT_MeasurementInterval_PT_MeasurementInterval_EN_2   2
+#define PT_PT_MeasurementInterval_PT_MeasurementInterval_EN_3   3
+#define PT_PT_ChxOnOffTime_PT_ChxOnOffTime_EN_0                 0
+#define PT_PT_ChxOnOffTime_PT_ChxOnOffTime_EN_3                 3
+#define PT_PT_ChxOnOffTime_PT_ChxOnOffTime_EN_5                 5
+#define PT_PT_ChxOnOffTime_PT_ChxOnOffTime_EN_7                 7
+#define PT_PT_ChxOnOffTime_PT_ChxOnOffTime_EN_10                10
+#define PT_PT_ChxOnOffTime_PT_ChxOnOffTime_EN_15                15
+#define PT_PT_ChxOnOffTime_PT_ChxOnOffTime_EN_20                20
+#define PT_PT_TempSensorPresent_PT_TempSensorPresent_EN_0       0
+#define PT_PT_TempSensorPresent_PT_TempSensorPresent_EN_1       1
+#define PT_PT_ShuntValue_PT_ShuntValue_EN_5                     5
+#define PT_PT_ShuntValue_PT_ShuntValue_EN_10                    10
+#define PT_PT_UseOnColor_PT_UseOnColor_EN_0                     0
+#define PT_PT_UseOnColor_PT_UseOnColor_EN_1                     1
+
 //--------------------Allgemein---------------------------
 #define MAIN_OpenKnxId 0xAF
 #define MAIN_ApplicationNumber 0x01
 #define MAIN_ApplicationVersion 0x01
-#define MAIN_OrderNumber "LED01" //may not work with multiple devices on same hardware or app on different hardware
-#define MAIN_ParameterSize 170
-#define MAIN_MaxKoNumber 349
+#define MAIN_OrderNumber "LED01"
+#define MAIN_ParameterSize 219
+#define MAIN_MaxKoNumber 407
 
 // number of channel to use in DimmerControl
 #define CHANNELSHW    6
 #define CHANNELSEK    6
 #define CHANNELSTW    3
+#define CHANNELSRGB   2
 
 // number of ko reserved for a channel
 #define KO_PER_CHANNEL_EK       20          //Number of KO per EK channel
 #define KO_PER_CHANNEL_TW       30          //Number of KO per TW channel
+#define KO_PER_CHANNEL_RGB      30          //Number of KO per RGB channel
+// -----------------------------------------------------
 
+//--------------------Kommunikationsobjekte---------------------------
+// ComObjects per EK channel
 #define KO_OFFSET_EK_SWITCH            0           //Offset for Switch KO
 #define KO_OFFSET_EK_DIMABSOLUT        3           //Offset for Dim Absolut KO
 #define KO_OFFSET_EK_DIMRELATIV        4           //Offset for Dim Relativ KO
 #define KO_OFFSET_EK_STATUSONOFF       14          //Offset for OnOff KO
 #define KO_OFFSET_EK_STATUSBRIGHTNESS  15          //Offset for Brightness KO
 
+// ComObjects per TW channel
 #define KO_OFFSET_TW_SWITCH            0           //Offset for Switch KO
 #define KO_OFFSET_TW_DIMABSOLUT        3           //Offset for Dim Absolut KO
 #define KO_OFFSET_TW_DIMKELVIN         5           //Offset for Dim Kelvin KO
@@ -37,6 +80,25 @@
 #define KO_OFFSET_TW_STATUSBRIGHTNESS  25          //Offset for Brightness KO
 #define KO_OFFSET_TW_STATUSKELVIN      27          //Offset for Kelvin KO
 
+// ComObjects per RGB channel
+#define KO_OFFSET_RGB_SWITCH                 0           //Offset for Switch KO
+#define KO_OFFSET_RGB_COLORRGB               2           //Offset for Color RGB KO
+#define KO_OFFSET_RGB_COLORHSV               3           //Offset for Color HSV KO
+#define KO_OFFSET_RGB_DIMABSOLUTSHADEH       4           //Offset for Dim Absolut H KO
+#define KO_OFFSET_RGB_DIMABSOLUTSATURATIONS  5           //Offset for Dim Absolut S KO
+#define KO_OFFSET_RGB_DIMABSOLUTBRIGHTNESSV  6           //Offset for Dim Absolut V KO
+#define KO_OFFSET_RGB_DIMRELATIVSHADEH       7           //Offset for Dim Relativ H KO
+#define KO_OFFSET_RGB_DIMRELATIVSATURATIONS  8           //Offset for Dim Relativ S KO
+#define KO_OFFSET_RGB_DIMRELATIVBRIGHTNESSV  9           //Offset for Dim Relativ V KO
+#define KO_OFFSET_RGB_STATUSONOFF            10          //Offset for OnOff KO
+#define KO_OFFSET_RGB_STATUSCOLORRGB         11          //Offset for Status Color RGB KO
+#define KO_OFFSET_RGB_STATUSCOLORHSV         12          //Offset for Status Color HSV KO
+#define KO_OFFSET_RGB_STATUSSHADEH           13          //Offset for Status H KO
+#define KO_OFFSET_RGB_STATUSSATURATIONS      14          //Offset for Status S KO
+#define KO_OFFSET_RGB_STATUSBRIGHTNESSV      15          //Offset for Status V KO
+// -----------------------------------------------------
+
+//--------------------Parameter---------------------------
 // Parameter per EK channel
 #define EK_ParamBlockOffset             32      // Parameter für Einzelkanal starten bei 32
 #define EK_ParamBlockSize               16      // Weitere Kanaele werden mit +16 berechnet
@@ -60,10 +122,23 @@
 
 #define TW_ParamCalcIndex(index) (index + (_channelIndex * TW_ParamBlockSize) + TW_ParamBlockOffset)
 
+// Parameter per RGB channel
+#define RGB_ParamBlockOffset            192      // Parameter für RGB Kanal starten bei 192
+#define RGB_ParamBlockSize               16      // Weitere Kanaele werden mit +16 berechnet
+#define RGB_ParamOnColor                  0      // Offset: 192, 208 usw. Text: Einschaltverhalten - Farbe
+#define RGB_ParamUseOnColor               7      // Offset: 199, 216 usw. Text: Einschaltverhalten
+#define RGB_ParamRelativDimTime           8      // Offset: 200, 216 usw. Text: Dimmgeschwindigkeit Relativ
+#define RGB_ParamOnOffTime                9      // Offset: 201, 217 usw. Text: Ein- und Ausschaltgeschwindigkeit
+#define RGB_ParamDimCurve                10      // Offset: 202, 218 usw. Text: Dimmkurve
+
+#define RGB_ParamCalcIndex(index) (index + (_channelIndex * RGB_ParamBlockSize) + RGB_ParamBlockOffset)
+// -----------------------------------------------------
+
+//--------------------Konfiguration---------------------------
 #define APP_PT_OperatingMode		0x0000
-#define APP_PT_OperatingMode_Shift	6
-#define APP_PT_OperatingMode_Mask	0x0003
-// Offset: 0, Size: 2 Bit, Text: Betriebsmodus
+#define APP_PT_OperatingMode_Shift	5
+#define APP_PT_OperatingMode_Mask	0x0007
+// Offset: 0, Size: 3 Bit, Text: Betriebsmodus
 #define ParamAPP_PT_OperatingMode ((uint)((knx.paramByte(0) >> APP_PT_OperatingMode_Shift) & APP_PT_OperatingMode_Mask))
 #define APP_PT_PwmFrequenz		0x0001
 #define APP_PT_PwmFrequenz_Shift	5
@@ -86,7 +161,7 @@
 #define APP_PT_ShuntValue_Mask	0x000F
 // Offset: 3, Size: 4 Bit, Text: Wert des verbauten Messwiderstand
 #define ParamAPP_PT_ShuntValue ((uint)((knx.paramByte(3) >> APP_PT_ShuntValue_Shift) & APP_PT_ShuntValue_Mask))
-
+// -----------------------------------------------------
 
 // ------------------- EK Channel ----------------------
 #define APP_PT_EKOnBrightness		0x0020
@@ -158,6 +233,35 @@
 #define ParamAPP_PT_TWDimCurve ((uint)((knx.paramByte(TW_ParamCalcIndex(TW_ParamDimCurve)) >> APP_PT_TWDimCurve_Shift) & APP_PT_TWDimCurve_Mask))
 // -----------------------------------------------------
 
+// ------------------- RGB Channel ----------------------
+#define APP_PT_RGBOnColor		0x00C0
+// Offset: 192, Size: 24 Bit (3 Byte), Text: Einschaltverhalten - Farbe
+#define ParamAPP_PT_RGBOnColor knx.paramData(RGB_ParamCalcIndex(RGB_ParamOnColor))
+
+#define APP_PT_RGB1UseOnColor		0x00C7
+// Offset: 199, Size: 1 Bit, Text: Einschaltverhalten
+#define ParamAPP_PT_RGBUseOnColor knx.paramBit(RGB_ParamCalcIndex(RGB_ParamUseOnColor), 0)
+
+#define APP_PT_RGBRelativDimTime		0x00C8
+#define APP_PT_RGBRelativDimTime_Shift	2
+#define APP_PT_RGBRelativDimTime_Mask	0x003F
+// Offset: 200, Size: 6 Bit, Text: Dimmgeschwindigkeit Relativ
+#define ParamAPP_PT_RGBRelativDimTime ((uint)((knx.paramByte(RGB_ParamCalcIndex(RGB_ParamRelativDimTime)) >> APP_PT_RGBRelativDimTime_Shift) & APP_PT_RGBRelativDimTime_Mask))
+
+#define APP_PT_RGBOnOffTime		0x00C9
+#define APP_PT_RGBOnOffTime_Shift	3
+#define APP_PT_RGBOnOffTime_Mask	0x001F
+// Offset: 201, Size: 5 Bit, Text: Ein- und Ausschaltgeschwindigkeit
+#define ParamAPP_PT_RGBOnOffTime ((uint)((knx.paramByte(RGB_ParamCalcIndex(RGB_ParamOnOffTime)) >> APP_PT_RGBOnOffTime_Shift) & APP_PT_RGBOnOffTime_Mask))
+
+#define APP_PT_RGBDimCurve		0x00CA
+#define APP_PT_RGBDimCurve_Shift	6
+#define APP_PT_RGBDimCurve_Mask	0x0003
+// Offset: 202, Size: 2 Bit, Text: Dimmkurve
+#define ParamAPP_PT_RGBDimCurve ((uint)((knx.paramByte(RGB_ParamCalcIndex(RGB_ParamDimCurve)) >> APP_PT_RGBDimCurve_Shift) & APP_PT_RGBDimCurve_Mask))
+// -----------------------------------------------------
+
+// ------------------- Kommunikationsobjekte ----------------------
 //!< Number: 2, Text: Spannung, Function: Spannung
 #define APP_KoKO_VoltageV 2
 #define KoAPP_KO_VoltageV knx.getGroupObject(2)
@@ -323,26 +427,96 @@
 //!< Number: 349, Text: TW3:, Function: Status Farbtemperatur (Kelvin)
 #define APP_KoKO_ChannelTW3StatusColorTemp 349
 #define KoAPP_KO_ChannelTW3StatusColorTemp knx.getGroupObject(349)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+//!< Number: 362, Text: RGB1: RGB / HSV, Function: Schalten
+#define APP_KoKO_ChannelRGB1Switch 362
+#define KoAPP_KO_ChannelRGB1Switch knx.getGroupObject(362)
+//!< Number: 364, Text: RGB1: RGB, Function: Farbeinstellung
+#define APP_KoKO_ChannelRGB1ColorRGB 364
+#define KoAPP_KO_ChannelRGB1ColorRGB knx.getGroupObject(364)
+//!< Number: 365, Text: RGB1: HSV, Function: Farbeinstellung
+#define APP_KoKO_ChannelRGB1ColorHSV 365
+#define KoAPP_KO_ChannelRGB1ColorHSV knx.getGroupObject(365)
+//!< Number: 366, Text: RGB1: HSV Farbton (H), Function: Dimmen absolut
+#define APP_KoKO_ChannelRGB1DimAbsoluteShadeH 366
+#define KoAPP_KO_ChannelRGB1DimAbsoluteShadeH knx.getGroupObject(366)
+//!< Number: 367, Text: RGB1: HSV Sättigung (S), Function: Dimmen absolut
+#define APP_KoKO_ChannelRGB1DimAbsoluteSaturationS 367
+#define KoAPP_KO_ChannelRGB1DimAbsoluteSaturationS knx.getGroupObject(367)
+//!< Number: 368, Text: RGB1: HSV Helligkeit (V), Function: Dimmen absolute
+#define APP_KoKO_ChannelRGB1DimAbsoluteBrightnessV 368
+#define KoAPP_KO_ChannelRGB1DimAbsoluteBrightnessV knx.getGroupObject(368)
+//!< Number: 369, Text: RGB1: HSV Farbton (H), Function: Dimmen relativ
+#define APP_KoKO_ChannelRGB1DimRelativShadeH 369
+#define KoAPP_KO_ChannelRGB1DimRelativShadeH knx.getGroupObject(369)
+//!< Number: 370, Text: RGB1: HSV Sättigung (S), Function: Dimmen relativ
+#define APP_KoKO_ChannelRGB1DimRelativSaturationS 370
+#define KoAPP_KO_ChannelRGB1DimRelativSaturationS knx.getGroupObject(370)
+//!< Number: 371, Text: RGB1: HSV Helligkeit (V), Function: Dimmen relativ
+#define APP_KoKO_ChannelRGB1DimRelativBrightnessV 371
+#define KoAPP_KO_ChannelRGB1DimRelativBrightnessV knx.getGroupObject(371)
+//!< Number: 372, Text: RGB1: RGB / HSV, Function: Staus Ein/Aus
+#define APP_KoKO_ChannelRGB1StatusOnOff 372
+#define KoAPP_KO_ChannelRGB1StatusOnOff knx.getGroupObject(372)
+//!< Number: 373, Text: RGB1: RGB, Function: 3Byte Status Dimmwert
+#define APP_KoKO_ChannelRGB1StatusColorRGB 373
+#define KoAPP_KO_ChannelRGB1StatusColorRGB knx.getGroupObject(373)
+//!< Number: 374, Text: RGB1: HSV, Function: 3Byte Status Dimmwert
+#define APP_KoKO_ChannelRGB1StatusColorHSV 374
+#define KoAPP_KO_ChannelRGB1StatusColorHSV knx.getGroupObject(374)
+//!< Number: 375, Text: RGB1: HSV Farbton (H), Function: Status Dimmwert
+#define APP_KoKO_ChannelRGB1StatusShadeH 375
+#define KoAPP_KO_ChannelRGB1StatusShadeH knx.getGroupObject(375)
+//!< Number: 376, Text: RGB1: HSV Sättigung (S), Function: Status Dimmwert
+#define APP_KoKO_ChannelRGB1StatusSaturationS 376
+#define KoAPP_KO_ChannelRGB1StatusSaturationS knx.getGroupObject(376)
+//!< Number: 377, Text: RGB1: HSV Helligkeit (V), Function: Status Dimmwert
+#define APP_KoKO_ChannelRGB1StatusBrightnessV 377
+#define KoAPP_KO_ChannelRGB1StatusBrightnessV knx.getGroupObject(377)
+//!< Number: 392, Text: RGB2: RGB / HSV, Function: Schalten
+#define APP_KoKO_ChannelRGB2Switch 392
+#define KoAPP_KO_ChannelRGB2Switch knx.getGroupObject(392)
+//!< Number: 394, Text: RGB2: RGB, Function: Farbeinstellung
+#define APP_KoKO_ChannelRGB2ColorRGB 394
+#define KoAPP_KO_ChannelRGB2ColorRGB knx.getGroupObject(394)
+//!< Number: 395, Text: RGB2: HSV, Function: Farbeinstellung
+#define APP_KoKO_ChannelRGB2ColorHSV 395
+#define KoAPP_KO_ChannelRGB2ColorHSV knx.getGroupObject(395)
+//!< Number: 396, Text: RGB2: HSV Farbton (H), Function: Dimmen absolut
+#define APP_KoKO_ChannelRGB2DimAbsoluteShadeH 396
+#define KoAPP_KO_ChannelRGB2DimAbsoluteShadeH knx.getGroupObject(396)
+//!< Number: 397, Text: RGB2: HSV Sättigung (S), Function: Dimmen absolut
+#define APP_KoKO_ChannelRGB2DimAbsoluteSaturationS 397
+#define KoAPP_KO_ChannelRGB2DimAbsoluteSaturationS knx.getGroupObject(397)
+//!< Number: 398, Text: RGB2: HSV Helligkeit (V), Function: Dimmen absolute
+#define APP_KoKO_ChannelRGB2DimAbsoluteBrightnessV 398
+#define KoAPP_KO_ChannelRGB2DimAbsoluteBrightnessV knx.getGroupObject(398)
+//!< Number: 399, Text: RGB2: HSV Farbton (H), Function: Dimmen relativ
+#define APP_KoKO_ChannelRGB2DimRelativShadeH 399
+#define KoAPP_KO_ChannelRGB2DimRelativShadeH knx.getGroupObject(399)
+//!< Number: 400, Text: RGB2: HSV Sättigung (S), Function: Dimmen relativ
+#define APP_KoKO_ChannelRGB2DimRelativSaturationS 400
+#define KoAPP_KO_ChannelRGB2DimRelativSaturationS knx.getGroupObject(400)
+//!< Number: 401, Text: RGB2: HSV Helligkeit (V), Function: Dimmen relativ
+#define APP_KoKO_ChannelRGB2DimRelativBrightnessV 401
+#define KoAPP_KO_ChannelRGB2DimRelativBrightnessV knx.getGroupObject(401)
+//!< Number: 402, Text: RGB2: RGB / HSV, Function: Staus Ein/Aus
+#define APP_KoKO_ChannelRGB2StatusOnOff 402
+#define KoAPP_KO_ChannelRGB2StatusOnOff knx.getGroupObject(402)
+//!< Number: 403, Text: RGB2: RGB, Function: 3Byte Status Dimmwert
+#define APP_KoKO_ChannelRGB2StatusColorRGB 403
+#define KoAPP_KO_ChannelRGB2StatusColorRGB knx.getGroupObject(403)
+//!< Number: 404, Text: RGB2: HSV, Function: 3Byte Status Dimmwert
+#define APP_KoKO_ChannelRGB2StatusColorHSV 404
+#define KoAPP_KO_ChannelRGB2StatusColorHSV knx.getGroupObject(404)
+//!< Number: 405, Text: RGB2: HSV Farbton (H), Function: Status Dimmwert
+#define APP_KoKO_ChannelRGB2StatusShadeH 405
+#define KoAPP_KO_ChannelRGB2StatusShadeH knx.getGroupObject(405)
+//!< Number: 406, Text: RGB2: HSV Sättigung (S), Function: Status Dimmwert
+#define APP_KoKO_ChannelRGB2StatusSaturationS 406
+#define KoAPP_KO_ChannelRGB2StatusSaturationS knx.getGroupObject(406)
+//!< Number: 407, Text: RGB2: HSV Helligkeit (V), Function: Status Dimmwert
+#define APP_KoKO_ChannelRGB2StatusBrightnessV 407
+#define KoAPP_KO_ChannelRGB2StatusBrightnessV knx.getGroupObject(407)
 
 
 
@@ -352,109 +526,6 @@
 
 
 /*
-
-
-#define KO_ChannelASwitch 	                101		//!< Number: 101, Text: A:, Function: Schalten
-#define KO_ChannelADimAbsolute 	            104		//!< Number: 104, Text: A:, Function: Dimmen Absolut
-#define KO_ChannelADimRelativ 	            105		//!< Number: 105, Text: A:, Function: Dimmen Relativ
-#define KO_ChannelAStatusOnOff 	            115		//!< Number: 115, Text: A:, Function: Status An/Aus
-#define KO_ChannelAStatusBrightness 	    116	    //!< Number: 116, Text: A:, Function: Status Helligkeit
-#define KO_ChannelBSwitch 	                121		//!< Number: 121, Text: B:, Function: Schalten
-#define KO_ChannelBDimAbsolute      	    124		//!< Number: 124, Text: B:, Function: Dimmen Absolut
-#define KO_ChannelBDimRelativ 	            125		//!< Number: 125, Text: B:, Function: Dimmen Relativ
-#define KO_ChannelBStatusOnOff 	            135		//!< Number: 135, Text: B:, Function: Status An/Aus
-#define KO_ChannelBStatusBrightness 	    136	    //!< Number: 136, Text: B:, Function: Status Helligkeit
-#define KO_ChannelCSwitch 	                141		//!< Number: 141, Text: C:, Function: Schalten
-#define KO_ChannelCDimAbsolute 	            144		//!< Number: 144, Text: C:, Function: Dimmen Absolut
-#define KO_ChannelCDimRelativ 	            145		//!< Number: 145, Text: C:, Function: Dimmen Relativ
-#define KO_ChannelCStatusOnOff 	            155		//!< Number: 155, Text: C:, Function: Status An/Aus
-#define KO_ChannelCStatusBrightness 	    156	    //!< Number: 156, Text: C:, Function: Status Helligkeit
-#define KO_ChannelDSwitch 	                161		//!< Number: 161, Text: D:, Function: Schalten
-#define KO_ChannelDDimAbsolute 	            164		//!< Number: 164, Text: D:, Function: Dimmen Absolut
-#define KO_ChannelDDimRelativ 	            165		//!< Number: 165, Text: D:, Function: Dimmen Relativ
-#define KO_ChannelDStatusOnOff 	            175		//!< Number: 175, Text: D:, Function: Status An/Aus
-#define KO_ChannelDStatusBrightness 	    176	    //!< Number: 176, Text: D:, Function: Status Helligkeit
-#define KO_ChannelESwitch 	                181		//!< Number: 181, Text: E:, Function: Schalten
-#define KO_ChannelEDimAbsolute 	            184		//!< Number: 184, Text: E:, Function: Dimmen Absolut
-#define KO_ChannelEDimRelativ 	            185		//!< Number: 185, Text: E:, Function: Dimmen Relativ
-#define KO_ChannelEStatusOnOff 	            195	    //!< Number: 195, Text: E:, Function: Status An/Aus
-#define KO_ChannelEStatusBrightness 	    196	    //!< Number: 196, Text: E:, Function: Status Helligkeit
-#define KO_ChannelRGBSwitch 	            201	    //!< Number: 201, Text: RGB, Function: Schalten
-#define KO_ChannelRGBDimAbsoluteR 	        205	    //!< Number: 205, Text: RGB:, Function: Dimmen Absolute R
-#define KO_ChannelRGBDimAbsoluteG 	        206	    //!< Number: 206, Text: RGB:, Function: Dimmen Absolute G
-#define KO_ChannelRGBDimAbsoluteB 	        207	    //!< Number: 207, Text: RGB:, Function: Dimmen Absolute B
-#define KO_ChannelRGBDimAbsoluteRGBW 	    210	    //!< Number: 210, Text: RGB:, Function: Dimmen Absolut RGBW
-#define KO_ChannelRGBDimAbsoluteRGB 	    211	    //!< Number: 211, Text: RGB:, Function: Dimmen Absolute RGB
-#define KO_ChannelRGBDimAbsoluteHSV 	    212	    //!< Number: 212, Text: RGB:, Function: Dimmen Absolute HSV
-#define KO_ChannelRGBDimAbsoluteH 	        213	    //!< Number: 213, Text: RGB:, Function: Dimmen Absolute H
-#define KO_ChannelRGBDimAbsoluteS 	        214	    //!< Number: 214, Text: RGB:, Function: Dimmen Absolute S
-#define KO_ChannelRGBDimAbsoluteV 	        215	    //!< Number: 215, Text: RGB:, Function: Dimmen Absolute V
-#define KO_ChannelRGBDimRelativR 	        216	    //!< Number: 216, Text: RGB:, Function: Dimmen Relativ R
-#define KO_ChannelRGBDimRelativG 	        217	    //!< Number: 217, Text: RGB:, Function: Dimmen Relativ G
-#define KO_ChannelRGBDimRelativB 	        218	    //!< Number: 218, Text: RGB:, Function: Dimmen Relativ B
-#define KO_ChannelRGBDimRelativRGBW 	    221	    //!< Number: 221, Text: RBG:, Function: Dimmen Relativ RGBW
-#define KO_ChannelRGBDimRelativRGB 	        222	    //!< Number: 222, Text: RGB:, Function: Dimmen Absolute RGB
-#define KO_ChannelRGBDimRelativHSV 	        223	    //!< Number: 223, Text: RGB:, Function: Dimmen Relativ HSV
-#define KO_ChannelRGBDimRelativH 	        224	    //!< Number: 224, Text: RGB:, Function: Dimmen Relativ H
-#define KO_ChannelRGBDimRelativS 	        225	    //!< Number: 225, Text: RGB:, Function: Dimmen Relativ S
-#define KO_ChannelRGBDimRelativV 	        226	    //!< Number: 226, Text: RGB:, Function: Dimmen Relativ V
-#define KO_ChannelRGBStatusOnOff 	        241	    //!< Number: 241, Text: RGB:, Function: Status An/Aus
-#define KO_ChannelRGBStatusR 	            242	    //!< Number: 242, Text: RGB:, Function: Status R
-#define KO_ChannelRGBStatusG 	            243	    //!< Number: 243, Text: RGB:, Function: Status G
-#define KO_ChannelRGBStatusB 	            244	    //!< Number: 244, Text: RGB:, Function: Status B
-#define KO_ChannelRGBStatusRGBW 	        247	    //!< Number: 247, Text: RGB:, Function: Status RGBW
-#define KO_ChannelRGBStatusRGB 	            248	    //!< Number: 248, Text: RGB:, Function: Status RGB
-#define KO_ChannelRGBStatusHSV 	            249	    //!< Number: 249, Text: RGB:, Function: Status HSV
-#define KO_ChannelRGBStatusH 	            250	    //!< Number: 250, Text: RGB:, Function: Status H
-#define KO_ChannelRGBStatusS 	            251	    //!< Number: 251, Text: RGB:, Function: Status S
-#define KO_ChannelRGBStatusV 	            252	    //!< Number: 252, Text: RGB:, Function: Status V
-#define KO_ChannelRGBDimAbsoluteTW 	        265	    //!< Number: 265, Text: RGB:, Function: Dimmen Absolut Helligkeit TW
-#define KO_ChannelRGBDimRelativTW 	        269	    //!< Number: 269, Text: RGB:, Function: Dimmen Relativ Helligkeit TW
-#define KO_ChannelRGBStatusTW 	            287	    //!< Number: 287, Text: RGB:, Function: Status Helligkeit TW
-#define KO_ChannelTW1Switch 	            262	    //!< Number: 262, Text: TW1:, Function: Schalten
-#define KO_ChannelTW1DimAbsoluteBrightness 	265	    //!< Number: 265, Text: TW1:, Function: Dimmen Absolut Helligkeit
-#define KO_ChannelTW1DimAbsoluteColorTemp 	267	    //!< Number: 267, Text: TW1:, Function: Dimmen Absolut Farbtemperatur (Kelvin)
-#define KO_ChannelTW1DimRelativBrightness 	269	    //!< Number: 269, Text: TW1:, Function: Dimmen Relativ Helligkeit
-#define KO_ChannelTW1StatusOnOff 	        286	    //!< Number: 286, Text: TW1:, Function: Status An/Aus
-#define KO_ChannelTW1StatusBrightness 	    287	    //!< Number: 287, Text: TW1:, Function: Status Helligkeit
-#define KO_ChannelTW1StatusColorTemp 	    289	    //!< Number: 289, Text: TW1:, Function: Status Farbtemperatur (Kelvin)
-#define KO_ChannelTW2Switch 	            299	    //!< Number: 299, Text: TW2:, Function: Schalten
-#define KO_ChannelTW2DimAbsoluteBrightness 	302	    //!< Number: 302, Text: TW2:, Function: Dimmen Absolut Helligkeit
-#define KO_ChannelTW2DimAbsoluteColorTemp 	304	    //!< Number: 304, Text: TW2:, Function: Dimmen Absolut Farbtemperatur (Kelvin)
-#define KO_ChannelTW2DimRelativBrightness 	306	    //!< Number: 306, Text: TW2:, Function: Dimmen Relativ Helligkeit
-#define KO_ChannelTW2StatusOnOff 	        323	    //!< Number: 323, Text: TW2:, Function: Status An/Aus
-#define KO_ChannelTW2StatusBrightness 	    324	    //!< Number: 324, Text: TW2:, Function: Status Helligkeit
-#define KO_ChannelTW2StatusColorTemp 	    326	    //!< Number: 326, Text: TW2:, Function: Status Farbtemperatur (Kelvin)
-
-
-#define KO_PER_CHANNEL_RGB      5           //Number of KO per RGB channel
-#define KO_PER_CHANNEL_RGBW     5           //Number of KO per RGBW channel
-#define KO_PER_CHANNEL_RGBCCT   5           //Number of KO per RGBCCT channel
-
-
-//Number of channel groups per operating mode -> not use till now
-//Operating Mode = 0
-#define OM_0_EK_CHANNELS        5   //5xEK
-//Operating Mode = 1
-#define OM_1_RGBCCT_CHANNELS    1   //1xRGBCTT
-//Operating Mode = 2
-#define OM_2_EK_CHANNELS        1   //1xEK
-#define OM_2_RGBW_CHANNELS      1   //1xRGBW
-//Operating Mode = 3
-#define OM_3_EK_CHANNELS        2   //2xEK
-#define OM_3_RGB_CHANNELS       1   //1xRGB
-//Operating Mode = 4
-#define OM_4_TW_CHANNELS        2   //1xTW
-#define OM_4_RGB_CHANNELS       1   //1xRGB
-//Operating Mode = 5
-#define OM_5_EK_CHANNELS        1   //1xEK
-#define OM_5_TW_CHANNELS        2   //2xTW
-//Operating Mode = 6
-#define OM_6_EK_CHANNELS        3   //3xEK
-#define OM_6_TW_CHANNELS        1   //1xTW
-
-
-
 
 //DEBUG options
 #define KDEBUG                      // comment this line to disable DEBUG info

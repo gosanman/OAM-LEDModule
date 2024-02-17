@@ -1,4 +1,4 @@
-#include <DimChannel_TW.h>
+#include "DimChannel_TW.h"
 
 DimChannel_TW::DimChannel_TW(uint8_t index) {
   _channelIndex = index;
@@ -72,12 +72,12 @@ void DimChannel_TW::processInputKoTW(GroupObject &ko) {
         bool value = ko.value(DPT_Switch);
         if (_lastbrightness == 0) { _lastbrightness = m_onbrightness; }
         if (_lastcolortemp == 0)  { _lastcolortemp = m_oncolortemp;   }
-        logInfoP("Switch - Value: %i - Kelvin: %i - Brightness: %i", value, _lastcolortemp, _lastbrightness);
+        // logInfoP("Switch - Value: %i - Kelvin: %i - Brightness: %i", value, _lastcolortemp, _lastbrightness);
         if (value) { // on
             uint8_t percent = prozToDim(_lastbrightness, 3);
             uint8_t percentWW = (percent*(m_colortempcw - _lastcolortemp))/(m_colortempcw - m_colortempww);
             uint8_t percentCW = (percent*(_lastcolortemp - m_colortempww))/(m_colortempcw - m_colortempww);
-            logInfoP("protzToDim Correction Value - WW: %i CW: %i", percentWW, percentCW);
+            // logInfoP("protzToDim Correction Value - WW: %i CW: %i", percentWW, percentCW);
             hwchannels[m_hwchannel_ww]->taskNewValue(percentWW);
             hwchannels[m_hwchannel_cw]->taskNewValue(percentCW);
         }
@@ -91,11 +91,11 @@ void DimChannel_TW::processInputKoTW(GroupObject &ko) {
         uint8_t brightness = ko.value(DPT_Percent_U8);
         _lastbrightness = brightness;
         if (_lastcolortemp == 0) { _lastcolortemp = m_oncolortemp; }
-        logInfoP("Dim Absolute - Kelvin: %i - Brightness: %i", _lastcolortemp, _lastbrightness);
+        // logInfoP("Dim Absolute - Kelvin: %i - Brightness: %i", _lastcolortemp, _lastbrightness);
         uint8_t percent = prozToDim(_lastbrightness, 3);
         uint8_t percentWW = (percent*(m_colortempcw - _lastcolortemp))/(m_colortempcw - m_colortempww);
         uint8_t percentCW = (percent*(_lastcolortemp - m_colortempww))/(m_colortempcw - m_colortempww);
-        logInfoP("protzToDim Correction Value - WW: %i CW %i", percentWW, percentCW); 
+        // logInfoP("protzToDim Correction Value - WW: %i CW %i", percentWW, percentCW); 
         hwchannels[m_hwchannel_ww]->taskNewValue(percentWW);
         hwchannels[m_hwchannel_cw]->taskNewValue(percentCW);
     }
@@ -103,29 +103,29 @@ void DimChannel_TW::processInputKoTW(GroupObject &ko) {
         uint16_t kelvin = ko.value(Dpt(7, 600));
         _lastcolortemp = kelvin;
         if (_lastbrightness == 0) { _lastbrightness = m_onbrightness; }
-        logInfoP("Dim Kelvin - Kelvin: %i - Brightness: %i", _lastcolortemp, _lastbrightness);
+        // logInfoP("Dim Kelvin - Kelvin: %i - Brightness: %i", _lastcolortemp, _lastbrightness);
         uint8_t percent = prozToDim(_lastbrightness, 3);
         uint8_t percentWW = (percent*(m_colortempcw - _lastcolortemp))/(m_colortempcw - m_colortempww);
         uint8_t percentCW = (percent*(_lastcolortemp - m_colortempww))/(m_colortempcw - m_colortempww);
-        logInfoP("protzToDim Correction Value - WW: %i CW %i", percentWW, percentCW);
+        // logInfoP("protzToDim Correction Value - WW: %i CW %i", percentWW, percentCW);
         hwchannels[m_hwchannel_ww]->taskNewValue(percentWW);
         hwchannels[m_hwchannel_cw]->taskNewValue(percentCW); 
     }
     else if (asap == calc_ko_dimrelativ) {
         uint8_t direction = ko.value(Dpt(3,7,0));
         uint8_t step = ko.value(Dpt(3,7,1));
-        logInfoP("Dim Relativ - Direction: %i, Step: %i", direction, step);
+        // logInfoP("Dim Relativ - Direction: %i, Step: %i", direction, step);
         //direction true = dim up, false = dim down, step = 0 then stop
         if (step == 0) {
-            logInfoP("Dim Relativ - Stop");
-            // code passt noch nicht
+            hwchannels[m_hwchannel_ww]->taskStop();
+            hwchannels[m_hwchannel_cw]->taskStop();
         }
         else if (direction == 1) {
-            logInfoP("Dim Relativ - DimUp");
+            // logInfoP("Dim Relativ - DimUp");
             // code passt noch nicht
         }
         else if (direction == 0) {
-            logInfoP("Dim Relativ - DimDown");
+            // logInfoP("Dim Relativ - DimDown");
             // code passt noch nicht
         }
     }

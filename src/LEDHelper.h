@@ -4,8 +4,6 @@
 
 /*
 
-void rgbToHsv(byte r, byte g, byte b, byte hsvColor[]);
-void hsvToRgb(byte h, byte s, byte v, byte rgbColor[]);
 void setDimmingCurves();
 
 // calc RGBW curve

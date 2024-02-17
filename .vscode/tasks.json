@@ -4,21 +4,43 @@
     "version": "2.0.0",
     "tasks": [
         {
+            "label": "develop_LEDDK_USB_V1",
+            "type": "shell",
+            "command": "lib/OGM-Common/scripts/build/OpenKNX-Build.ps1",
+            "args": [
+                "develop_LEDDK_USB_V1"
+            ],
+            "group": "build",
+            "problemMatcher": [],
+            "dependsOrder": "sequence",
+            "dependsOn": ["Gen. Dependencies.txt"]
+        },
+        {
+            "label": "develop_LEDDK_JLINK_V1",
+            "type": "shell",
+            "command": "lib/OGM-Common/scripts/build/OpenKNX-Build.ps1",
+            "args": [
+                "develop_LEDDK_JLINK_V1",
+            ],
+            "group": "build",
+            "problemMatcher": [],
+            "dependsOrder": "sequence",
+            "dependsOn": ["Gen. Dependencies.txt"]
+        },
+        {
             "label": "OpenKNXproducer",
             "type": "shell",
-            "options": {
-                "cwd": "${workspaceFolder}/src"
-            },
-            "command": "~/bin/OpenKNXproducer.exe",
+            "command": "${env:USERPROFILE}/bin/OpenKNXproducer.exe",
             "args": [
                 "create",
                 "--Debug",
                 "-h",
-                "LEDModuleKnxprod.h",
-                "LEDModule"
+                "include/knxprod.h"
             ],
             "problemMatcher": [],
-            "group": "test"
+            "group": "test",
+            "dependsOrder": "sequence",
+            "dependsOn": ["Gen. Dependencies.txt"]
         },
         {
             "label": "Gen. Dependencies.txt",
@@ -30,48 +52,33 @@
             "group": "test"
         },
         {
-            "label": "RP2040: Build",
+            "label": "Pull",
             "type": "shell",
-            "command": "scripts/OpenKNX-Build.ps1",
+            "command": "git pull --ff-only",
             "args": [
-                "build_RP2040"
             ],
-            "group": "build",
-            "problemMatcher": []
+            "options": {
+                "cwd": "${workspaceFolder}/"
+            },
+            "problemMatcher": [],
+            "group": "test"
         },
         {
-            "label": "RP2040: Build & Upload (USB)",
+            "label": "Pull & Restore",
             "type": "shell",
-            "command": "scripts/OpenKNX-Build.ps1",
+            "command": "${workspaceFolder}/restore/Restore-Checkout-Branch.ps1",
             "args": [
-                "upload_USB_RP2040",
-                "upload"
             ],
-            "group": "build",
-            "problemMatcher": []
+            "options": {
+                "cwd": "${workspaceFolder}/restore/"
+            },
+            "problemMatcher": [],
+            "group": "test",
+            "dependsOn": ["Pull"]
         },
+        // Build a release package for distribution
         {
-            "label": "RP2040: Build & Upload (JLINK)",
-            "type": "shell",
-            "command": "scripts/OpenKNX-Build.ps1",
-            "args": [
-                "upload_JLINK_RP2040",
-                "upload"
-            ],
-            "group": "build",
-            "problemMatcher": []
-        },
-        {
-            "label": "Build-Release",
-            "type": "shell",
-            "command": "scripts/Build-Release.ps1", 
-            "args": [
-                "Release"
-            ],
-            "problemMatcher": []
-        },
-        {
-            "label": "Build-Beta",
+            "label": "release_LEDDK_V1",
             "type": "shell",
             "command": "scripts/Build-Release.ps1",
             "args": [

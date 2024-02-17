@@ -107,48 +107,48 @@ void HWChannel::task()
             _currentTask = DIM_STOP;
         }
         break;
-        //increase value
-        case DIM_UP:
-            if(_valueCurrent < _valueMax){
-                if(!_busy){
-                    _delayRelative = (word)(_durationRelative / (_valueMax - _valueCurrent));
-                }
-                if(_currentMillis - _lastTaskExecution >= _delayRelative){
-                    _valueCurrent++;
-                    _busy = true;
-                    _updateCounter++;
-                    if(_updateCounter >= _updateInterval){
-                        _updateAvailable  = true;
-                        _updateCounter = 0;
-                    }
-                    setChannelValue(_valueCurrent);
-                    _lastTaskExecution = millis();
-                }
-            }else{
-                _currentTask = DIM_STOP;
+    //increase value
+    case DIM_UP:
+        if(_valueCurrent < _valueMax){
+            if(!_busy){
+                _delayRelative = (word)(_durationRelative / (_valueMax - _valueCurrent));
             }
-            break;
-        //decrease value
-        case DIM_DOWN:
-            if(_valueCurrent > _valueMin){
-                if(!_busy){
-                    _delayRelative = (word)(_durationRelative / (_valueCurrent - _valueMin));
+            if(_currentMillis - _lastTaskExecution >= _delayRelative){
+                _valueCurrent++;
+                _busy = true;
+                _updateCounter++;
+                if(_updateCounter >= _updateInterval){
+                    _updateAvailable  = true;
+                    _updateCounter = 0;
                 }
-                if(_currentMillis - _lastTaskExecution >= _delayRelative){
-                    _valueCurrent--;
-                    _busy = true;
-                    _updateCounter++;
-                    if(_updateCounter >= _updateInterval){
-                        _updateAvailable  = true;
-                        _updateCounter = 0;
-                    }
-                    setChannelValue(_valueCurrent);
-                    _lastTaskExecution = millis();
-                }
-            }else{
-                _currentTask = DIM_STOP;
+                setChannelValue(_valueCurrent);
+                _lastTaskExecution = millis();
             }
-            break;
+        }else{
+            _currentTask = DIM_STOP;
+        }
+        break;
+    //decrease value
+    case DIM_DOWN:
+        if(_valueCurrent > _valueMin){
+            if(!_busy){
+                _delayRelative = (word)(_durationRelative / (_valueCurrent - _valueMin));
+            }
+            if(_currentMillis - _lastTaskExecution >= _delayRelative){
+                _valueCurrent--;
+                _busy = true;
+                _updateCounter++;
+                if(_updateCounter >= _updateInterval){
+                    _updateAvailable  = true;
+                    _updateCounter = 0;
+                }
+                setChannelValue(_valueCurrent);
+                _lastTaskExecution = millis();
+            }
+        }else{
+            _currentTask = DIM_STOP;
+        }
+        break;
     // set value
     case DIM_SET:
         if (_valueCurrent < _valueNew)

@@ -1,8 +1,9 @@
-#include <LEDModule.h>
+#include "LEDModule.h"
 
-#include <DimChannel_EK.h>
-#include <DimChannel_TW.h>
-#include <HwChannel.h>
+#include "DimChannel_EK.h"
+#include "DimChannel_TW.h"
+#include "DimChannel_RGB.h"
+#include "HwChannel.h"
 
 LEDModule *LEDModule::_instance = nullptr;
 
@@ -28,8 +29,8 @@ void LEDModule::setup() {
     pwmFreqSelect = ParamAPP_PT_PwmFrequenz;
     
     // Debug
-    logInfoP("Operating Mode: %i", operatinModeSelect);
-    logInfoP("PWM frequenz: %i", pwmFreqSelect);
+    logDebugP("Operating Mode: %i", operatinModeSelect);
+    logDebugP("PWM frequenz: %i", pwmFreqSelect);
 
     // Init Lib
     _pwm = Adafruit_PWMServoDriver(I2C_PCA9685_DEVICE_ADDRESS, Wire1);
@@ -38,8 +39,6 @@ void LEDModule::setup() {
     if (!_pwm.begin()) {
         logErrorP("ERROR: initialization for PCA9685 failed...");
     }
-
-    //_pwm.begin();
 
     // Set default values for led
     _pwm.setOscillatorFrequency(25000000);
@@ -91,6 +90,24 @@ void LEDModule::setup() {
         channels_ek[5]->setup(5, APP_KoKO_ChannelFSwitch);
     }
     break;
+    case 3: // 2xRGB
+    {
+        channels_rgb[0] = new DimChannel_RGB(0);
+        channels_rgb[0]->setup(0, 1, 2, APP_KoKO_ChannelRGB1Switch);
+        channels_rgb[1] = new DimChannel_RGB(1);
+        channels_rgb[1]->setup(3, 4, 5, APP_KoKO_ChannelRGB2Switch);
+    }
+    break;
+    case 4: // 1x RGB + 1x TW + 1x EK
+    {
+
+    }
+    break;
+    case 5: // 1x RGB + 3x EK
+    {
+
+    }
+    break;
     default:
         logErrorP("Operation Mode not valide");
         break;
@@ -126,6 +143,22 @@ void LEDModule::loop()
         channels_ek[5]->task();
     }
     break;
+    case 3: // 2xRGB
+    {
+        channels_rgb[0]->task();
+        channels_rgb[1]->task();
+    }
+    break;
+    case 4: // 1x RGB + 1x TW + 1x EK
+    {
+
+    }
+    break;
+    case 5: // 1x RGB + 3x EK
+    {
+
+    }
+    break;
     default:
         logErrorP("Operation Mode not valide");
         break;
@@ -141,7 +174,7 @@ void LEDModule::setHwChannelValue(byte channel, byte value, int curve) {
 void LEDModule::processInputKo(GroupObject &ko) {
     // we have to check first, if external KO are used
     uint16_t asap = ko.asap();
-    logInfoP("KO: %i", asap);
+    //logInfoP("KO: %i", asap);
     // check if KO for Channels
     if (asap < 100) // KO not for Channels
         return;
@@ -168,6 +201,22 @@ void LEDModule::processInputKo(GroupObject &ko) {
         if (channelIndexEK >= 4 && channelIndexEK < 6) { channels_ek[channelIndexEK]->processInputKoEK(ko); }
     }
     break;
+    case 3: // 2xRGB
+    {
+        int channelIndexRGB = (asap - 362) / KO_PER_CHANNEL_RGB;
+        if (channelIndexRGB >= 0 && channelIndexRGB < 2) { channels_rgb[channelIndexRGB]->processInputKoRGB(ko); }
+    }
+    break;
+    case 4: // 1x RGB + 1x TW + 1x EK
+    {
+
+    }
+    break;
+    case 5: // 1x RGB + 3x EK
+    {
+
+    }
+    break;
     default:
         logErrorP("Operation Mode not valide");
     break;
@@ -181,9 +230,7 @@ void LEDModule::processBeforeRestart() {
 }
 
 void LEDModule::savePower() {
-    for (byte ch = 0; ch < CHANNELSHW; ch++) {
-        _pwm.setPin(ch, 0);
-    }
+    processBeforeRestart();
 }
 
 

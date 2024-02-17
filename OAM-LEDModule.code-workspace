@@ -7,6 +7,9 @@
 			"path": "../OGM-Common"
 		},
 		{
+			"path": "../OFM-FileTransferModule"
+		},
+		{
 			"path": "../knx"
 		}
 	],

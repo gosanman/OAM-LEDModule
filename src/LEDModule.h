@@ -1,18 +1,15 @@
 #ifndef LEDMODULE_H
 #define LEDMODULE_H
 
-#include <LIB_PWM.h>
-#include "OpenKNX.h"
+#include <Adafruit_PWMServoDriver.h>
+#include <OpenKNX.h>
 #include "hardware.h"
 
-#include <LEDHelper.h>
-
-//#include <DimChannel_EK.h>
-//#include <DimChannel_RGB.h>
-//#include <DimChannel_TW.h>
+#include "LEDHelper.h"
 
 class DimChannel_EK;
 class DimChannel_TW;
+class DimChannel_RGB;
 class HWChannel;
 
 class LEDModule : public OpenKNX::Module
@@ -34,7 +31,7 @@ public:
     void setHwChannelValue(byte channel, byte value, int curve);
 
 private:
-    int8_t operatinModeSelect = 0;  // 0=5xEK, 1=1xRGBCTT, 2=1xRGBW and 1xEK, 3=1xRGB and 2xEK, 4=1xRGB and 1xTW, 5=2xTW and 1xEK, 6=1xTW and 3xEK
+    int8_t operatinModeSelect = 0;  // 0=6xEK, 1=1xRGBCTT, 2=1xRGBW and 1xEK, 3=1xRGB and 2xEK, 4=1xRGB and 1xTW, 5=2xTW and 1xEK, 6=1xTW and 3xEK
     int16_t pwmFreqSelect = 488;    // 211, 488, 600, 832, 1000, 1200
     unsigned long currentTime = 0;
 
@@ -42,6 +39,7 @@ private:
  
     DimChannel_EK *channels_ek[CHANNELSEK];
     DimChannel_TW *channels_tw[CHANNELSTW];
+    DimChannel_RGB *channels_rgb[CHANNELSRGB];
     HWChannel *hwchannels[CHANNELSHW]; 
 
 };

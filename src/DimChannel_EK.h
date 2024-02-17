@@ -3,8 +3,8 @@
 
 #include <OpenKNX.h>
 
-#include <LEDModule.h>
-#include <HwChannel.h>
+#include "LEDModule.h"
+#include "HwChannel.h"
 
 class LEDModule;
 class DimChannel_EK : public OpenKNX::Channel

@@ -1,7 +1,7 @@
 #include <OpenKNX.h>
-#include <LEDModule.h>
-#include <MeasuringModule.h>
-#include <UpdaterModule.h>
+#include "LEDModule.h"
+#include "MeasuringModule.h"
+#include <FileTransferModule.h>
 
 void setup() {
     // setup 1Wire connection for hardware
@@ -15,7 +15,7 @@ void setup() {
 
     openknx.addModule(1, new LEDModule());
     openknx.addModule(2, new MeasuringModule());
-    //openknx.addModule(9, new UpdaterModule());
+    openknx.addModule(9, new FileTransferModule());
     openknx.setup();
 }
 
@@ -23,6 +23,12 @@ void loop() {
     openknx.loop();
 }
 
-void loop1() {
-    openknx.loop1();
-}
+#ifdef OPENKNX_DUALCORE
+    void setup1() {
+        openknx.setup1();
+    };
+
+    void loop1() {
+        openknx.loop1();
+    }
+#endif
