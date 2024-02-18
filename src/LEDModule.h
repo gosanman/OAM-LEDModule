@@ -21,6 +21,8 @@ public:
     const std::string name() override;
     const std::string version() override;
     void processInputKo(GroupObject &ko) override;
+    void showHelp() override;
+    bool processCommand(const std::string cmd, bool diagnoseKo);
     
     void processBeforeRestart();
     void savePower();
@@ -43,5 +45,7 @@ private:
     HWChannel *hwchannels[CHANNELSHW]; 
 
 };
+
+extern LEDModule openknxLEDModule;
 
 #endif

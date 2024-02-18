@@ -223,6 +223,30 @@ void LEDModule::processInputKo(GroupObject &ko) {
     }
 }
 
+void LEDModule::showHelp()
+{
+    openknx.logger.color(CONSOLE_HEADLINE_COLOR);
+    openknx.logger.log("======================== LED Module ============================================");
+    openknx.logger.color(0);
+    openknx.console.printHelpLine("chon <ch>", "Switch Channel 0-5 on");
+    openknx.console.printHelpLine("choff <ch>", "Switch Channel 0-5 off");
+    openknx.console.printHelpLine("chval <ch> <value>", "Switch Channel 0-5 to value 0-4095");
+}
+
+bool LEDModule::processCommand(const std::string cmd, bool diagnoseKo) 
+{
+    if (!diagnoseKo && (cmd.rfind("chon ", 0) == 0 || cmd.rfind("choff ", 0) == 0)) {
+        setHwChannelValue(std::stoi(cmd.substr(cmd.find(' ') + 1)), std::stoi(cmd.rfind("chon", 0) == 0 ? "4095" : "0"), 0);
+        openknx.logger.logWithPrefixAndValues("Channel", "Switch channel %i to %i", std::stoi(cmd.substr(cmd.find(' ') + 1)), std::stoi(cmd.rfind("chon", 0) == 0 ? "4095" : "0"));
+        return true;
+    } else if (!diagnoseKo && cmd.rfind("chval ", 0) == 0) {
+        setHwChannelValue(std::stoi(cmd.substr(cmd.find(' ') + 1)), std::stoi(cmd.substr(cmd.find(' ') + 3)), 0);
+        openknx.logger.logWithPrefixAndValues("Channel", "Set value channel %i to %i", std::stoi(cmd.substr(cmd.find(' ') + 1)), std::stoi(cmd.substr(cmd.find(' ') + 3)));
+        return true;
+    }
+    return false;
+}
+
 void LEDModule::processBeforeRestart() {
     for (byte ch = 0; ch < CHANNELSHW; ch++) {
         _pwm.setPin(ch, 0);
@@ -233,4 +257,4 @@ void LEDModule::savePower() {
     processBeforeRestart();
 }
 
-
+LEDModule openknxLEDModule;

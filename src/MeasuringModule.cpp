@@ -108,3 +108,38 @@ void MeasuringModule::getSingleMeasurement()
         KoAPP_KO_TempC.value(temperatur_C, DPT_Value_Common_Temperature);
     }
 }
+
+void MeasuringModule::showHelp()
+{
+    openknx.logger.color(CONSOLE_HEADLINE_COLOR);
+    openknx.logger.log("======================== Measuring Module ======================================");
+    openknx.logger.color(0);
+    openknx.console.printHelpLine("temp", "Display the internal temperature in °C");
+    openknx.console.printHelpLine("voltage", "Display the current voltage in volt");
+    openknx.console.printHelpLine("current", "Display the current current in ampere");
+    openknx.console.printHelpLine("power", "Display the current power in watt");
+}
+
+bool MeasuringModule::processCommand(const std::string cmd, bool diagnoseKo) 
+{
+    if (!diagnoseKo && (cmd == "temp")) {
+        getSingleMeasurement();
+        logInfoP("Temperatur: %f °C", temperatur_C);
+        return true;
+    } else if (!diagnoseKo && (cmd == "voltage")) {
+        getSingleMeasurement();
+        logInfoP("Voltage: %f V", busVoltage_V);
+        return true;
+    } else if (!diagnoseKo && (cmd == "current")) {
+        getSingleMeasurement();
+        logInfoP("Current: %f A", current_A);
+        return true;
+    } else if (!diagnoseKo && (cmd == "power")) {
+        getSingleMeasurement();
+        logInfoP("Power: %f W",  power_W);
+        return true;
+    }
+    return false;
+}
+
+MeasuringModule openknxMeasuringModule;

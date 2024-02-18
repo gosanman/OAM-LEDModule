@@ -19,13 +19,15 @@ public:
     void loop1() override;
     const std::string name() override;
     const std::string version() override;
-    static MeasuringModule *instance();
-
+    
     void getSingleMeasurement();
+    void showHelp() override;
+    bool processCommand(const std::string cmd, bool diagnoseKo);
 
-private:
+    static MeasuringModule *instance();
     static MeasuringModule *_instance;
 
+private:
     float shuntValue = 0;               // value will divided by 1000
     float maxcurrent = 0;
     byte measurementSend = 1;           // 0=No, 1=Yes
@@ -47,5 +49,7 @@ private:
     INA226_WE _ina226;
     TMP100_WE _tmp100;
 };
+
+extern MeasuringModule openknxMeasuringModule;
 
 #endif

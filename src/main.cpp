@@ -13,9 +13,9 @@ void setup() {
     const uint8_t firmwareRevision = 1;
     openknx.init(firmwareRevision);
 
-    openknx.addModule(1, new LEDModule());
-    openknx.addModule(2, new MeasuringModule());
-    openknx.addModule(9, new FileTransferModule());
+    openknx.addModule(1, openknxLEDModule);
+    openknx.addModule(2, openknxMeasuringModule);
+    openknx.addModule(9, openknxFileTransferModule);
     openknx.setup();
 }
 
