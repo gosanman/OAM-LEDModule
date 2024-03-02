@@ -49,31 +49,31 @@ void DimChannel_RGB::setup(int8_t hwchannel_r, int8_t hwchannel_g, int8_t hwchan
     hwchannels[m_hwchannel_g]->setup(m_hwchannel_g, m_curve, m_durationabsolut, m_durationrelativ);
     hwchannels[m_hwchannel_b]->setup(m_hwchannel_b, m_curve, m_durationabsolut, m_durationrelativ);
 
-    logInfoP("------------------ DEBUG -------------------");
-    logInfoP("KO Switch: %i", calc_ko_switch);
-    logInfoP("KO Color RGB: %i", calc_ko_colorrgb);
-    logInfoP("KO Color HSV: %i", calc_ko_colorhsv);
-    logInfoP("KO Dim Absolut H: %i", calc_ko_dimabsolutshadeh);
-    logInfoP("KO Dim Absolut S: %i", calc_ko_dimabsolutsaturations);
-    logInfoP("KO Dim Absolut V: %i", calc_ko_dimabsolutbrightnessv);
-    logInfoP("KO Dim Relativ H: %i", calc_ko_dimrelativshadeh);
-    logInfoP("KO Dim Relativ S: %i", calc_ko_dimrelativsaturations);
-    logInfoP("KO Dim Relativ V: %i", calc_ko_dimrelativbrightnessv);
-    logInfoP("KO Status OnOff: %i", calc_ko_statusonoff);
-    logInfoP("KO Status Color RGB: %i", calc_ko_statuscolorrgb);
-    logInfoP("KO Status Color HSV: %i", calc_ko_statuscolorhsv);
-    logInfoP("KO Status H: %i", calc_ko_statusshadeh);
-    logInfoP("KO Status S: %i", calc_ko_statussaturations);
-    logInfoP("KO Status V: %i", calc_ko_statusbrightnessv);
-    logInfoP("HW Port R: %i", m_hwchannel_r);
-    logInfoP("HW Port G: %i", m_hwchannel_g);
-    logInfoP("HW Port B: %i", m_hwchannel_b);
-    logInfoP("PT UseOnColor: %i", m_useoncolor);
-    logInfoP("PT OnColor: #%.2X%.2X%.2X", m_oncolor[0], m_oncolor[1], m_oncolor[2]);
-    logInfoP("PT DurationRelativ: %i", m_durationrelativ);
-    logInfoP("PT DurationAbsolut: %i", m_durationabsolut);
-    logInfoP("PT Curve: %i", m_curve);
-    logInfoP("--------------------------------------------");
+    logDebugP("------------------ DEBUG -------------------");
+    logDebugP("KO Switch: %i", calc_ko_switch);
+    logDebugP("KO Color RGB: %i", calc_ko_colorrgb);
+    logDebugP("KO Color HSV: %i", calc_ko_colorhsv);
+    logDebugP("KO Dim Absolut H: %i", calc_ko_dimabsolutshadeh);
+    logDebugP("KO Dim Absolut S: %i", calc_ko_dimabsolutsaturations);
+    logDebugP("KO Dim Absolut V: %i", calc_ko_dimabsolutbrightnessv);
+    logDebugP("KO Dim Relativ H: %i", calc_ko_dimrelativshadeh);
+    logDebugP("KO Dim Relativ S: %i", calc_ko_dimrelativsaturations);
+    logDebugP("KO Dim Relativ V: %i", calc_ko_dimrelativbrightnessv);
+    logDebugP("KO Status OnOff: %i", calc_ko_statusonoff);
+    logDebugP("KO Status Color RGB: %i", calc_ko_statuscolorrgb);
+    logDebugP("KO Status Color HSV: %i", calc_ko_statuscolorhsv);
+    logDebugP("KO Status H: %i", calc_ko_statusshadeh);
+    logDebugP("KO Status S: %i", calc_ko_statussaturations);
+    logDebugP("KO Status V: %i", calc_ko_statusbrightnessv);
+    logDebugP("HW Port R: %i", m_hwchannel_r);
+    logDebugP("HW Port G: %i", m_hwchannel_g);
+    logDebugP("HW Port B: %i", m_hwchannel_b);
+    logDebugP("PT UseOnColor: %i", m_useoncolor);
+    logDebugP("PT OnColor: #%.2X%.2X%.2X", m_oncolor[0], m_oncolor[1], m_oncolor[2]);
+    logDebugP("PT DurationRelativ: %i", m_durationrelativ);
+    logDebugP("PT DurationAbsolut: %i", m_durationabsolut);
+    logDebugP("PT Curve: %i", m_curve);
+    logDebugP("--------------------------------------------");
 }
 
 void DimChannel_RGB::processInputKoRGB(GroupObject &ko) {
@@ -213,7 +213,7 @@ void DimChannel_RGB::processInputKoRGB(GroupObject &ko) {
     else if (asap == calc_ko_dimrelativshadeh) {
         uint8_t direction = ko.value(Dpt(3,7,0));
         uint8_t step = ko.value(Dpt(3,7,1));
-        // logInfoP("Dim Relativ - Direction: %i, Step: %i", direction, step);
+        logDebugP("Dim Relativ - Direction: %i, Step: %i", direction, step);
         //direction true = dim up, false = dim down, step = 0 then stop
         if (step == 0) {
             hwchannels[m_hwchannel_r]->taskStop();
@@ -221,11 +221,11 @@ void DimChannel_RGB::processInputKoRGB(GroupObject &ko) {
             hwchannels[m_hwchannel_b]->taskStop();
         }
         else if (direction == 1) {
-            // logInfoP("Dim Relativ - DimUp");
+            logDebugP("Dim Relativ - DimUp");
             // code passt noch nicht
         }
         else if (direction == 0) {
-            // logInfoP("Dim Relativ - DimDown");
+            logDebugP("Dim Relativ - DimDown");
             // code passt noch nicht
         }
     }

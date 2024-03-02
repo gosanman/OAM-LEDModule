@@ -42,27 +42,27 @@ void DimChannel_TW::setup(int8_t hwchannel_ww, int8_t hwchannel_cw, uint16_t sta
     hwchannels[m_hwchannel_ww]->setup(m_hwchannel_ww, m_curve, m_durationabsolut, m_durationrelativ);
     hwchannels[m_hwchannel_cw]->setup(m_hwchannel_cw, m_curve, m_durationabsolut, m_durationrelativ);
 
-    logInfoP("------------------ DEBUG -------------------");
-    logInfoP("KO Switch: %i", calc_ko_switch);
-    logInfoP("KO Dim Absolute: %i", calc_ko_dimabsolute);
-    logInfoP("KO Dim Kelvin: %i", calc_ko_dimkelvin);
-    logInfoP("KO Dim Relativ: %i", calc_ko_dimrelativ);
-    logInfoP("KO Status OnOff: %i", calc_ko_statusonoff);
-    logInfoP("KO Status Brightness: %i", calc_ko_statusbrightness);
-    logInfoP("KO Status Kelvin: %i", calc_ko_statuskelvin);
-    logInfoP("HW Port WW: %i", m_hwchannel_ww);
-    logInfoP("HW Port CW: %i", m_hwchannel_cw);
-    logInfoP("PT ColorTemp WW: %i", m_colortempww);
-    logInfoP("PT ColorTemp CW: %i", m_colortempcw);
-    logInfoP("PT OnBrightness: %i", m_onbrightness);
-    logInfoP("PT OnColorTemp: %i", m_oncolortemp);
-    logInfoP("PT DurationRelativ WW: %i", m_durationrelativ);
-    logInfoP("PT DurationAbsolut WW: %i", m_durationabsolut);
-    logInfoP("PT DurationRelativ CW: %i", m_durationrelativ);
-    logInfoP("PT DurationAbsolut CW: %i", m_durationabsolut);
-    logInfoP("PT Curve WW: %i", m_curve);
-    logInfoP("PT Curve CW: %i", m_curve);
-    logInfoP("--------------------------------------------");
+    logDebugP("------------------ DEBUG -------------------");
+    logDebugP("KO Switch: %i", calc_ko_switch);
+    logDebugP("KO Dim Absolute: %i", calc_ko_dimabsolute);
+    logDebugP("KO Dim Kelvin: %i", calc_ko_dimkelvin);
+    logDebugP("KO Dim Relativ: %i", calc_ko_dimrelativ);
+    logDebugP("KO Status OnOff: %i", calc_ko_statusonoff);
+    logDebugP("KO Status Brightness: %i", calc_ko_statusbrightness);
+    logDebugP("KO Status Kelvin: %i", calc_ko_statuskelvin);
+    logDebugP("HW Port WW: %i", m_hwchannel_ww);
+    logDebugP("HW Port CW: %i", m_hwchannel_cw);
+    logDebugP("PT ColorTemp WW: %i", m_colortempww);
+    logDebugP("PT ColorTemp CW: %i", m_colortempcw);
+    logDebugP("PT OnBrightness: %i", m_onbrightness);
+    logDebugP("PT OnColorTemp: %i", m_oncolortemp);
+    logDebugP("PT DurationRelativ WW: %i", m_durationrelativ);
+    logDebugP("PT DurationAbsolut WW: %i", m_durationabsolut);
+    logDebugP("PT DurationRelativ CW: %i", m_durationrelativ);
+    logDebugP("PT DurationAbsolut CW: %i", m_durationabsolut);
+    logDebugP("PT Curve WW: %i", m_curve);
+    logDebugP("PT Curve CW: %i", m_curve);
+    logDebugP("--------------------------------------------");
 }
 
 void DimChannel_TW::processInputKoTW(GroupObject &ko) {
@@ -72,12 +72,12 @@ void DimChannel_TW::processInputKoTW(GroupObject &ko) {
         bool value = ko.value(DPT_Switch);
         if (_lastbrightness == 0) { _lastbrightness = m_onbrightness; }
         if (_lastcolortemp == 0)  { _lastcolortemp = m_oncolortemp;   }
-        // logInfoP("Switch - Value: %i - Kelvin: %i - Brightness: %i", value, _lastcolortemp, _lastbrightness);
+        logDebugP("Switch - Value: %i - Kelvin: %i - Brightness: %i", value, _lastcolortemp, _lastbrightness);
         if (value) { // on
             uint8_t percent = prozToDim(_lastbrightness, 3);
             uint8_t percentWW = (percent*(m_colortempcw - _lastcolortemp))/(m_colortempcw - m_colortempww);
             uint8_t percentCW = (percent*(_lastcolortemp - m_colortempww))/(m_colortempcw - m_colortempww);
-            // logInfoP("protzToDim Correction Value - WW: %i CW: %i", percentWW, percentCW);
+            logDebugP("protzToDim Correction Value - WW: %i CW: %i", percentWW, percentCW);
             hwchannels[m_hwchannel_ww]->taskNewValue(percentWW);
             hwchannels[m_hwchannel_cw]->taskNewValue(percentCW);
         }
@@ -91,11 +91,11 @@ void DimChannel_TW::processInputKoTW(GroupObject &ko) {
         uint8_t brightness = ko.value(DPT_Percent_U8);
         _lastbrightness = brightness;
         if (_lastcolortemp == 0) { _lastcolortemp = m_oncolortemp; }
-        // logInfoP("Dim Absolute - Kelvin: %i - Brightness: %i", _lastcolortemp, _lastbrightness);
+        logDebugP("Dim Absolute - Kelvin: %i - Brightness: %i", _lastcolortemp, _lastbrightness);
         uint8_t percent = prozToDim(_lastbrightness, 3);
         uint8_t percentWW = (percent*(m_colortempcw - _lastcolortemp))/(m_colortempcw - m_colortempww);
         uint8_t percentCW = (percent*(_lastcolortemp - m_colortempww))/(m_colortempcw - m_colortempww);
-        // logInfoP("protzToDim Correction Value - WW: %i CW %i", percentWW, percentCW); 
+        logDebugP("protzToDim Correction Value - WW: %i CW %i", percentWW, percentCW); 
         hwchannels[m_hwchannel_ww]->taskNewValue(percentWW);
         hwchannels[m_hwchannel_cw]->taskNewValue(percentCW);
     }
@@ -103,29 +103,29 @@ void DimChannel_TW::processInputKoTW(GroupObject &ko) {
         uint16_t kelvin = ko.value(Dpt(7, 600));
         _lastcolortemp = kelvin;
         if (_lastbrightness == 0) { _lastbrightness = m_onbrightness; }
-        // logInfoP("Dim Kelvin - Kelvin: %i - Brightness: %i", _lastcolortemp, _lastbrightness);
+        logDebugP("Dim Kelvin - Kelvin: %i - Brightness: %i", _lastcolortemp, _lastbrightness);
         uint8_t percent = prozToDim(_lastbrightness, 3);
         uint8_t percentWW = (percent*(m_colortempcw - _lastcolortemp))/(m_colortempcw - m_colortempww);
         uint8_t percentCW = (percent*(_lastcolortemp - m_colortempww))/(m_colortempcw - m_colortempww);
-        // logInfoP("protzToDim Correction Value - WW: %i CW %i", percentWW, percentCW);
+        logDebugP("protzToDim Correction Value - WW: %i CW %i", percentWW, percentCW);
         hwchannels[m_hwchannel_ww]->taskNewValue(percentWW);
         hwchannels[m_hwchannel_cw]->taskNewValue(percentCW); 
     }
     else if (asap == calc_ko_dimrelativ) {
         uint8_t direction = ko.value(Dpt(3,7,0));
         uint8_t step = ko.value(Dpt(3,7,1));
-        // logInfoP("Dim Relativ - Direction: %i, Step: %i", direction, step);
+        logDebugP("Dim Relativ - Direction: %i, Step: %i", direction, step);
         //direction true = dim up, false = dim down, step = 0 then stop
         if (step == 0) {
             hwchannels[m_hwchannel_ww]->taskStop();
             hwchannels[m_hwchannel_cw]->taskStop();
         }
         else if (direction == 1) {
-            // logInfoP("Dim Relativ - DimUp");
+            logDebugP("Dim Relativ - DimUp");
             // code passt noch nicht
         }
         else if (direction == 0) {
-            // logInfoP("Dim Relativ - DimDown");
+            logDebugP("Dim Relativ - DimDown");
             // code passt noch nicht
         }
     }

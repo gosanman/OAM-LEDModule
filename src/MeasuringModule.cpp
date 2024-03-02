@@ -28,11 +28,11 @@ void MeasuringModule::setup()
     maxcurrent = (shuntValue == 10) ? 8.0 : 16.0;
 
     // Debug
-    logInfoP("Measuring send: %i", measurementSend);
-    logInfoP("Measuring interval: %i", MeasurementInterval[measurementSelectInterval]);
-    logInfoP("Shunt value: %f", shuntValue / 1000);
-    logInfoP("Max current in A: %f", maxcurrent);
-    logInfoP("Temp sensor present: %i", tempSensorPresent);
+    logDebugP("Measuring send: %i", measurementSend);
+    logDebugP("Measuring interval: %i", MeasurementInterval[measurementSelectInterval]);
+    logDebugP("Shunt value: %f", shuntValue / 1000);
+    logDebugP("Max current in A: %f", maxcurrent);
+    logDebugP("Temp sensor present: %i", tempSensorPresent);
 
     // Init TMP100 Lib if present
     if (tempSensorPresent) {
@@ -85,10 +85,6 @@ void MeasuringModule::getSingleMeasurement()
     current_A = round(_ina226.getCurrent_A() * 100) / 100;      // rounded to two decimal places
     power_W = round(_ina226.getBusPower_W() * 100) / 100;       // rounded to two decimal places
 
-    // logInfoP("BusVoltage: %f", busVoltage_V);
-    // logInfoP("Current: %f", current_A);
-    // logInfoP("Power: %f", power_W);
-
     KoAPP_KO_VoltageV.value(busVoltage_V, DPT_Value_Electric_Potential);
     KoAPP_KO_CurrentA.value(current_A, DPT_Value_Electric_Current);
     KoAPP_KO_PowerW.value(power_W, DPT_Value_Power);
@@ -104,7 +100,6 @@ void MeasuringModule::getSingleMeasurement()
     // run Temp Measurment if sensor present
     if (tempSensorPresent) {
         temperatur_C = _tmp100.getTemperature();
-        // logInfoP("Temperatur: %f", temperatur_C);
         KoAPP_KO_TempC.value(temperatur_C, DPT_Value_Common_Temperature);
     }
 }

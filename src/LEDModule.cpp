@@ -167,14 +167,12 @@ void LEDModule::loop()
 
 // Core function to set value
 void LEDModule::setHwChannelValue(byte channel, byte value, int curve) {
-    //logInfoP("Channel: %i - Value: %i - Curve: %i", channel, value, curve);
     _pwm.setPin(channel, curves[value][curve]);
 }
 
 void LEDModule::processInputKo(GroupObject &ko) {
     // we have to check first, if external KO are used
     uint16_t asap = ko.asap();
-    //logInfoP("KO: %i", asap);
     // check if KO for Channels
     if (asap < 100) // KO not for Channels
         return;

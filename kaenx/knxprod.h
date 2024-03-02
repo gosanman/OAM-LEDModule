@@ -6,45 +6,43 @@
             (time & 0xC000) == 0x4000 ? (time & 0x3FFF) * 60000 : \
             (time & 0xC000) == 0x8000 ? ((time & 0x3FFF) > 1000 ? 3600000 : \
                                             (time & 0x3FFF) * 3600000 ) : 0 )
-
-#define PT_PT_OperatingMode_PT_OperatingMode_EN_0               0
-#define PT_PT_OperatingMode_PT_OperatingMode_EN_1               1
-#define PT_PT_OperatingMode_PT_OperatingMode_EN_2               2
-#define PT_PT_OperatingMode_PT_OperatingMode_EN_3               3
-#define PT_PT_OperatingMode_PT_OperatingMode_EN_4               4
-#define PT_PT_OperatingMode_PT_OperatingMode_EN_5               5
-#define PT_PT_PwmFrequenz_PT_PwmFrequenz_EN_211                 211
-#define PT_PT_PwmFrequenz_PT_PwmFrequenz_EN_488                 488
-#define PT_PT_PwmFrequenz_PT_PwmFrequenz_EN_600                 600
-#define PT_PT_PwmFrequenz_PT_PwmFrequenz_EN_832                 832
-#define PT_PT_PwmFrequenz_PT_PwmFrequenz_EN_1000                1000
-#define PT_PT_PwmFrequenz_PT_PwmFrequenz_EN_1200                1200
-#define PT_PT_ChxDimCurve_PT_DimCurve_EN_0                      0
-#define PT_PT_ChxDimCurve_PT_DimCurve_EN_1                      1
-#define PT_PT_ChxDimCurve_PT_DimCurve_EN_2                      2
-#define PT_PT_ChxDimCurve_PT_DimCurve_EN_3                      3
-#define PT_PT_SendMeasuredValues_PT_SendMeasuredValues_EN_1     1
-#define PT_PT_SendMeasuredValues_PT_SendMeasuredValues_EN_0     0
-#define PT_PT_MeasurementInterval_PT_MeasurementInterval_EN_0   0
-#define PT_PT_MeasurementInterval_PT_MeasurementInterval_EN_1   1
-#define PT_PT_MeasurementInterval_PT_MeasurementInterval_EN_2   2
-#define PT_PT_MeasurementInterval_PT_MeasurementInterval_EN_3   3
-#define PT_PT_ChxOnOffTime_PT_ChxOnOffTime_EN_0                 0
-#define PT_PT_ChxOnOffTime_PT_ChxOnOffTime_EN_3                 3
-#define PT_PT_ChxOnOffTime_PT_ChxOnOffTime_EN_5                 5
-#define PT_PT_ChxOnOffTime_PT_ChxOnOffTime_EN_7                 7
-#define PT_PT_ChxOnOffTime_PT_ChxOnOffTime_EN_10                10
-#define PT_PT_ChxOnOffTime_PT_ChxOnOffTime_EN_15                15
-#define PT_PT_ChxOnOffTime_PT_ChxOnOffTime_EN_20                20
-#define PT_PT_TempSensorPresent_PT_TempSensorPresent_EN_0       0
-#define PT_PT_TempSensorPresent_PT_TempSensorPresent_EN_1       1
-#define PT_PT_ShuntValue_PT_ShuntValue_EN_5                     5
-#define PT_PT_ShuntValue_PT_ShuntValue_EN_10                    10
-#define PT_PT_UseOnColor_PT_UseOnColor_EN_0                     0
-#define PT_PT_UseOnColor_PT_UseOnColor_EN_1                     1
-#define PT_PT_OnOffYesNo_PT_OnOffYesNo_EN_0                     0
-#define PT_PT_OnOffYesNo_PT_OnOffYesNo_EN_1                     1
-
+#define PT_PT_OperatingMode_PT_OperatingMode_EN_0 0
+#define PT_PT_OperatingMode_PT_OperatingMode_EN_1 1
+#define PT_PT_OperatingMode_PT_OperatingMode_EN_2 2
+#define PT_PT_OperatingMode_PT_OperatingMode_EN_3 3
+#define PT_PT_OperatingMode_PT_OperatingMode_EN_4 4
+#define PT_PT_OperatingMode_PT_OperatingMode_EN_5 5
+#define PT_PT_PwmFrequenz_PT_PwmFrequenz_EN_211 211
+#define PT_PT_PwmFrequenz_PT_PwmFrequenz_EN_488 488
+#define PT_PT_PwmFrequenz_PT_PwmFrequenz_EN_600 600
+#define PT_PT_PwmFrequenz_PT_PwmFrequenz_EN_832 832
+#define PT_PT_PwmFrequenz_PT_PwmFrequenz_EN_1000 1000
+#define PT_PT_PwmFrequenz_PT_PwmFrequenz_EN_1200 1200
+#define PT_PT_ChxDimCurve_PT_DimCurve_EN_0 0
+#define PT_PT_ChxDimCurve_PT_DimCurve_EN_1 1
+#define PT_PT_ChxDimCurve_PT_DimCurve_EN_2 2
+#define PT_PT_ChxDimCurve_PT_DimCurve_EN_3 3
+#define PT_PT_SendMeasuredValues_PT_SendMeasuredValues_EN_1 1
+#define PT_PT_SendMeasuredValues_PT_SendMeasuredValues_EN_0 0
+#define PT_PT_MeasurementInterval_PT_MeasurementInterval_EN_0 0
+#define PT_PT_MeasurementInterval_PT_MeasurementInterval_EN_1 1
+#define PT_PT_MeasurementInterval_PT_MeasurementInterval_EN_2 2
+#define PT_PT_MeasurementInterval_PT_MeasurementInterval_EN_3 3
+#define PT_PT_ChxOnOffTime_PT_ChxOnOffTime_EN_0 0
+#define PT_PT_ChxOnOffTime_PT_ChxOnOffTime_EN_3 3
+#define PT_PT_ChxOnOffTime_PT_ChxOnOffTime_EN_5 5
+#define PT_PT_ChxOnOffTime_PT_ChxOnOffTime_EN_7 7
+#define PT_PT_ChxOnOffTime_PT_ChxOnOffTime_EN_10 10
+#define PT_PT_ChxOnOffTime_PT_ChxOnOffTime_EN_15 15
+#define PT_PT_ChxOnOffTime_PT_ChxOnOffTime_EN_20 20
+#define PT_PT_TempSensorPresent_PT_TempSensorPresent_EN_0 0
+#define PT_PT_TempSensorPresent_PT_TempSensorPresent_EN_1 1
+#define PT_PT_ShuntValue_PT_ShuntValue_EN_5 5
+#define PT_PT_ShuntValue_PT_ShuntValue_EN_10 10
+#define PT_PT_UseOnColor_PT_UseOnColor_EN_0 0
+#define PT_PT_UseOnColor_PT_UseOnColor_EN_1 1
+#define PT_PT_OnOffYesNo_PT_OnOffYesNo_EN_0 0
+#define PT_PT_OnOffYesNo_PT_OnOffYesNo_EN_1 1
 //--------------------Allgemein---------------------------
 #define MAIN_OpenKnxId 0xAF
 #define MAIN_ApplicationNumber 0x01
@@ -53,99 +51,13 @@
 #define MAIN_ParameterSize 219
 #define MAIN_MaxKoNumber 407
 
-// number of channel to use in DimmerControl
-#define CHANNELSHW    6
-#define CHANNELSEK    6
-#define CHANNELSTW    3
-#define CHANNELSRGB   2
 
-// number of ko reserved for a channel
-#define KO_PER_CHANNEL_EK       20          //Number of KO per EK channel
-#define KO_PER_CHANNEL_TW       30          //Number of KO per TW channel
-#define KO_PER_CHANNEL_RGB      30          //Number of KO per RGB channel
-// -----------------------------------------------------
-
-//--------------------Kommunikationsobjekte---------------------------
-// ComObjects per EK channel
-#define KO_OFFSET_EK_SWITCH            0           //Offset for Switch KO
-#define KO_OFFSET_EK_DIMABSOLUT        3           //Offset for Dim Absolut KO
-#define KO_OFFSET_EK_DIMRELATIV        4           //Offset for Dim Relativ KO
-#define KO_OFFSET_EK_STATUSONOFF       14          //Offset for OnOff KO
-#define KO_OFFSET_EK_STATUSBRIGHTNESS  15          //Offset for Brightness KO
-
-// ComObjects per TW channel
-#define KO_OFFSET_TW_SWITCH            0           //Offset for Switch KO
-#define KO_OFFSET_TW_DIMABSOLUT        3           //Offset for Dim Absolut KO
-#define KO_OFFSET_TW_DIMKELVIN         5           //Offset for Dim Kelvin KO
-#define KO_OFFSET_TW_DIMRELATIV        7           //Offset for Dim Relativ KO
-#define KO_OFFSET_TW_STATUSONOFF       24          //Offset for OnOff KO
-#define KO_OFFSET_TW_STATUSBRIGHTNESS  25          //Offset for Brightness KO
-#define KO_OFFSET_TW_STATUSKELVIN      27          //Offset for Kelvin KO
-
-// ComObjects per RGB channel
-#define KO_OFFSET_RGB_SWITCH                 0           //Offset for Switch KO
-#define KO_OFFSET_RGB_COLORRGB               2           //Offset for Color RGB KO
-#define KO_OFFSET_RGB_COLORHSV               3           //Offset for Color HSV KO
-#define KO_OFFSET_RGB_DIMABSOLUTSHADEH       4           //Offset for Dim Absolut H KO
-#define KO_OFFSET_RGB_DIMABSOLUTSATURATIONS  5           //Offset for Dim Absolut S KO
-#define KO_OFFSET_RGB_DIMABSOLUTBRIGHTNESSV  6           //Offset for Dim Absolut V KO
-#define KO_OFFSET_RGB_DIMRELATIVSHADEH       7           //Offset for Dim Relativ H KO
-#define KO_OFFSET_RGB_DIMRELATIVSATURATIONS  8           //Offset for Dim Relativ S KO
-#define KO_OFFSET_RGB_DIMRELATIVBRIGHTNESSV  9           //Offset for Dim Relativ V KO
-#define KO_OFFSET_RGB_STATUSONOFF            10          //Offset for OnOff KO
-#define KO_OFFSET_RGB_STATUSCOLORRGB         11          //Offset for Status Color RGB KO
-#define KO_OFFSET_RGB_STATUSCOLORHSV         12          //Offset for Status Color HSV KO
-#define KO_OFFSET_RGB_STATUSSHADEH           13          //Offset for Status H KO
-#define KO_OFFSET_RGB_STATUSSATURATIONS      14          //Offset for Status S KO
-#define KO_OFFSET_RGB_STATUSBRIGHTNESSV      15          //Offset for Status V KO
-// -----------------------------------------------------
-
-//--------------------Parameter---------------------------
-// Parameter per EK channel
-#define EK_ParamBlockOffset             32      // Parameter für Einzelkanal starten bei 32
-#define EK_ParamBlockSize               16      // Weitere Kanaele werden mit +16 berechnet
-#define EK_ParamOffSetOnBrightness       0      // Offset: 32, 48 usw. Text: Einschalthelligkeit
-#define EK_ParamOffSetRelativDimTime     1      // Offset: 33, 49 usw. Text: Dimmgeschwindigkeit Relativ
-#define EK_ParamOffSetOnOffTime		     2      // Offset: 34, 50 usw. Text: Ein- und Ausschaltgeschwindigkeit
-#define EK_ParamOffSetDimCurve           3      // Offset: 35, 51 usw. Text: Dimmkurve
-
-#define EK_ParamCalcIndex(index) (index + (_channelIndex * EK_ParamBlockSize) + EK_ParamBlockOffset)
-
-// Parameter per TW channel
-#define TW_ParamBlockOffset            128      // Parameter für TW Kanal starten bei 128
-#define TW_ParamBlockSize               16      // Weitere Kanaele werden mit +16 berechnet
-#define TW_ParamColorTempWW	             0      // Offset: 128, 144 usw. Text: Farbtemperatur Warmweiß
-#define TW_ParamColorTempKW	             2      // Offset: 130, 146 usw. Text: Farbtemperatur Kaltweiß
-#define TW_ParamOnBrightness		     4      // Offset: 132, 148 usw. Text: Einschaltverhalten - Helligkeit
-#define TW_ParamOnColorTemp              5      // Offset: 133, 149 usw. Text: Einschaltverhalten - Farbtemperatur
-#define TW_ParamRelativDimTime           7      // Offset: 135, 151 usw. Text: Dimmgeschwindigkeit Relativ
-#define TW_ParamOnOffTime                8      // Offset: 136, 152 usw. Text: Ein- und Ausschaltgeschwindigkeit
-#define TW_ParamDimCurve                 9      // Offset: 137, 153 usw. Text: Dimmkurve
-
-#define TW_ParamCalcIndex(index) (index + (_channelIndex * TW_ParamBlockSize) + TW_ParamBlockOffset)
-
-// Parameter per RGB channel
-#define RGB_ParamBlockOffset            192      // Parameter für RGB Kanal starten bei 192
-#define RGB_ParamBlockSize               16      // Weitere Kanaele werden mit +16 berechnet
-#define RGB_ParamOnColor                  0      // Offset: 192, 208 usw. Text: Einschaltverhalten - Farbe
-#define RGB_ParamUseOnColor               7      // Offset: 199, 216 usw. Text: Einschaltverhalten
-#define RGB_ParamRelativDimTime           8      // Offset: 200, 216 usw. Text: Dimmgeschwindigkeit Relativ
-#define RGB_ParamOnOffTime                9      // Offset: 201, 217 usw. Text: Ein- und Ausschaltgeschwindigkeit
-#define RGB_ParamDimCurve                10      // Offset: 202, 218 usw. Text: Dimmkurve
-
-#define RGB_ParamCalcIndex(index) (index + (_channelIndex * RGB_ParamBlockSize) + RGB_ParamBlockOffset)
-// -----------------------------------------------------
-
-//--------------------OpenKNX Common---------------------------
-#define BASE_Watchdog		0x0010
+#define APP_PT_Watchdog		0x0010
 // Offset: 16, Size: 1 Bit, Text: Watchdog aktivieren
-#define ParamBASE_Watchdog knx.paramBit(16, 0)
-#define BASE_Diagnose		0x0010
+#define ParamAPP_PT_Watchdog knx.paramBit(16, 0)
+#define APP_PT_Diagnose		0x0010
 // Offset: 16, BitOffset: 1, Size: 1 Bit, Text: Diagnoseobjekt anzeigen
-#define ParamBASE_Diagnose knx.paramBit(16, 1)
-// -----------------------------------------------------
-
-//--------------------Konfiguration---------------------------
+#define ParamAPP_PT_Diagnose knx.paramBit(16, 1)
 #define APP_PT_OperatingMode		0x0000
 #define APP_PT_OperatingMode_Shift	5
 #define APP_PT_OperatingMode_Mask	0x0007
@@ -172,113 +84,274 @@
 #define APP_PT_ShuntValue_Mask	0x000F
 // Offset: 3, Size: 4 Bit, Text: Wert des verbauten Messwiderstand
 #define ParamAPP_PT_ShuntValue ((uint)((knx.paramByte(3) >> APP_PT_ShuntValue_Shift) & APP_PT_ShuntValue_Mask))
-// -----------------------------------------------------
-
-// ------------------- EK Channel ----------------------
-#define APP_PT_EKOnBrightness		0x0020
-#define APP_PT_EKOnBrightness_Shift	1
-#define APP_PT_EKOnBrightness_Mask	0x007F
+#define APP_PT_ChAOnBrightness		0x0020
+#define APP_PT_ChAOnBrightness_Shift	1
+#define APP_PT_ChAOnBrightness_Mask	0x007F
 // Offset: 32, Size: 7 Bit, Text: Einschalthelligkeit
-#define ParamAPP_PT_EKOnBrightness ((uint)((knx.paramByte(EK_ParamCalcIndex(EK_ParamOffSetOnBrightness)) >> APP_PT_EKOnBrightness_Shift) & APP_PT_EKOnBrightness_Mask))
-
-#define APP_PT_EKRelativDimTime		0x0021
-#define APP_PT_EKRelativDimTime_Shift	2
-#define APP_PT_EKRelativDimTime_Mask	0x003F
+#define ParamAPP_PT_ChAOnBrightness ((uint)((knx.paramByte(32) >> APP_PT_ChAOnBrightness_Shift) & APP_PT_ChAOnBrightness_Mask))
+#define APP_PT_ChARelativDimTime		0x0021
+#define APP_PT_ChARelativDimTime_Shift	2
+#define APP_PT_ChARelativDimTime_Mask	0x003F
 // Offset: 33, Size: 6 Bit, Text: Dimmgeschwindigkeit Relativ
-#define ParamAPP_PT_EKRelativDimTime ((uint)((knx.paramByte(EK_ParamCalcIndex(EK_ParamOffSetRelativDimTime)) >> APP_PT_EKRelativDimTime_Shift) & APP_PT_EKRelativDimTime_Mask))
-
-#define APP_PT_EKOnOffTime		0x0022
-#define APP_PT_EKOnOffTime_Shift	3
-#define APP_PT_EKOnOffTime_Mask	0x001F
+#define ParamAPP_PT_ChARelativDimTime ((uint)((knx.paramByte(33) >> APP_PT_ChARelativDimTime_Shift) & APP_PT_ChARelativDimTime_Mask))
+#define APP_PT_ChAOnOffTime		0x0022
+#define APP_PT_ChAOnOffTime_Shift	3
+#define APP_PT_ChAOnOffTime_Mask	0x001F
 // Offset: 34, Size: 5 Bit, Text: Ein- und Ausschaltgeschwindigkeit
-#define ParamAPP_PT_EKOnOffTime ((uint)((knx.paramByte(EK_ParamCalcIndex(EK_ParamOffSetOnOffTime)) >> APP_PT_EKOnOffTime_Shift) & APP_PT_EKOnOffTime_Mask))
-
-#define APP_PT_EKDimCurve		0x0023
-#define APP_PT_EKDimCurve_Shift	6
-#define APP_PT_EKDimCurve_Mask	0x0003
+#define ParamAPP_PT_ChAOnOffTime ((uint)((knx.paramByte(34) >> APP_PT_ChAOnOffTime_Shift) & APP_PT_ChAOnOffTime_Mask))
+#define APP_PT_ChADimCurve		0x0023
+#define APP_PT_ChADimCurve_Shift	6
+#define APP_PT_ChADimCurve_Mask	0x0003
 // Offset: 35, Size: 2 Bit, Text: Dimmkurve
-#define ParamAPP_PT_EKDimCurve ((uint)((knx.paramByte(EK_ParamCalcIndex(EK_ParamOffSetDimCurve)) >> APP_PT_EKDimCurve_Shift) & APP_PT_EKDimCurve_Mask))
-// -----------------------------------------------------
-
-// ------------------- TW Channel ----------------------
-#define APP_PT_TWColorTempWW		0x0080
-#define APP_PT_TWColorTempWW_Shift	4
-#define APP_PT_TWColorTempWW_Mask	0x0FFF
+#define ParamAPP_PT_ChADimCurve ((uint)((knx.paramByte(35) >> APP_PT_ChADimCurve_Shift) & APP_PT_ChADimCurve_Mask))
+#define APP_PT_ChBOnBrightness		0x0030
+#define APP_PT_ChBOnBrightness_Shift	1
+#define APP_PT_ChBOnBrightness_Mask	0x007F
+// Offset: 48, Size: 7 Bit, Text: Einschalthelligkeit
+#define ParamAPP_PT_ChBOnBrightness ((uint)((knx.paramByte(48) >> APP_PT_ChBOnBrightness_Shift) & APP_PT_ChBOnBrightness_Mask))
+#define APP_PT_ChBRelativDimTime		0x0031
+#define APP_PT_ChBRelativDimTime_Shift	2
+#define APP_PT_ChBRelativDimTime_Mask	0x003F
+// Offset: 49, Size: 6 Bit, Text: Dimmgeschwindigkeit Relativ
+#define ParamAPP_PT_ChBRelativDimTime ((uint)((knx.paramByte(49) >> APP_PT_ChBRelativDimTime_Shift) & APP_PT_ChBRelativDimTime_Mask))
+#define APP_PT_ChBOnOffTime		0x0032
+#define APP_PT_ChBOnOffTime_Shift	3
+#define APP_PT_ChBOnOffTime_Mask	0x001F
+// Offset: 50, Size: 5 Bit, Text: Ein- und Ausschaltgeschwindigkeit
+#define ParamAPP_PT_ChBOnOffTime ((uint)((knx.paramByte(50) >> APP_PT_ChBOnOffTime_Shift) & APP_PT_ChBOnOffTime_Mask))
+#define APP_PT_ChBDimCurve		0x0033
+#define APP_PT_ChBDimCurve_Mask	0x0003
+// Offset: 51, BitOffset: 6, Size: 2 Bit, Text: Dimmkurve
+#define ParamAPP_PT_ChBDimCurve ((uint)((knx.paramByte(51)) & APP_PT_ChBDimCurve_Mask))
+#define APP_PT_ChCOnBrightness		0x0040
+#define APP_PT_ChCOnBrightness_Shift	1
+#define APP_PT_ChCOnBrightness_Mask	0x007F
+// Offset: 64, Size: 7 Bit, Text: Einschalthelligkeit
+#define ParamAPP_PT_ChCOnBrightness ((uint)((knx.paramByte(64) >> APP_PT_ChCOnBrightness_Shift) & APP_PT_ChCOnBrightness_Mask))
+#define APP_PT_ChCRelativDimTime		0x0041
+#define APP_PT_ChCRelativDimTime_Shift	2
+#define APP_PT_ChCRelativDimTime_Mask	0x003F
+// Offset: 65, Size: 6 Bit, Text: Dimmgeschwindigkeit Relativ
+#define ParamAPP_PT_ChCRelativDimTime ((uint)((knx.paramByte(65) >> APP_PT_ChCRelativDimTime_Shift) & APP_PT_ChCRelativDimTime_Mask))
+#define APP_PT_ChCOnOffTime		0x0042
+#define APP_PT_ChCOnOffTime_Shift	3
+#define APP_PT_ChCOnOffTime_Mask	0x001F
+// Offset: 66, Size: 5 Bit, Text: Ein- und Ausschaltgeschwindigkeit
+#define ParamAPP_PT_ChCOnOffTime ((uint)((knx.paramByte(66) >> APP_PT_ChCOnOffTime_Shift) & APP_PT_ChCOnOffTime_Mask))
+#define APP_PT_ChCDimCurve		0x0043
+#define APP_PT_ChCDimCurve_Shift	6
+#define APP_PT_ChCDimCurve_Mask	0x0003
+// Offset: 67, Size: 2 Bit, Text: Dimmkurve
+#define ParamAPP_PT_ChCDimCurve ((uint)((knx.paramByte(67) >> APP_PT_ChCDimCurve_Shift) & APP_PT_ChCDimCurve_Mask))
+#define APP_PT_ChDOnBrightness		0x0050
+#define APP_PT_ChDOnBrightness_Shift	1
+#define APP_PT_ChDOnBrightness_Mask	0x007F
+// Offset: 80, Size: 7 Bit, Text: Einschalthelligkeit
+#define ParamAPP_PT_ChDOnBrightness ((uint)((knx.paramByte(80) >> APP_PT_ChDOnBrightness_Shift) & APP_PT_ChDOnBrightness_Mask))
+#define APP_PT_ChDRelativDimTime		0x0051
+#define APP_PT_ChDRelativDimTime_Shift	2
+#define APP_PT_ChDRelativDimTime_Mask	0x003F
+// Offset: 81, Size: 6 Bit, Text: Dimmgeschwindigkeit Relativ
+#define ParamAPP_PT_ChDRelativDimTime ((uint)((knx.paramByte(81) >> APP_PT_ChDRelativDimTime_Shift) & APP_PT_ChDRelativDimTime_Mask))
+#define APP_PT_ChDOnOffTime		0x0052
+#define APP_PT_ChDOnOffTime_Shift	3
+#define APP_PT_ChDOnOffTime_Mask	0x001F
+// Offset: 82, Size: 5 Bit, Text: Ein- und Ausschaltgeschwindigkeit
+#define ParamAPP_PT_ChDOnOffTime ((uint)((knx.paramByte(82) >> APP_PT_ChDOnOffTime_Shift) & APP_PT_ChDOnOffTime_Mask))
+#define APP_PT_ChDDimCurve		0x0053
+#define APP_PT_ChDDimCurve_Mask	0x0003
+// Offset: 83, BitOffset: 6, Size: 2 Bit, Text: Dimmkurve
+#define ParamAPP_PT_ChDDimCurve ((uint)((knx.paramByte(83)) & APP_PT_ChDDimCurve_Mask))
+#define APP_PT_ChEOnBrightness		0x0060
+#define APP_PT_ChEOnBrightness_Shift	1
+#define APP_PT_ChEOnBrightness_Mask	0x007F
+// Offset: 96, Size: 7 Bit, Text: Einschalthelligkeit
+#define ParamAPP_PT_ChEOnBrightness ((uint)((knx.paramByte(96) >> APP_PT_ChEOnBrightness_Shift) & APP_PT_ChEOnBrightness_Mask))
+#define APP_PT_ChERelativDimTime		0x0061
+#define APP_PT_ChERelativDimTime_Shift	2
+#define APP_PT_ChERelativDimTime_Mask	0x003F
+// Offset: 97, Size: 6 Bit, Text: Dimmgeschwindigkeit Relativ
+#define ParamAPP_PT_ChERelativDimTime ((uint)((knx.paramByte(97) >> APP_PT_ChERelativDimTime_Shift) & APP_PT_ChERelativDimTime_Mask))
+#define APP_PT_ChEOnOffTime		0x0062
+#define APP_PT_ChEOnOffTime_Shift	3
+#define APP_PT_ChEOnOffTime_Mask	0x001F
+// Offset: 98, Size: 5 Bit, Text: Ein- und Ausschaltgeschwindigkeit
+#define ParamAPP_PT_ChEOnOffTime ((uint)((knx.paramByte(98) >> APP_PT_ChEOnOffTime_Shift) & APP_PT_ChEOnOffTime_Mask))
+#define APP_PT_ChEDimCurve		0x0063
+#define APP_PT_ChEDimCurve_Shift	6
+#define APP_PT_ChEDimCurve_Mask	0x0003
+// Offset: 99, Size: 2 Bit, Text: Dimmkurve
+#define ParamAPP_PT_ChEDimCurve ((uint)((knx.paramByte(99) >> APP_PT_ChEDimCurve_Shift) & APP_PT_ChEDimCurve_Mask))
+#define APP_PT_ChFOnBrightness		0x0070
+#define APP_PT_ChFOnBrightness_Shift	1
+#define APP_PT_ChFOnBrightness_Mask	0x007F
+// Offset: 112, Size: 7 Bit, Text: Einschalthelligkeit
+#define ParamAPP_PT_ChFOnBrightness ((uint)((knx.paramByte(112) >> APP_PT_ChFOnBrightness_Shift) & APP_PT_ChFOnBrightness_Mask))
+#define APP_PT_ChFRelativDimTime		0x0071
+#define APP_PT_ChFRelativDimTime_Shift	2
+#define APP_PT_ChFRelativDimTime_Mask	0x003F
+// Offset: 113, Size: 6 Bit, Text: Dimmgeschwindigkeit Relativ
+#define ParamAPP_PT_ChFRelativDimTime ((uint)((knx.paramByte(113) >> APP_PT_ChFRelativDimTime_Shift) & APP_PT_ChFRelativDimTime_Mask))
+#define APP_PT_ChFOnOffTime		0x0072
+#define APP_PT_ChFOnOffTime_Shift	3
+#define APP_PT_ChFOnOffTime_Mask	0x001F
+// Offset: 114, Size: 5 Bit, Text: Ein- und Ausschaltgeschwindigkeit
+#define ParamAPP_PT_ChFOnOffTime ((uint)((knx.paramByte(114) >> APP_PT_ChFOnOffTime_Shift) & APP_PT_ChFOnOffTime_Mask))
+#define APP_PT_ChFDimCurve		0x0073
+#define APP_PT_ChFDimCurve_Shift	6
+#define APP_PT_ChFDimCurve_Mask	0x0003
+// Offset: 115, Size: 2 Bit, Text: Dimmkurve
+#define ParamAPP_PT_ChFDimCurve ((uint)((knx.paramByte(115) >> APP_PT_ChFDimCurve_Shift) & APP_PT_ChFDimCurve_Mask))
+#define APP_PT_TW1ColorTempWW		0x0080
+#define APP_PT_TW1ColorTempWW_Shift	4
+#define APP_PT_TW1ColorTempWW_Mask	0x0FFF
 // Offset: 128, Size: 12 Bit, Text: Farbtemperatur Warmweiß
-#define ParamAPP_PT_TWColorTempWW ((uint)((knx.paramWord(TW_ParamCalcIndex(TW_ParamColorTempWW)) >> APP_PT_TWColorTempWW_Shift) & APP_PT_TWColorTempWW_Mask))
-
-#define APP_PT_TWColorTempKW		0x0082
-#define APP_PT_TWColorTempKW_Shift	3
-#define APP_PT_TWColorTempKW_Mask	0x1FFF
+#define ParamAPP_PT_TW1ColorTempWW ((uint)((knx.paramWord(128) >> APP_PT_TW1ColorTempWW_Shift) & APP_PT_TW1ColorTempWW_Mask))
+#define APP_PT_TW1ColorTempKW		0x0082
+#define APP_PT_TW1ColorTempKW_Shift	3
+#define APP_PT_TW1ColorTempKW_Mask	0x1FFF
 // Offset: 130, Size: 13 Bit, Text: Farbtemperatur Kaltweiß
-#define ParamAPP_PT_TWColorTempKW ((uint)((knx.paramWord(TW_ParamCalcIndex(TW_ParamColorTempKW)) >> APP_PT_TWColorTempKW_Shift) & APP_PT_TWColorTempKW_Mask))
-
-#define APP_PT_TWOnBrightness		0x0084
-#define APP_PT_TWOnBrightness_Shift	1
-#define APP_PT_TWOnBrightness_Mask	0x007F
+#define ParamAPP_PT_TW1ColorTempKW ((uint)((knx.paramWord(130) >> APP_PT_TW1ColorTempKW_Shift) & APP_PT_TW1ColorTempKW_Mask))
+#define APP_PT_TW1OnBrightness		0x0084
+#define APP_PT_TW1OnBrightness_Shift	1
+#define APP_PT_TW1OnBrightness_Mask	0x007F
 // Offset: 132, Size: 7 Bit, Text: Einschaltverhalten - Helligkeit
-#define ParamAPP_PT_TWOnBrightness ((uint)((knx.paramByte(TW_ParamCalcIndex(TW_ParamOnBrightness)) >> APP_PT_TWOnBrightness_Shift) & APP_PT_TWOnBrightness_Mask))
-
-#define APP_PT_TWOnColorTemp		0x0085
-#define APP_PT_TWOnColorTemp_Shift	2
-#define APP_PT_TWOnColorTemp_Mask	0x3FFF
+#define ParamAPP_PT_TW1OnBrightness ((uint)((knx.paramByte(132) >> APP_PT_TW1OnBrightness_Shift) & APP_PT_TW1OnBrightness_Mask))
+#define APP_PT_TW1OnColorTemp		0x0085
+#define APP_PT_TW1OnColorTemp_Shift	2
+#define APP_PT_TW1OnColorTemp_Mask	0x3FFF
 // Offset: 133, Size: 14 Bit, Text: Einschaltverhalten - Farbtemperatur
-#define ParamAPP_PT_TWOnColorTemp ((uint)((knx.paramWord(TW_ParamCalcIndex(TW_ParamOnColorTemp)) >> APP_PT_TWOnColorTemp_Shift) & APP_PT_TWOnColorTemp_Mask))
-
-#define APP_PT_TWRelativDimTime		0x0087
-#define APP_PT_TWRelativDimTime_Shift	2
-#define APP_PT_TWRelativDimTime_Mask	0x003F
+#define ParamAPP_PT_TW1OnColorTemp ((uint)((knx.paramWord(133) >> APP_PT_TW1OnColorTemp_Shift) & APP_PT_TW1OnColorTemp_Mask))
+#define APP_PT_TW1RelativDimTime		0x0087
+#define APP_PT_TW1RelativDimTime_Shift	2
+#define APP_PT_TW1RelativDimTime_Mask	0x003F
 // Offset: 135, Size: 6 Bit, Text: Dimmgeschwindigkeit Relativ
-#define ParamAPP_PT_TWRelativDimTime ((uint)((knx.paramByte(TW_ParamCalcIndex(TW_ParamRelativDimTime)) >> APP_PT_TWRelativDimTime_Shift) & APP_PT_TWRelativDimTime_Mask))
-
-#define APP_PT_TWOnOffTime		0x0088
-#define APP_PT_TWOnOffTime_Shift	3
-#define APP_PT_TWOnOffTime_Mask	0x001F
+#define ParamAPP_PT_TW1RelativDimTime ((uint)((knx.paramByte(135) >> APP_PT_TW1RelativDimTime_Shift) & APP_PT_TW1RelativDimTime_Mask))
+#define APP_PT_TW1OnOffTime		0x0088
+#define APP_PT_TW1OnOffTime_Shift	3
+#define APP_PT_TW1OnOffTime_Mask	0x001F
 // Offset: 136, Size: 5 Bit, Text: Ein- und Ausschaltgeschwindigkeit
-#define ParamAPP_PT_TWOnOffTime ((uint)((knx.paramByte(TW_ParamCalcIndex(TW_ParamOnOffTime)) >> APP_PT_TWOnOffTime_Shift) & APP_PT_TWOnOffTime_Mask))
-
-#define APP_PT_TWDimCurve		0x0089
-#define APP_PT_TWDimCurve_Shift	6
-#define APP_PT_TWDimCurve_Mask	0x0003
+#define ParamAPP_PT_TW1OnOffTime ((uint)((knx.paramByte(136) >> APP_PT_TW1OnOffTime_Shift) & APP_PT_TW1OnOffTime_Mask))
+#define APP_PT_TW1DimCurve		0x0089
+#define APP_PT_TW1DimCurve_Shift	6
+#define APP_PT_TW1DimCurve_Mask	0x0003
 // Offset: 137, Size: 2 Bit, Text: Dimmkurve
-#define ParamAPP_PT_TWDimCurve ((uint)((knx.paramByte(TW_ParamCalcIndex(TW_ParamDimCurve)) >> APP_PT_TWDimCurve_Shift) & APP_PT_TWDimCurve_Mask))
-// -----------------------------------------------------
-
-// ------------------- RGB Channel ----------------------
-#define APP_PT_RGBOnColor		0x00C0
+#define ParamAPP_PT_TW1DimCurve ((uint)((knx.paramByte(137) >> APP_PT_TW1DimCurve_Shift) & APP_PT_TW1DimCurve_Mask))
+#define APP_PT_TW2ColorTempWW		0x0090
+#define APP_PT_TW2ColorTempWW_Shift	4
+#define APP_PT_TW2ColorTempWW_Mask	0x0FFF
+// Offset: 144, Size: 12 Bit, Text: Farbtemperatur Warmweiß
+#define ParamAPP_PT_TW2ColorTempWW ((uint)((knx.paramWord(144) >> APP_PT_TW2ColorTempWW_Shift) & APP_PT_TW2ColorTempWW_Mask))
+#define APP_PT_TW2ColorTempKW		0x0092
+#define APP_PT_TW2ColorTempKW_Shift	3
+#define APP_PT_TW2ColorTempKW_Mask	0x1FFF
+// Offset: 146, Size: 13 Bit, Text: Farbtemperatur Kaltweiß
+#define ParamAPP_PT_TW2ColorTempKW ((uint)((knx.paramWord(146) >> APP_PT_TW2ColorTempKW_Shift) & APP_PT_TW2ColorTempKW_Mask))
+#define APP_PT_TW2OnBrightness		0x0094
+#define APP_PT_TW2OnBrightness_Shift	1
+#define APP_PT_TW2OnBrightness_Mask	0x007F
+// Offset: 148, Size: 7 Bit, Text: Einschaltverhalten - Helligkeit
+#define ParamAPP_PT_TW2OnBrightness ((uint)((knx.paramByte(148) >> APP_PT_TW2OnBrightness_Shift) & APP_PT_TW2OnBrightness_Mask))
+#define APP_PT_TW2OnColorTemp		0x0095
+#define APP_PT_TW2OnColorTemp_Shift	2
+#define APP_PT_TW2OnColorTemp_Mask	0x3FFF
+// Offset: 149, Size: 14 Bit, Text: Einschaltverhalten - Farbtemperatur
+#define ParamAPP_PT_TW2OnColorTemp ((uint)((knx.paramWord(149) >> APP_PT_TW2OnColorTemp_Shift) & APP_PT_TW2OnColorTemp_Mask))
+#define APP_PT_TW2RelativDimTime		0x0097
+#define APP_PT_TW2RelativDimTime_Shift	2
+#define APP_PT_TW2RelativDimTime_Mask	0x003F
+// Offset: 151, Size: 6 Bit, Text: Dimmgeschwindigkeit Relativ
+#define ParamAPP_PT_TW2RelativDimTime ((uint)((knx.paramByte(151) >> APP_PT_TW2RelativDimTime_Shift) & APP_PT_TW2RelativDimTime_Mask))
+#define APP_PT_TW2OnOffTime		0x0098
+#define APP_PT_TW2OnOffTime_Shift	3
+#define APP_PT_TW2OnOffTime_Mask	0x001F
+// Offset: 152, Size: 5 Bit, Text: Ein- und Ausschaltgeschwindigkeit
+#define ParamAPP_PT_TW2OnOffTime ((uint)((knx.paramByte(152) >> APP_PT_TW2OnOffTime_Shift) & APP_PT_TW2OnOffTime_Mask))
+#define APP_PT_TW2DimCurve		0x0099
+#define APP_PT_TW2DimCurve_Shift	6
+#define APP_PT_TW2DimCurve_Mask	0x0003
+// Offset: 153, Size: 2 Bit, Text: Dimmkurve
+#define ParamAPP_PT_TW2DimCurve ((uint)((knx.paramByte(153) >> APP_PT_TW2DimCurve_Shift) & APP_PT_TW2DimCurve_Mask))
+#define APP_PT_TW3ColorTempWW		0x00A0
+#define APP_PT_TW3ColorTempWW_Shift	4
+#define APP_PT_TW3ColorTempWW_Mask	0x0FFF
+// Offset: 160, Size: 12 Bit, Text: Farbtemperatur Warmweiß
+#define ParamAPP_PT_TW3ColorTempWW ((uint)((knx.paramWord(160) >> APP_PT_TW3ColorTempWW_Shift) & APP_PT_TW3ColorTempWW_Mask))
+#define APP_PT_TW3ColorTempKW		0x00A2
+#define APP_PT_TW3ColorTempKW_Shift	3
+#define APP_PT_TW3ColorTempKW_Mask	0x1FFF
+// Offset: 162, Size: 13 Bit, Text: Farbtemperatur Kaltweiß
+#define ParamAPP_PT_TW3ColorTempKW ((uint)((knx.paramWord(162) >> APP_PT_TW3ColorTempKW_Shift) & APP_PT_TW3ColorTempKW_Mask))
+#define APP_PT_TW3OnBrightness		0x00A4
+#define APP_PT_TW3OnBrightness_Shift	1
+#define APP_PT_TW3OnBrightness_Mask	0x007F
+// Offset: 164, Size: 7 Bit, Text: Einschaltverhalten - Helligkeit
+#define ParamAPP_PT_TW3OnBrightness ((uint)((knx.paramByte(164) >> APP_PT_TW3OnBrightness_Shift) & APP_PT_TW3OnBrightness_Mask))
+#define APP_PT_TW3OnColorTemp		0x00A5
+#define APP_PT_TW3OnColorTemp_Shift	2
+#define APP_PT_TW3OnColorTemp_Mask	0x3FFF
+// Offset: 165, Size: 14 Bit, Text: Einschaltverhalten - Farbtemperatur
+#define ParamAPP_PT_TW3OnColorTemp ((uint)((knx.paramWord(165) >> APP_PT_TW3OnColorTemp_Shift) & APP_PT_TW3OnColorTemp_Mask))
+#define APP_PT_TW3RelativDimTime		0x00A7
+#define APP_PT_TW3RelativDimTime_Shift	2
+#define APP_PT_TW3RelativDimTime_Mask	0x003F
+// Offset: 167, Size: 6 Bit, Text: Dimmgeschwindigkeit Relativ
+#define ParamAPP_PT_TW3RelativDimTime ((uint)((knx.paramByte(167) >> APP_PT_TW3RelativDimTime_Shift) & APP_PT_TW3RelativDimTime_Mask))
+#define APP_PT_TW3OnOffTime		0x00A8
+#define APP_PT_TW3OnOffTime_Shift	3
+#define APP_PT_TW3OnOffTime_Mask	0x001F
+// Offset: 168, Size: 5 Bit, Text: Ein- und Ausschaltgeschwindigkeit
+#define ParamAPP_PT_TW3OnOffTime ((uint)((knx.paramByte(168) >> APP_PT_TW3OnOffTime_Shift) & APP_PT_TW3OnOffTime_Mask))
+#define APP_PT_TW3DimCurve		0x00A9
+#define APP_PT_TW3DimCurve_Shift	6
+#define APP_PT_TW3DimCurve_Mask	0x0003
+// Offset: 169, Size: 2 Bit, Text: Dimmkurve
+#define ParamAPP_PT_TW3DimCurve ((uint)((knx.paramByte(169) >> APP_PT_TW3DimCurve_Shift) & APP_PT_TW3DimCurve_Mask))
+#define APP_PT_RGB1OnColor		0x00C0
 // Offset: 192, Size: 24 Bit (3 Byte), Text: Einschaltverhalten - Farbe
-#define ParamAPP_PT_RGBOnColor knx.paramData(RGB_ParamCalcIndex(RGB_ParamOnColor))
-
+#define ParamAPP_PT_RGB1OnColor knx.paramData(192)
 #define APP_PT_RGB1UseOnColor		0x00C7
 // Offset: 199, Size: 1 Bit, Text: Einschaltverhalten
-#define ParamAPP_PT_RGBUseOnColor knx.paramBit(RGB_ParamCalcIndex(RGB_ParamUseOnColor), 0)
-
-#define APP_PT_RGBRelativDimTime		0x00C8
-#define APP_PT_RGBRelativDimTime_Shift	2
-#define APP_PT_RGBRelativDimTime_Mask	0x003F
+#define ParamAPP_PT_RGB1UseOnColor knx.paramBit(199, 0)
+#define APP_PT_RGB1RelativDimTime		0x00C8
+#define APP_PT_RGB1RelativDimTime_Shift	2
+#define APP_PT_RGB1RelativDimTime_Mask	0x003F
 // Offset: 200, Size: 6 Bit, Text: Dimmgeschwindigkeit Relativ
-#define ParamAPP_PT_RGBRelativDimTime ((uint)((knx.paramByte(RGB_ParamCalcIndex(RGB_ParamRelativDimTime)) >> APP_PT_RGBRelativDimTime_Shift) & APP_PT_RGBRelativDimTime_Mask))
-
-#define APP_PT_RGBOnOffTime		0x00C9
-#define APP_PT_RGBOnOffTime_Shift	3
-#define APP_PT_RGBOnOffTime_Mask	0x001F
+#define ParamAPP_PT_RGB1RelativDimTime ((uint)((knx.paramByte(200) >> APP_PT_RGB1RelativDimTime_Shift) & APP_PT_RGB1RelativDimTime_Mask))
+#define APP_PT_RGB1OnOffTime		0x00C9
+#define APP_PT_RGB1OnOffTime_Shift	3
+#define APP_PT_RGB1OnOffTime_Mask	0x001F
 // Offset: 201, Size: 5 Bit, Text: Ein- und Ausschaltgeschwindigkeit
-#define ParamAPP_PT_RGBOnOffTime ((uint)((knx.paramByte(RGB_ParamCalcIndex(RGB_ParamOnOffTime)) >> APP_PT_RGBOnOffTime_Shift) & APP_PT_RGBOnOffTime_Mask))
-
-#define APP_PT_RGBDimCurve		0x00CA
-#define APP_PT_RGBDimCurve_Shift	6
-#define APP_PT_RGBDimCurve_Mask	0x0003
+#define ParamAPP_PT_RGB1OnOffTime ((uint)((knx.paramByte(201) >> APP_PT_RGB1OnOffTime_Shift) & APP_PT_RGB1OnOffTime_Mask))
+#define APP_PT_RGB1DimCurve		0x00CA
+#define APP_PT_RGB1DimCurve_Shift	6
+#define APP_PT_RGB1DimCurve_Mask	0x0003
 // Offset: 202, Size: 2 Bit, Text: Dimmkurve
-#define ParamAPP_PT_RGBDimCurve ((uint)((knx.paramByte(RGB_ParamCalcIndex(RGB_ParamDimCurve)) >> APP_PT_RGBDimCurve_Shift) & APP_PT_RGBDimCurve_Mask))
-// -----------------------------------------------------
-
-//--------------------OpenKNX Common---------------------------
-#define BASE_KoDiagnose 7
-// Diagnose
-#define KoBASE_Diagnose (knx.getGroupObject(BASE_KoDiagnose))
-// -----------------------------------------------------
-
-// ------------------- Kommunikationsobjekte ----------------------
+#define ParamAPP_PT_RGB1DimCurve ((uint)((knx.paramByte(202) >> APP_PT_RGB1DimCurve_Shift) & APP_PT_RGB1DimCurve_Mask))
+#define APP_PT_RGB2OnColor		0x00D0
+// Offset: 208, Size: 24 Bit (3 Byte), Text: Einschaltverhalten - Farbe
+#define ParamAPP_PT_RGB2OnColor knx.paramData(208)
+#define APP_PT_RGB2UseOnColor		0x00D7
+// Offset: 215, Size: 1 Bit, Text: Einschaltverhalten
+#define ParamAPP_PT_RGB2UseOnColor knx.paramBit(215, 0)
+#define APP_PT_RGB2RelativDimTime		0x00D8
+#define APP_PT_RGB2RelativDimTime_Shift	2
+#define APP_PT_RGB2RelativDimTime_Mask	0x003F
+// Offset: 216, Size: 6 Bit, Text: Dimmgeschwindigkeit Relativ
+#define ParamAPP_PT_RGB2RelativDimTime ((uint)((knx.paramByte(216) >> APP_PT_RGB2RelativDimTime_Shift) & APP_PT_RGB2RelativDimTime_Mask))
+#define APP_PT_RGB2OnOffTime		0x00D9
+#define APP_PT_RGB2OnOffTime_Shift	3
+#define APP_PT_RGB2OnOffTime_Mask	0x001F
+// Offset: 217, Size: 5 Bit, Text: Ein- und Ausschaltgeschwindigkeit
+#define ParamAPP_PT_RGB2OnOffTime ((uint)((knx.paramByte(217) >> APP_PT_RGB2OnOffTime_Shift) & APP_PT_RGB2OnOffTime_Mask))
+#define APP_PT_RGB2DimCurve		0x00DA
+#define APP_PT_RGB2DimCurve_Shift	6
+#define APP_PT_RGB2DimCurve_Mask	0x0003
+// Offset: 218, Size: 2 Bit, Text: Dimmkurve
+#define ParamAPP_PT_RGB2DimCurve ((uint)((knx.paramByte(218) >> APP_PT_RGB2DimCurve_Shift) & APP_PT_RGB2DimCurve_Mask))
+//!< Number: 7, Text: Diagnose, Function: Diagnoseobjekt
+#define APP_KoKO_Diagnose 7
+#define KoAPP_KO_Diagnose knx.getGroupObject(7)
 //!< Number: 20, Text: Spannung, Function: Spannung
 #define APP_KoKO_VoltageV 20
 #define KoAPP_KO_VoltageV knx.getGroupObject(20)
@@ -535,21 +608,3 @@
 #define APP_KoKO_ChannelRGB2StatusBrightnessV 407
 #define KoAPP_KO_ChannelRGB2StatusBrightnessV knx.getGroupObject(407)
 
-
-
-
-
-
-
-
-/*
-
-//DEBUG options
-#define KDEBUG                      // comment this line to disable DEBUG info
-#define KDEBUG_KO                   // comment this line to disable COMOBJECT DEBUG info
-#define KDEBUG_ME                   // comment this line to disable MEASURING DEBUG info
-#define KDEBUG_LED                  // comment this line to disable LED DEBUG info
-//#define KDEBUG_LED_VALUE          // comment this line to disable LED DEBUG VALUE info
-#define ENABLE_DEBUG_OUTPUT         
-
-*/

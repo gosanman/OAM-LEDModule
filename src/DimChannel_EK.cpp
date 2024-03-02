@@ -34,18 +34,18 @@ void DimChannel_EK::setup(int8_t hwchannel, uint16_t startKO) {
     hwchannels[m_hwchannel] = new HWChannel(m_hwchannel);
     hwchannels[m_hwchannel]->setup(m_hwchannel, m_curve, m_durationabsolut, m_durationrelativ);
  
-    logInfoP("------------------ DEBUG -------------------");
-    logInfoP("KO Switch: %i", calc_ko_switch);
-    logInfoP("KO Dim Absolute: %i", calc_ko_dimabsolute);
-    logInfoP("KO Dim Relativ: %i", calc_ko_dimrelativ);
-    logInfoP("KO Status OnOff: %i", calc_ko_statusonoff);
-    logInfoP("KO Status Brightness: %i", calc_ko_statusbrightness);
-    logInfoP("HW Port: %i", m_hwchannel);
-    logInfoP("PT OnBrightness: %i", m_onbrightness);
-    logInfoP("PT DurationRelativ: %i", m_durationrelativ);
-    logInfoP("PT DurationAbsolut: %i", m_durationabsolut);
-    logInfoP("PT Curve: %i", m_curve);
-    logInfoP("--------------------------------------------");
+    logDebugP("------------------ DEBUG -------------------");
+    logDebugP("KO Switch: %i", calc_ko_switch);
+    logDebugP("KO Dim Absolute: %i", calc_ko_dimabsolute);
+    logDebugP("KO Dim Relativ: %i", calc_ko_dimrelativ);
+    logDebugP("KO Status OnOff: %i", calc_ko_statusonoff);
+    logDebugP("KO Status Brightness: %i", calc_ko_statusbrightness);
+    logDebugP("HW Port: %i", m_hwchannel);
+    logDebugP("PT OnBrightness: %i", m_onbrightness);
+    logDebugP("PT DurationRelativ: %i", m_durationrelativ);
+    logDebugP("PT DurationAbsolut: %i", m_durationabsolut);
+    logDebugP("PT Curve: %i", m_curve);
+    logDebugP("--------------------------------------------");
 }
 
 void DimChannel_EK::processInputKoEK(GroupObject &ko) {
@@ -55,7 +55,7 @@ void DimChannel_EK::processInputKoEK(GroupObject &ko) {
     {
         bool value = ko.value(DPT_Switch);
         if (_lastbrightness == 0) { _setbrightness = m_onbrightness; } else {_setbrightness = _lastbrightness;}
-        // logInfoP("Switch - Value: %i", value);
+        logDebugP("Switch - Value: %i", value);
         if (value) {
             hwchannels[m_hwchannel]->taskNewValue(_setbrightness);
         }
@@ -71,7 +71,7 @@ void DimChannel_EK::processInputKoEK(GroupObject &ko) {
     else if (asap == calc_ko_dimrelativ) {
         uint8_t direction = ko.value(Dpt(3,7,0));
         uint8_t step = ko.value(Dpt(3,7,1));
-        // logInfoP("Dim Relativ - Direction: %i, Step: %i", direction, step);
+        logDebugP("Dim Relativ - Direction: %i, Step: %i", direction, step);
         //direction true = dim up, false = dim down, step = 0 then stop
         if (step == 0) {
             hwchannels[m_hwchannel]->taskStop();
