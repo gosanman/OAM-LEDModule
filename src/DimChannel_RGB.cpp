@@ -1,7 +1,7 @@
 #include "DimChannel_RGB.h"
 
-DimChannel_RGB::DimChannel_RGB(uint8_t index) {
-  _channelIndex = index;
+DimChannel_RGB::DimChannel_RGB(uint8_t index) : DimChannel(index) {
+  _index = index;
 }
 
 DimChannel_RGB::~DimChannel_RGB() {}
@@ -11,15 +11,16 @@ const std::string DimChannel_RGB::name()
     return "DimChannel_RGB";
 }
 
-void DimChannel_RGB::setup(int8_t hwchannel_r, int8_t hwchannel_g, int8_t hwchannel_b, uint16_t startKO) {
+void DimChannel_RGB::setup(uint8_t* hwchannel, uint16_t startKO) {
     // Parameter
-    m_hwchannel_r = hwchannel_r;
-    m_hwchannel_g = hwchannel_g;
-    m_hwchannel_b = hwchannel_b;
+    m_hwchannel_r = hwchannel[0];
+    m_hwchannel_g = hwchannel[1];
+    m_hwchannel_b = hwchannel[2];
 
     m_oncolor = ParamAPP_PT_RGBOnColor;
-    m_useoncolor = 0;
-    //m_useoncolor = ParamAPP_PT_RGBUseOnColor;
+    m_nightcolor = ParamAPP_PT_RGBNightColor;
+    m_useoncolor = ParamAPP_PT_RGBUseOnColor;
+    m_usenightcolor = ParamAPP_PT_RGBUseNightColor;
     m_durationrelativ = ParamAPP_PT_RGBRelativDimTime * 1000;
     m_durationabsolut = ParamAPP_PT_RGBOnOffTime * 100;
     m_curve = ParamAPP_PT_RGBDimCurve;                               // 0=A, 1=B, 2=C, 3=D
@@ -70,19 +71,20 @@ void DimChannel_RGB::setup(int8_t hwchannel_r, int8_t hwchannel_g, int8_t hwchan
     logDebugP("HW Port B: %i", m_hwchannel_b);
     logDebugP("PT UseOnColor: %i", m_useoncolor);
     logDebugP("PT OnColor: #%.2X%.2X%.2X", m_oncolor[0], m_oncolor[1], m_oncolor[2]);
+    logDebugP("PT UseNightColor: %i", m_usenightcolor);
+    logDebugP("PT NightColor: #%.2X%.2X%.2X", m_nightcolor[0], m_nightcolor[1], m_nightcolor[2]);
     logDebugP("PT DurationRelativ: %i", m_durationrelativ);
     logDebugP("PT DurationAbsolut: %i", m_durationabsolut);
     logDebugP("PT Curve: %i", m_curve);
     logDebugP("--------------------------------------------");
 }
 
-void DimChannel_RGB::processInputKoRGB(GroupObject &ko) {
+void DimChannel_RGB::processInputKo(GroupObject &ko) {
     uint16_t asap = ko.asap();
     if (asap == calc_ko_switch) {
         bool value = ko.value(DPT_Switch);
         if (value) { // on
             uint8_t on_r, on_g, on_b;
-
             if (m_useoncolor == 1) { // true use oncolor
                 m_oncolorvalue = m_oncolor[0];
                 m_oncolorvalue |= m_oncolor[1] << 8;
@@ -214,6 +216,7 @@ void DimChannel_RGB::processInputKoRGB(GroupObject &ko) {
         uint8_t direction = ko.value(Dpt(3,7,0));
         uint8_t step = ko.value(Dpt(3,7,1));
         logDebugP("Dim Relativ - Direction: %i, Step: %i", direction, step);
+
         //direction true = dim up, false = dim down, step = 0 then stop
         if (step == 0) {
             hwchannels[m_hwchannel_r]->taskStop();
@@ -231,6 +234,10 @@ void DimChannel_RGB::processInputKoRGB(GroupObject &ko) {
     }
 }
 
+void DimChannel_RGB::setDayNight(bool value) {
+    isNight = value;
+}
+
 void DimChannel_RGB::task() {
     hwchannels[m_hwchannel_r]->task();
     hwchannels[m_hwchannel_g]->task();
@@ -238,41 +245,45 @@ void DimChannel_RGB::task() {
     //run ko update every 500ms
     _currentTaskRun = millis();
     if (_currentTaskRun - _lastTaskRun >= 500) {
-        if (hwchannels[m_hwchannel_r]->isBusy() || hwchannels[m_hwchannel_g]->isBusy() || hwchannels[m_hwchannel_b]->isBusy()) { return; }
-        if (!hwchannels[m_hwchannel_r]->updateAvailable() || !hwchannels[m_hwchannel_g]->updateAvailable() || !hwchannels[m_hwchannel_b]->updateAvailable()) { return; }
+        updateDimValue();
+        _lastTaskRun = millis();
+    }
+}
 
-        hwchannels[m_hwchannel_r]->resetUpdateFlag();
-        hwchannels[m_hwchannel_g]->resetUpdateFlag();
-        hwchannels[m_hwchannel_b]->resetUpdateFlag();
-        byte value_r = hwchannels[m_hwchannel_r]->getCurrentValue();
-        byte value_g = hwchannels[m_hwchannel_g]->getCurrentValue();
-        byte value_b = hwchannels[m_hwchannel_b]->getCurrentValue();
+void DimChannel_RGB::updateDimValue() {
+    if (hwchannels[m_hwchannel_r]->isBusy() || hwchannels[m_hwchannel_g]->isBusy() || hwchannels[m_hwchannel_b]->isBusy()) { return; }
+    if (!hwchannels[m_hwchannel_r]->updateAvailable() || !hwchannels[m_hwchannel_g]->updateAvailable() || !hwchannels[m_hwchannel_b]->updateAvailable()) { return; }
+
+    hwchannels[m_hwchannel_r]->resetUpdateFlag();
+    hwchannels[m_hwchannel_g]->resetUpdateFlag();
+    hwchannels[m_hwchannel_b]->resetUpdateFlag();
+    byte value_r = hwchannels[m_hwchannel_r]->getCurrentValue();
+    byte value_g = hwchannels[m_hwchannel_g]->getCurrentValue();
+    byte value_b = hwchannels[m_hwchannel_b]->getCurrentValue();
 
         if (value_r != _lasthwvalue[0] || value_g != _lasthwvalue[1] || value_b != _lasthwvalue[2]) {
-            if (value_r != 0 || value_g != 0 || value_b != 0) {
-                knx.getGroupObject(calc_ko_statusonoff).value((bool)1, DPT_Switch);
-            } else {
-                knx.getGroupObject(calc_ko_statusonoff).value((bool)0, DPT_Switch);
-            }
-
-            _currentvalue_rgb = (_currentrgb[0] << 16) | (_currentrgb[1] << 8) | _currentrgb[2];
-            _currentvalue_hsv = (_currenthsv[0] << 16) | (_currenthsv[1] << 8) | _currenthsv[2];
-
-            _currenth = _currenthsv[0];
-            _currents = _currenthsv[1];
-            _currentv = _currenthsv[2];
-
-            knx.getGroupObject(calc_ko_statuscolorrgb).value(_currentvalue_rgb, DPT_Colour_RGB);
-            knx.getGroupObject(calc_ko_statuscolorhsv).value(_currentvalue_hsv, DPT_Colour_RGB);
-            knx.getGroupObject(calc_ko_statusshadeh).value(_currenth, DPT_Angle);
-            knx.getGroupObject(calc_ko_statussaturations).value(_currents, DPT_Scaling);
-            knx.getGroupObject(calc_ko_statusbrightnessv).value(_currentv, DPT_Scaling);
-
-            _lasthwvalue[0] = value_r;
-            _lasthwvalue[1] = value_g;
-            _lasthwvalue[2] = value_b;
+        if (value_r != 0 || value_g != 0 || value_b != 0) {
+            knx.getGroupObject(calc_ko_statusonoff).value((bool)1, DPT_Switch);
+        } else {
+            knx.getGroupObject(calc_ko_statusonoff).value((bool)0, DPT_Switch);
         }
-    _lastTaskRun = millis();
+
+        _currentvalue_rgb = (_currentrgb[0] << 16) | (_currentrgb[1] << 8) | _currentrgb[2];
+        _currentvalue_hsv = (_currenthsv[0] << 16) | (_currenthsv[1] << 8) | _currenthsv[2];
+
+        _currenth = _currenthsv[0];
+        _currents = _currenthsv[1];
+        _currentv = _currenthsv[2];
+
+        knx.getGroupObject(calc_ko_statuscolorrgb).value(_currentvalue_rgb, DPT_Colour_RGB);
+        knx.getGroupObject(calc_ko_statuscolorhsv).value(_currentvalue_hsv, DPT_Colour_RGB);
+        knx.getGroupObject(calc_ko_statusshadeh).value(_currenth, DPT_Angle);
+        knx.getGroupObject(calc_ko_statussaturations).value(_currents, DPT_Scaling);
+        knx.getGroupObject(calc_ko_statusbrightnessv).value(_currentv, DPT_Scaling);
+
+        _lasthwvalue[0] = value_r;
+        _lasthwvalue[1] = value_g;
+        _lasthwvalue[2] = value_b;
     }
 }
 

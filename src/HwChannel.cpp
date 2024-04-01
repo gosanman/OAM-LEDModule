@@ -18,6 +18,7 @@ void HWChannel::setup(uint8_t hwchannel, uint8_t curve, uint16_t durationabsolut
     _valueMin = 0;
     _valueMax = 255;
     _valueNew = 0;
+    _valueCurrent = 0;
     _updateCounter = 0;
     _busy = false;
     _durationAbsolute = durationabsolute;

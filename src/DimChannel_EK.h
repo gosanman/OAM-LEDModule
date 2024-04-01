@@ -1,13 +1,14 @@
 #ifndef DIMCHANNEL_EK_H
 #define DIMCHANNEL_EK_H
 
-#include <OpenKNX.h>
+//#include <OpenKNX.h>
+#include "DimChannel.h"
 
 #include "LEDModule.h"
 #include "HwChannel.h"
 
-class LEDModule;
-class DimChannel_EK : public OpenKNX::Channel
+//class LEDModule;
+class DimChannel_EK : public DimChannel
 {
 public:
     DimChannel_EK(uint8_t index);
@@ -15,14 +16,17 @@ public:
     const std::string name() override;
 
     //dimmchannel
-    void setup(int8_t hwchannel, uint16_t startKO);
-    void processInputKoEK(GroupObject &ko);
-    void task();
+    void setup(uint8_t* hwchannel, uint16_t startKO) override;
+    void processInputKo(GroupObject &ko) override;
+    void task() override;
+
+    void setDayNight(bool value) override;
 
 private:
     uint8_t m_curve;
     uint8_t m_hwchannel;
     uint16_t m_startko;
+    bool m_useonbrightness;
     uint8_t m_onbrightness;
     uint16_t m_durationrelativ;
     uint16_t m_durationabsolut;
@@ -33,13 +37,19 @@ private:
     uint16_t calc_ko_statusonoff;
     uint16_t calc_ko_statusbrightness;
 
+    uint8_t _index;
+
     uint8_t _lastbrightness = 0;
     uint8_t _setbrightness = 0;
 
     uint32_t _currentTaskRun = 0;
     uint32_t _lastTaskRun = 0;
 
-    HWChannel *hwchannels[CHANNELSHW]; 
+    bool isNight = false;
+
+    void updateDimValue();
+
+    HWChannel *hwchannels[MAXCHANNELSHW]; 
 };
 
 #endif

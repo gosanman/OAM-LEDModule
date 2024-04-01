@@ -1,7 +1,7 @@
 #include "DimChannel_EK.h"
 
-DimChannel_EK::DimChannel_EK(uint8_t index) {
-  _channelIndex = index;
+DimChannel_EK::DimChannel_EK(uint8_t index) : DimChannel(index) {
+  _index = index;
 }
 
 DimChannel_EK::~DimChannel_EK() {}
@@ -11,17 +11,16 @@ const std::string DimChannel_EK::name()
     return "DimChannel_EK";
 }
 
-void DimChannel_EK::setup(int8_t hwchannel, uint16_t startKO) {
+void DimChannel_EK::setup(uint8_t* hwchannel, uint16_t startKO) {
     // Parameter
-    m_hwchannel = hwchannel;
+    m_hwchannel = hwchannel[0];
     
     m_startko = startKO;
+    m_useonbrightness = ParamAPP_PT_EKUseOnBrightness;
     m_onbrightness = round(ParamAPP_PT_EKOnBrightness * 2.55);
     m_durationrelativ = ParamAPP_PT_EKRelativDimTime * 1000;
     m_durationabsolut = ParamAPP_PT_EKOnOffTime * 100;
     m_curve = ParamAPP_PT_EKDimCurve;                               // 0=A, 1=B, 2=C, 3=D
-
-    _lastbrightness = 0;
 
     // calculate KO Objects and save this
     calc_ko_switch = m_startko + KO_OFFSET_EK_SWITCH;
@@ -41,6 +40,7 @@ void DimChannel_EK::setup(int8_t hwchannel, uint16_t startKO) {
     logDebugP("KO Status OnOff: %i", calc_ko_statusonoff);
     logDebugP("KO Status Brightness: %i", calc_ko_statusbrightness);
     logDebugP("HW Port: %i", m_hwchannel);
+    logDebugP("PT UseOnBrightness: %i", m_useonbrightness);
     logDebugP("PT OnBrightness: %i", m_onbrightness);
     logDebugP("PT DurationRelativ: %i", m_durationrelativ);
     logDebugP("PT DurationAbsolut: %i", m_durationabsolut);
@@ -48,14 +48,19 @@ void DimChannel_EK::setup(int8_t hwchannel, uint16_t startKO) {
     logDebugP("--------------------------------------------");
 }
 
-void DimChannel_EK::processInputKoEK(GroupObject &ko) {
+void DimChannel_EK::processInputKo(GroupObject &ko) {
     uint16_t asap = ko.asap();
     calc_ko_switch = m_startko + KO_OFFSET_EK_SWITCH;
     if (asap == calc_ko_switch)
     {
         bool value = ko.value(DPT_Switch);
-        if (_lastbrightness == 0) { _setbrightness = m_onbrightness; } else {_setbrightness = _lastbrightness;}
-        logDebugP("Switch - Value: %i", value);
+        if (m_useonbrightness) { 
+                _setbrightness = m_onbrightness;
+            } 
+            else {
+                if (_lastbrightness == 0) { _setbrightness = 255; } else { _setbrightness = _lastbrightness; }
+            }
+        logDebugP("Switch - %i with value %i", value, _setbrightness);
         if (value) {
             hwchannels[m_hwchannel]->taskNewValue(_setbrightness);
         }
@@ -65,8 +70,8 @@ void DimChannel_EK::processInputKoEK(GroupObject &ko) {
     }
     else if (asap == calc_ko_dimabsolute) {
         uint8_t brightness = ko.value(DPT_Percent_U8);
-            _lastbrightness = brightness;
-            hwchannels[m_hwchannel]->taskNewValue(brightness);
+        logDebugP("Dim Absolut with value %i", brightness);
+        hwchannels[m_hwchannel]->taskNewValue(brightness);
     }
     else if (asap == calc_ko_dimrelativ) {
         uint8_t direction = ko.value(Dpt(3,7,0));
@@ -85,26 +90,41 @@ void DimChannel_EK::processInputKoEK(GroupObject &ko) {
     }
 }
 
+void DimChannel_EK::setDayNight(bool value) {
+    isNight = value;
+}
+
 void DimChannel_EK::task() {
     hwchannels[m_hwchannel]->task();
     //run ko update every 500ms
     _currentTaskRun = millis();
     if (_currentTaskRun - _lastTaskRun >= 500) {
-        if (hwchannels[m_hwchannel]->isBusy()) { return; }
-        if (!hwchannels[m_hwchannel]->updateAvailable()) { return; }
-        
-        hwchannels[m_hwchannel]->resetUpdateFlag();
-        byte value = hwchannels[m_hwchannel]->getCurrentValue();
-
-        if (value != _lastbrightness) {    
-            if (value != 0) { 
-                knx.getGroupObject(calc_ko_statusonoff).value((bool)1, DPT_Switch);
-            } else {
-                knx.getGroupObject(calc_ko_statusonoff).value((bool)0, DPT_Switch);
-            }
-            knx.getGroupObject(calc_ko_statusbrightness).value(value, DPT_Percent_U8);
-            _lastbrightness = value;
-        }
-    _lastTaskRun = millis();
+        updateDimValue();
+        _lastTaskRun = millis();
     }
 }
+
+void DimChannel_EK::updateDimValue() {
+    if (hwchannels[m_hwchannel]->isBusy()) { return; }
+    if (!hwchannels[m_hwchannel]->updateAvailable()) { return; }
+        
+    hwchannels[m_hwchannel]->resetUpdateFlag();
+    byte value = hwchannels[m_hwchannel]->getCurrentValue();
+    
+    if (value != 0) { 
+        GroupObject& ko = knx.getGroupObject(calc_ko_statusonoff);
+        if(ko.valueNoSendCompare((bool)1, DPT_Switch))
+            ko.objectWritten();
+    } else {
+        GroupObject& ko = knx.getGroupObject(calc_ko_statusonoff);
+        if(ko.valueNoSendCompare((bool)0, DPT_Switch))
+            ko.objectWritten();
+    }
+    
+    GroupObject& ko = knx.getGroupObject(calc_ko_statusbrightness);
+    if(ko.valueNoSendCompare(value, DPT_Percent_U8))
+        ko.objectWritten();
+
+    if (value > 0) { _lastbrightness = value; }
+}
+

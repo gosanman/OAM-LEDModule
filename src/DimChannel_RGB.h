@@ -1,13 +1,14 @@
 #ifndef DIMCHANNEL_RGB_H
 #define DIMCHANNEL_RGB_H
 
-#include <OpenKNX.h>
+//#include <OpenKNX.h>
+#include "DimChannel.h"
 
 #include "LEDModule.h"
 #include "HwChannel.h"
 
 class LEDModule;
-class DimChannel_RGB : public OpenKNX::Channel
+class DimChannel_RGB : public DimChannel
 {
 public:
     DimChannel_RGB(uint8_t index);
@@ -15,9 +16,11 @@ public:
     const std::string name() override;
 
     //dimmchannel
-    void setup(int8_t hwchannel_r, int8_t hwchannel_g, int8_t hwchannel_b, uint16_t startKO);
-    void processInputKoRGB(GroupObject &ko);
-    void task();
+    void setup(uint8_t* hwchannel, uint16_t startKO) override;
+    void processInputKo(GroupObject &ko) override;
+    void task() override;
+
+    void setDayNight(bool isNight);
 
 private:
     uint8_t m_curve;
@@ -25,8 +28,10 @@ private:
     uint8_t m_hwchannel_g;
     uint8_t m_hwchannel_b;
     uint8_t *m_oncolor;
+    uint8_t *m_nightcolor;
     uint32_t m_oncolorvalue;
     bool m_useoncolor;
+    bool m_usenightcolor;
     uint16_t m_durationrelativ;
     uint16_t m_durationabsolut;
 
@@ -47,6 +52,8 @@ private:
     uint16_t calc_ko_statussaturations;
     uint16_t calc_ko_statusbrightnessv;
 
+    uint8_t _index;
+
     uint8_t _lasthwvalue[3];
     uint32_t _currentvalue_rgb;
     uint32_t _currentvalue_hsv;
@@ -62,7 +69,11 @@ private:
     uint32_t _currentTaskRun = 0;
     uint32_t _lastTaskRun = 0;
 
-    HWChannel *hwchannels[CHANNELSHW];
+    bool isNight = false;
+
+    void updateDimValue();
+
+    HWChannel *hwchannels[MAXCHANNELSHW];
        
 };
 

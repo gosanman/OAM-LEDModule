@@ -1,7 +1,7 @@
 #include "DimChannel_TW.h"
 
-DimChannel_TW::DimChannel_TW(uint8_t index) {
-  _channelIndex = index;
+DimChannel_TW::DimChannel_TW(uint8_t index) : DimChannel(index) {
+  _index = index;
 }
 
 DimChannel_TW::~DimChannel_TW() {}
@@ -11,13 +11,14 @@ const std::string DimChannel_TW::name()
     return "DimChannel_TW";
 }
 
-void DimChannel_TW::setup(int8_t hwchannel_ww, int8_t hwchannel_cw, uint16_t startKO) {
+void DimChannel_TW::setup(uint8_t* hwchannel, uint16_t startKO) {
     // Parameter
-    m_hwchannel_ww = hwchannel_ww;
-    m_hwchannel_cw = hwchannel_cw;
+    m_hwchannel_ww = hwchannel[0];
+    m_hwchannel_cw = hwchannel[1];
 
     m_colortempww = ParamAPP_PT_TWColorTempWW;
     m_colortempcw = ParamAPP_PT_TWColorTempKW;
+    m_useoncolortemp = ParamAPP_PT_TWUseOnColorTemp;
     m_onbrightness = round(ParamAPP_PT_TWOnBrightness * 2.55);
     m_oncolortemp = ParamAPP_PT_TWOnColorTemp;
     m_durationrelativ = ParamAPP_PT_TWRelativDimTime * 1000;
@@ -54,6 +55,7 @@ void DimChannel_TW::setup(int8_t hwchannel_ww, int8_t hwchannel_cw, uint16_t sta
     logDebugP("HW Port CW: %i", m_hwchannel_cw);
     logDebugP("PT ColorTemp WW: %i", m_colortempww);
     logDebugP("PT ColorTemp CW: %i", m_colortempcw);
+    logDebugP("PT UseOnColorTemp: %i", m_useoncolortemp);
     logDebugP("PT OnBrightness: %i", m_onbrightness);
     logDebugP("PT OnColorTemp: %i", m_oncolortemp);
     logDebugP("PT DurationRelativ WW: %i", m_durationrelativ);
@@ -65,7 +67,7 @@ void DimChannel_TW::setup(int8_t hwchannel_ww, int8_t hwchannel_cw, uint16_t sta
     logDebugP("--------------------------------------------");
 }
 
-void DimChannel_TW::processInputKoTW(GroupObject &ko) {
+void DimChannel_TW::processInputKo(GroupObject &ko) {
     uint16_t asap = ko.asap();
     if (asap == calc_ko_switch)
     {
@@ -131,35 +133,43 @@ void DimChannel_TW::processInputKoTW(GroupObject &ko) {
     }
 }
 
+void DimChannel_TW::setDayNight(bool value) {
+    isNight = value;
+}
+
 void DimChannel_TW::task() {
     hwchannels[m_hwchannel_ww]->task();
     hwchannels[m_hwchannel_cw]->task();
     //run ko update every 500ms
     _currentTaskRun = millis();
     if (_currentTaskRun - _lastTaskRun >= 500) {
-        if (hwchannels[m_hwchannel_ww]->isBusy() || hwchannels[m_hwchannel_cw]->isBusy()) { return; }
-        if (!hwchannels[m_hwchannel_ww]->updateAvailable() || !hwchannels[m_hwchannel_cw]->updateAvailable()) { return; }
-
-        hwchannels[m_hwchannel_ww]->resetUpdateFlag();
-        hwchannels[m_hwchannel_cw]->resetUpdateFlag();
-        byte value_ww = hwchannels[m_hwchannel_ww]->getCurrentValue();
-        byte value_cw = hwchannels[m_hwchannel_cw]->getCurrentValue();
-
-        if (value_ww != _lastvalue_ww || value_cw != _lastvalue_cw) {
-            if (value_ww != 0 || value_cw != 0) {
-                knx.getGroupObject(calc_ko_statusonoff).value((bool)1, DPT_Switch);
-            } else {
-                knx.getGroupObject(calc_ko_statusonoff).value((bool)0, DPT_Switch);
-            }
-            knx.getGroupObject(calc_ko_statuskelvin).value(_lastcolortemp, Dpt(7, 600));
-            knx.getGroupObject(calc_ko_statusbrightness).value(_lastbrightness, DPT_Percent_U8);
-            _lastvalue_ww = value_ww;
-            _lastvalue_cw = value_cw;
-        }
-    _lastTaskRun = millis();
+        updateDimValue();
+        _lastTaskRun = millis();
     }
 }
 
+void DimChannel_TW::updateDimValue() {
+    if (hwchannels[m_hwchannel_ww]->isBusy() || hwchannels[m_hwchannel_cw]->isBusy()) { return; }
+    if (!hwchannels[m_hwchannel_ww]->updateAvailable() || !hwchannels[m_hwchannel_cw]->updateAvailable()) { return; }
+
+    hwchannels[m_hwchannel_ww]->resetUpdateFlag();
+    hwchannels[m_hwchannel_cw]->resetUpdateFlag();
+    byte value_ww = hwchannels[m_hwchannel_ww]->getCurrentValue();
+    byte value_cw = hwchannels[m_hwchannel_cw]->getCurrentValue();
+
+    if (value_ww != _lastvalue_ww || value_cw != _lastvalue_cw) {
+        if (value_ww != 0 || value_cw != 0) {
+            knx.getGroupObject(calc_ko_statusonoff).value((bool)1, DPT_Switch);
+        } else {
+            knx.getGroupObject(calc_ko_statusonoff).value((bool)0, DPT_Switch);
+        }
+        knx.getGroupObject(calc_ko_statuskelvin).value(_lastcolortemp, Dpt(7, 600));
+        knx.getGroupObject(calc_ko_statusbrightness).value(_lastbrightness, DPT_Percent_U8);
+        _lastvalue_ww = value_ww;
+        _lastvalue_cw = value_cw;
+    }    
+}
+
 uint16_t DimChannel_TW::prozToDim(uint8_t value, uint8_t curve) {
-  return proztable[value][curve];
+    return proztable[value][curve];
 }  

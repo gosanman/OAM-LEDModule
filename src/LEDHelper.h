@@ -12,7 +12,7 @@ uint8_t maxR = 255; // to match the same brightness on different colors
 uint8_t maxG = 255; // reduce brightnes of some colors
 uint8_t maxB = 255; // also usefull to make not "to blueisch" white
 uint8_t maxW = 255; // recomended values: R:255,G:176,B:240,W:255
-uint8_t whiteType = 0; // if RGBW strip used, 0=warm, 1=neutral, 2=cold
+uint8_t whiteType = 0; // if RGBW used, 0=warm, 1=neutral, 2=cold
 float gammaCorrection = 1.0;
 
 byte curveR[256];

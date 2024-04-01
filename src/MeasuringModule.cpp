@@ -117,21 +117,25 @@ void MeasuringModule::showHelp()
 
 bool MeasuringModule::processCommand(const std::string cmd, bool diagnoseKo) 
 {
-    if (!diagnoseKo && (cmd == "temp")) {
+    if (cmd == "temp") {
         getSingleMeasurement();
-        logInfoP("Temperatur: %f °C", temperatur_C);
+        if (diagnoseKo) { openknx.console.writeDiagenoseKo("T %.2fC", temperatur_C); }
+        logInfoP("Temperatur: %.2f °C", temperatur_C);
         return true;
-    } else if (!diagnoseKo && (cmd == "voltage")) {
+    } else if (cmd == "voltage") {
         getSingleMeasurement();
-        logInfoP("Voltage: %f V", busVoltage_V);
+        if (diagnoseKo) { openknx.console.writeDiagenoseKo("V %.1fV", busVoltage_V); }
+        logInfoP("Voltage: %.1f V", busVoltage_V);
         return true;
-    } else if (!diagnoseKo && (cmd == "current")) {
+    } else if (cmd == "current") {
         getSingleMeasurement();
-        logInfoP("Current: %f A", current_A);
+        if (diagnoseKo) { openknx.console.writeDiagenoseKo("C %.2fA", current_A); }
+        logInfoP("Current: %.2f A", current_A);
         return true;
-    } else if (!diagnoseKo && (cmd == "power")) {
+    } else if (cmd == "power") {
         getSingleMeasurement();
-        logInfoP("Power: %f W",  power_W);
+        if (diagnoseKo) { openknx.console.writeDiagenoseKo("P %.2fW", power_W); }
+        logInfoP("Power: %.2f W",  power_W);
         return true;
     }
     return false;

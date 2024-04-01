@@ -3,6 +3,7 @@
 #include "DimChannel_EK.h"
 #include "DimChannel_TW.h"
 #include "DimChannel_RGB.h"
+#include "DimChannel.h"
 #include "HwChannel.h"
 
 LEDModule *LEDModule::_instance = nullptr;
@@ -31,6 +32,7 @@ void LEDModule::setup() {
     // Debug
     logDebugP("Operating Mode: %i", operatinModeSelect);
     logDebugP("PWM frequenz: %i", pwmFreqSelect);
+    logDebugP("DayNight: %i", ParamAPP_PT_DayNight);
 
     // Init Lib
     _pwm = Adafruit_PWMServoDriver(I2C_PCA9685_DEVICE_ADDRESS, Wire1);
@@ -45,7 +47,7 @@ void LEDModule::setup() {
     _pwm.setPWMFreq(pwmFreqSelect); // 1600 is the maximum PWM frequency
 
     // Set all Channels off for a defined status
-    for (byte ch = 0; ch < CHANNELSHW; ch++) {
+    for (byte ch = 0; ch < MAXCHANNELSHW; ch++) {
         _pwm.setPin(ch, 0);
     }
 
@@ -54,48 +56,71 @@ void LEDModule::setup() {
     {
     case 0: // 6xEK
     {
-        channels_ek[0] = new DimChannel_EK(0);
-        channels_ek[0]->setup(0, APP_KoKO_ChannelASwitch);
-        channels_ek[1] = new DimChannel_EK(1);
-        channels_ek[1]->setup(1, APP_KoKO_ChannelBSwitch);
-        channels_ek[2] = new DimChannel_EK(2);
-        channels_ek[2]->setup(2, APP_KoKO_ChannelCSwitch);
-        channels_ek[3] = new DimChannel_EK(3);
-        channels_ek[3]->setup(3, APP_KoKO_ChannelDSwitch);
-        channels_ek[4] = new DimChannel_EK(4);
-        channels_ek[4]->setup(4, APP_KoKO_ChannelESwitch);
-        channels_ek[5] = new DimChannel_EK(5);
-        channels_ek[5]->setup(5, APP_KoKO_ChannelFSwitch);
+        channel[0] = new DimChannel_EK(0);
+        uint8_t hwchannel0[] = {0};
+        channel[0]->setup(hwchannel0, KO_OFFSET_EK_BLOCK + (0 * KO_PER_CHANNEL_EK));
+        channel[1] = new DimChannel_EK(1);
+        uint8_t hwchannel1[] = {1};
+        channel[1]->setup(hwchannel1, KO_OFFSET_EK_BLOCK + (1 * KO_PER_CHANNEL_EK));
+        channel[2] = new DimChannel_EK(2);
+        uint8_t hwchannel2[] = {2};
+        channel[2]->setup(hwchannel2, KO_OFFSET_EK_BLOCK + (2 * KO_PER_CHANNEL_EK));
+        channel[3] = new DimChannel_EK(3);
+        uint8_t hwchannel3[] = {3};
+        channel[3]->setup(hwchannel3, KO_OFFSET_EK_BLOCK + (3 * KO_PER_CHANNEL_EK));
+        channel[4] = new DimChannel_EK(4);
+        uint8_t hwchannel4[] = {4};
+        channel[4]->setup(hwchannel4, KO_OFFSET_EK_BLOCK + (4 * KO_PER_CHANNEL_EK));
+        channel[5] = new DimChannel_EK(5);
+        uint8_t hwchannel5[] = {5};
+        channel[5]->setup(hwchannel5, KO_OFFSET_EK_BLOCK + (5 * KO_PER_CHANNEL_EK));
+        //used Channels
+        usedChannels = 6;
     }
     break;
     case 1: // 3xTW
     {
-        channels_tw[0] = new DimChannel_TW(0);
-        channels_tw[0]->setup(0, 1, APP_KoKO_ChannelTW1Switch);
-        channels_tw[1] = new DimChannel_TW(1);
-        channels_tw[1]->setup(2, 3, APP_KoKO_ChannelTW2Switch);
-        channels_tw[2] = new DimChannel_TW(2);
-        channels_tw[2]->setup(4, 5, APP_KoKO_ChannelTW3Switch);
+        channel[0] = new DimChannel_TW(0);
+        uint8_t hwchannel0[] = {0, 1};
+        channel[0]->setup(hwchannel0, KO_OFFSET_TW_BLOCK + (0 * KO_PER_CHANNEL_TW));
+        channel[1] = new DimChannel_TW(1);
+        uint8_t hwchannel1[] = {2, 3};
+        channel[1]->setup(hwchannel1, KO_OFFSET_TW_BLOCK + (1 * KO_PER_CHANNEL_TW));
+        channel[2] = new DimChannel_TW(2);
+        uint8_t hwchannel2[] = {4, 5};
+        channel[2]->setup(hwchannel2, KO_OFFSET_TW_BLOCK + (2 * KO_PER_CHANNEL_TW));
+        //used Channels
+        usedChannels = 3;
     }
     break;
     case 2: // 2xTW and 2xEK
     {
-        channels_tw[0] = new DimChannel_TW(0);
-        channels_tw[0]->setup(0, 1, APP_KoKO_ChannelTW1Switch);
-        channels_tw[1] = new DimChannel_TW(1);
-        channels_tw[1]->setup(2, 3, APP_KoKO_ChannelTW2Switch);
-        channels_ek[4] = new DimChannel_EK(4);
-        channels_ek[4]->setup(4, APP_KoKO_ChannelESwitch);
-        channels_ek[5] = new DimChannel_EK(5);
-        channels_ek[5]->setup(5, APP_KoKO_ChannelFSwitch);
+        channel[0] = new DimChannel_TW(0);
+        uint8_t hwchannel0[] = {0, 1};
+        channel[0]->setup(hwchannel0, KO_OFFSET_TW_BLOCK + (0 * KO_PER_CHANNEL_TW));
+        channel[1] = new DimChannel_TW(1);
+        uint8_t hwchannel1[] = {2, 3};
+        channel[1]->setup(hwchannel1, KO_OFFSET_TW_BLOCK + (1 * KO_PER_CHANNEL_TW));
+        channel[2] = new DimChannel_EK(4);
+        uint8_t hwchannel4[] = {4};
+        channel[2]->setup(hwchannel4, KO_OFFSET_EK_BLOCK + (4 * KO_PER_CHANNEL_EK));
+        channel[3] = new DimChannel_EK(5);
+        uint8_t hwchannel5[] = {5};
+        channel[3]->setup(hwchannel5, KO_OFFSET_EK_BLOCK + (5 * KO_PER_CHANNEL_EK));
+        //used Channels
+        usedChannels = 4;
     }
     break;
     case 3: // 2xRGB
     {
-        channels_rgb[0] = new DimChannel_RGB(0);
-        channels_rgb[0]->setup(0, 1, 2, APP_KoKO_ChannelRGB1Switch);
-        channels_rgb[1] = new DimChannel_RGB(1);
-        channels_rgb[1]->setup(3, 4, 5, APP_KoKO_ChannelRGB2Switch);
+        channel[0] = new DimChannel_RGB(0);
+        uint8_t hwchannel0[] = {0, 1, 2};
+        channel[0]->setup(hwchannel0, KO_OFFSET_RGB_BLOCK + (0 * KO_PER_CHANNEL_RGB));
+        channel[1] = new DimChannel_RGB(1);
+        uint8_t hwchannel1[] = {3, 4, 5};
+        channel[1]->setup(hwchannel1, KO_OFFSET_RGB_BLOCK + (1 * KO_PER_CHANNEL_RGB));
+        //used Channels
+        usedChannels = 2;
     }
     break;
     case 4: // 1x RGB + 1x TW + 1x EK
@@ -116,109 +141,52 @@ void LEDModule::setup() {
 
 void LEDModule::loop()
 {
-    switch (operatinModeSelect)
-    {
-    case 0: // 6xEK
-    {
-        channels_ek[0]->task();
-        channels_ek[1]->task();
-        channels_ek[2]->task();
-        channels_ek[3]->task();
-        channels_ek[4]->task();
-        channels_ek[5]->task();
-    }
-    break;
-    case 1: // 3xTW
-    {
-        channels_tw[0]->task();
-        channels_tw[1]->task();
-        channels_tw[2]->task();
-    }
-    break;
-    case 2: // 2xTW and 2xEK
-    {
-        channels_tw[0]->task();
-        channels_tw[1]->task();
-        channels_ek[4]->task();
-        channels_ek[5]->task();
-    }
-    break;
-    case 3: // 2xRGB
-    {
-        channels_rgb[0]->task();
-        channels_rgb[1]->task();
-    }
-    break;
-    case 4: // 1x RGB + 1x TW + 1x EK
-    {
-
-    }
-    break;
-    case 5: // 1x RGB + 3x EK
-    {
-
-    }
-    break;
-    default:
-        logErrorP("Operation Mode not valide");
-        break;
-    }
+    for(int i = 0; i < usedChannels; i++)
+    channel[i]->task();
 }
 
-// Core function to set value
+// Core function to set value, change if you use other hardware
 void LEDModule::setHwChannelValue(byte channel, byte value, int curve) {
     _pwm.setPin(channel, curves[value][curve]);
 }
 
 void LEDModule::processInputKo(GroupObject &ko) {
     // we have to check first, if external KO are used
-    uint16_t asap = ko.asap();
+    uint16_t koNum = ko.asap();
+    logDebugP("Got KO %i", koNum);
+    switch(koNum)
+    {
+        //broadcast switch
+        case BASE_KoDiagnose:
+            openknx.console.processDiagnoseKo(ko);
+            break;
+
+        //Tag/Nacht Objekt
+        case APP_KoKO_DayNight:
+            koHandleDayNight(ko);
+            break;
+    }    
     // check if KO for Channels
-    if (asap < 100) // KO not for Channels
+    if (koNum < 100) // KO not for Channels
         return;
-    // send Input KO to the correct dimmer based on the parameter PT_OperationMode
-    switch (operatinModeSelect)
-    {
-    case 0: // 6xEK
-    {
-        int channelIndexEK = (asap - 101) / KO_PER_CHANNEL_EK;
-        if (channelIndexEK >= 0 && channelIndexEK < 6) { channels_ek[channelIndexEK]->processInputKoEK(ko); }
-    }
-    break;
-    case 1: // 3xTW
-    {
-        int channelIndexTW = (asap - 262) / KO_PER_CHANNEL_TW;
-        if (channelIndexTW >= 0 && channelIndexTW < 3) { channels_tw[channelIndexTW]->processInputKoTW(ko); }
-    }
-    break;
-    case 2: // 2xTW and 2xEK
-    {
-        int channelIndexTW = (asap - 262) / KO_PER_CHANNEL_TW;
-        if (channelIndexTW >= 0 && channelIndexTW < 2) { channels_tw[channelIndexTW]->processInputKoTW(ko); }       
-        int channelIndexEK = (asap - 181) / KO_PER_CHANNEL_EK;
-        if (channelIndexEK >= 4 && channelIndexEK < 6) { channels_ek[channelIndexEK]->processInputKoEK(ko); }
-    }
-    break;
-    case 3: // 2xRGB
-    {
-        int channelIndexRGB = (asap - 362) / KO_PER_CHANNEL_RGB;
-        if (channelIndexRGB >= 0 && channelIndexRGB < 2) { channels_rgb[channelIndexRGB]->processInputKoRGB(ko); }
-    }
-    break;
-    case 4: // 1x RGB + 1x TW + 1x EK
-    {
+    // send Input KO to the correct dimmer
+    int channelIndexEK = (koNum - KO_OFFSET_EK_BLOCK) / KO_PER_CHANNEL_EK;
+    if (channelIndexEK >= 0 && channelIndexEK < MAXCHANNELSEK) { channel[channelIndexEK]->processInputKo(ko); }
+    int channelIndexTW = (koNum - KO_OFFSET_TW_BLOCK) / KO_PER_CHANNEL_TW;
+    if (channelIndexTW >= 0 && channelIndexTW < MAXCHANNELSTW) { channel[channelIndexTW]->processInputKo(ko); }
+    int channelIndexRGB = (koNum - KO_OFFSET_RGB_BLOCK) / KO_PER_CHANNEL_RGB;
+    if (channelIndexRGB >= 0 && channelIndexRGB < MAXCHANNELSRGB) { channel[channelIndexRGB]->processInputKo(ko); }
+}
 
-    }
-    break;
-    case 5: // 1x RGB + 3x EK
-    {
+void LEDModule::koHandleDayNight(GroupObject & ko)
+{
+    bool value = ko.value(DPT_Switch);
+    if(ParamAPP_PT_DayNight) value = !value;
+    logDebugP("Broadcast Day/Night %i", value);
+    if(ParamAPP_PT_DayNight) value = !value;
 
-    }
-    break;
-    default:
-        logErrorP("Operation Mode not valide");
-    break;
-    }
+    for(int i = 0; i < usedChannels; i++)
+        channel[i]->setDayNight(value);
 }
 
 void LEDModule::showHelp()
@@ -241,12 +209,12 @@ bool LEDModule::processCommand(const std::string cmd, bool diagnoseKo)
         setHwChannelValue(std::stoi(cmd.substr(cmd.find(' ') + 1)), std::stoi(cmd.substr(cmd.find(' ') + 3)), 0);
         openknx.logger.logWithPrefixAndValues("Channel", "Set value channel %i to %i", std::stoi(cmd.substr(cmd.find(' ') + 1)), std::stoi(cmd.substr(cmd.find(' ') + 3)));
         return true;
-    }
+    } 
     return false;
 }
 
 void LEDModule::processBeforeRestart() {
-    for (byte ch = 0; ch < CHANNELSHW; ch++) {
+    for (byte ch = 0; ch < MAXCHANNELSHW; ch++) {
         _pwm.setPin(ch, 0);
     }
 }
