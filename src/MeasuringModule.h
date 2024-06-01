@@ -15,6 +15,7 @@ class MeasuringModule : public OpenKNX::Module
 public:
     MeasuringModule();
     void setup() override;
+    void setup1() override;
     void loop() override;
     void loop1() override;
     const std::string name() override;
@@ -45,6 +46,12 @@ private:
     float power_W = 0.0;
     
     float temperatur_C = 0.0;
+
+    uint32_t _timerCheckI2cConnection = 0;
+    bool doResetI2c = false;
+
+    bool initI2cConnection();
+    bool checkI2cConnection();
 
     INA226_WE _ina226;
     TMP100_WE _tmp100;

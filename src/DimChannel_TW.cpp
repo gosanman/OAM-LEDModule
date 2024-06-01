@@ -30,9 +30,10 @@ void DimChannel_TW::setup(uint8_t* hwchannel, uint16_t startKO) {
   
     // calculate KO Objects and save this
     calc_ko_switch = startKO + KO_OFFSET_TW_SWITCH;
-    calc_ko_dimabsolute = startKO + KO_OFFSET_TW_DIMABSOLUT;
-    calc_ko_dimkelvin = startKO + KO_OFFSET_TW_DIMKELVIN;
+    calc_ko_dimabsolut = startKO + KO_OFFSET_TW_DIMABSOLUT;
+    calc_ko_dimabsolutkelvin = startKO + KO_OFFSET_TW_DIMABSOLUTKELVIN;
     calc_ko_dimrelativ = startKO + KO_OFFSET_TW_DIMRELATIV;
+    calc_ko_dimrelativkelvin = startKO + KO_OFFSET_TW_DIMRELATIVKELVIN;
     calc_ko_statusonoff = startKO + KO_OFFSET_TW_STATUSONOFF;
     calc_ko_statusbrightness = startKO + KO_OFFSET_TW_STATUSBRIGHTNESS;
     calc_ko_statuskelvin = startKO + KO_OFFSET_TW_STATUSKELVIN;
@@ -45,9 +46,10 @@ void DimChannel_TW::setup(uint8_t* hwchannel, uint16_t startKO) {
 
     logDebugP("------------------ DEBUG -------------------");
     logDebugP("KO Switch: %i", calc_ko_switch);
-    logDebugP("KO Dim Absolute: %i", calc_ko_dimabsolute);
-    logDebugP("KO Dim Kelvin: %i", calc_ko_dimkelvin);
+    logDebugP("KO Dim Absolute: %i", calc_ko_dimabsolut);
+    logDebugP("KO Dim Absolut Kelvin: %i", calc_ko_dimabsolutkelvin);
     logDebugP("KO Dim Relativ: %i", calc_ko_dimrelativ);
+    logDebugP("KO Dim Relativ Kelvin: %i", calc_ko_dimrelativkelvin);
     logDebugP("KO Status OnOff: %i", calc_ko_statusonoff);
     logDebugP("KO Status Brightness: %i", calc_ko_statusbrightness);
     logDebugP("KO Status Kelvin: %i", calc_ko_statuskelvin);
@@ -89,7 +91,7 @@ void DimChannel_TW::processInputKo(GroupObject &ko) {
             hwchannels[m_hwchannel_cw]->taskSoftOff();   
         }
     }
-    else if (asap == calc_ko_dimabsolute) {
+    else if (asap == calc_ko_dimabsolut) {
         uint8_t brightness = ko.value(DPT_Percent_U8);
         _lastbrightness = brightness;
         if (_lastcolortemp == 0) { _lastcolortemp = m_oncolortemp; }
@@ -101,7 +103,7 @@ void DimChannel_TW::processInputKo(GroupObject &ko) {
         hwchannels[m_hwchannel_ww]->taskNewValue(percentWW);
         hwchannels[m_hwchannel_cw]->taskNewValue(percentCW);
     }
-    else if (asap == calc_ko_dimkelvin) {
+    else if (asap == calc_ko_dimabsolutkelvin) {
         uint16_t kelvin = ko.value(Dpt(7, 600));
         _lastcolortemp = kelvin;
         if (_lastbrightness == 0) { _lastbrightness = m_onbrightness; }

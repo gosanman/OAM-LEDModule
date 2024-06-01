@@ -26,6 +26,7 @@ void DimChannel_EK::setup(uint8_t* hwchannel, uint16_t startKO) {
     calc_ko_switch = m_startko + KO_OFFSET_EK_SWITCH;
     calc_ko_dimabsolute = m_startko + KO_OFFSET_EK_DIMABSOLUT;
     calc_ko_dimrelativ = m_startko + KO_OFFSET_EK_DIMRELATIV;
+    calc_ko_scene = m_startko + KO_OFFSET_EK_SCENE;
     calc_ko_statusonoff = m_startko + KO_OFFSET_EK_STATUSONOFF;
     calc_ko_statusbrightness = m_startko + KO_OFFSET_EK_STATUSBRIGHTNESS;
 
@@ -37,6 +38,7 @@ void DimChannel_EK::setup(uint8_t* hwchannel, uint16_t startKO) {
     logDebugP("KO Switch: %i", calc_ko_switch);
     logDebugP("KO Dim Absolute: %i", calc_ko_dimabsolute);
     logDebugP("KO Dim Relativ: %i", calc_ko_dimrelativ);
+    logDebugP("KO Scene: %i", calc_ko_scene);
     logDebugP("KO Status OnOff: %i", calc_ko_statusonoff);
     logDebugP("KO Status Brightness: %i", calc_ko_statusbrightness);
     logDebugP("HW Port: %i", m_hwchannel);
@@ -50,7 +52,6 @@ void DimChannel_EK::setup(uint8_t* hwchannel, uint16_t startKO) {
 
 void DimChannel_EK::processInputKo(GroupObject &ko) {
     uint16_t asap = ko.asap();
-    calc_ko_switch = m_startko + KO_OFFSET_EK_SWITCH;
     if (asap == calc_ko_switch)
     {
         bool value = ko.value(DPT_Switch);
@@ -86,6 +87,27 @@ void DimChannel_EK::processInputKo(GroupObject &ko) {
         }
         else if (direction == 0) {
             hwchannels[m_hwchannel]->taskDimDown();
+        }
+    }
+    else if (asap == calc_ko_scene) {
+        uint8_t value;
+        uint8_t scene = ko.value(DPT_SceneNumber);
+        scene++; //increase value by one
+        logDebugP("Scene - Number: %i", scene);
+        for (uint8_t i = 0; i < MAXCHANNELSCENE; i++) {
+            uint8_t sceneparam = ParamAPP_PT_EKSzNum;
+            if (scene == sceneparam) {
+                uint8_t action = ParamAPP_PT_EKSzAction;
+                switch (action) {
+                    case SC_EK_SetBrightness:
+                        value = round(ParamAPP_PT_EKSzValue * 2.55);
+                        hwchannels[m_hwchannel]->taskNewValue(value);
+                        break;
+                    default:
+                        // do nothing
+                        break;
+                }
+            }
         }
     }
 }

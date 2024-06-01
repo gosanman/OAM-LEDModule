@@ -7,6 +7,10 @@
 #include "LEDModule.h"
 #include "HwChannel.h"
 
+// scene actions
+#define SC_EK_None              0
+#define SC_EK_SetBrightness     1
+
 //class LEDModule;
 class DimChannel_EK : public DimChannel
 {
@@ -34,6 +38,7 @@ private:
     uint16_t calc_ko_switch;
     uint16_t calc_ko_dimabsolute;
     uint16_t calc_ko_dimrelativ;
+    uint16_t calc_ko_scene;
     uint16_t calc_ko_statusonoff;
     uint16_t calc_ko_statusbrightness;
 

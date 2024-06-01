@@ -36,10 +36,19 @@ public:
 private:
     int8_t operatinModeSelect = 0;  // 0=6xEK, 1=1xRGBCTT, 2=1xRGBW and 1xEK, 3=1xRGB and 2xEK, 4=1xRGB and 1xTW, 5=2xTW and 1xEK, 6=1xTW and 3xEK
     int16_t pwmFreqSelect = 488;    // 211, 488, 600, 832, 1000, 1200
+    bool useDiagnoseKo = 0;
     unsigned long currentTime = 0;
     int8_t usedChannels = 0;
+    uint32_t _timerCheckI2cConnection = 0;
+    bool doResetI2c = false;
 
     void koHandleDayNight(GroupObject & ko);
+    bool initI2cConnection();
+    bool checkI2cConnection();
+    #ifdef FUNC1_BUTTON_PIN
+		  void handleFunc1(uint8_t setting);
+		  bool _currentToggleState = false;
+    #endif
 
     Adafruit_PWMServoDriver _pwm;
  

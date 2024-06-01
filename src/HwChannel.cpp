@@ -110,7 +110,8 @@ void HWChannel::task()
         break;
     //increase value
     case DIM_UP:
-        if(_valueCurrent < _valueMax){
+        if(_valueCurrent < _valueMax)
+        {
             if(!_busy){
                 _delayRelative = (word)(_durationRelative / (_valueMax - _valueCurrent));
             }
@@ -131,7 +132,8 @@ void HWChannel::task()
         break;
     //decrease value
     case DIM_DOWN:
-        if(_valueCurrent > _valueMin){
+        if(_valueCurrent > _valueMin)
+        {
             if(!_busy){
                 _delayRelative = (word)(_durationRelative / (_valueCurrent - _valueMin));
             }

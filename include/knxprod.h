@@ -7,19 +7,34 @@
             (time & 0xC000) == 0x8000 ? ((time & 0x3FFF) > 1000 ? 3600000 : \
                                             (time & 0x3FFF) * 3600000 ) : 0 )
 
+#define PT_FuncClickAction_none      0
+#define PT_FuncClickAction_on        1
+#define PT_FuncClickAction_off       2
+#define PT_FuncClickAction_toggle    3
+
 //--------------------Allgemein---------------------------
 #define MAIN_OpenKnxId 0xAF
 #define MAIN_ApplicationNumber 0x01
 #define MAIN_ApplicationVersion 0x01
 #define MAIN_OrderNumber "OpenKnxLEDDimmer"
-#define MAIN_ParameterSize 648
+#define MAIN_ParameterSize 783
 #define MAIN_MaxKoNumber 698
 
 // max number of channel to use in DimmerControl
-#define MAXCHANNELSHW    6
-#define MAXCHANNELSEK    6
-#define MAXCHANNELSTW    3
-#define MAXCHANNELSRGB   2
+#ifdef BOARD_KNXLED_DK_06_V10
+    #define MAXCHANNELSHW    6
+    #define MAXCHANNELSEK    6
+    #define MAXCHANNELSTW    3
+    #define MAXCHANNELSRGB   2
+    #define MAXCHANNELSCENE  5
+#endif
+#ifdef BOARD_KNXLED_DK_12_V10
+    #define MAXCHANNELSHW    12
+    #define MAXCHANNELSEK    12
+    #define MAXCHANNELSTW    6
+    #define MAXCHANNELSRGB   4
+    #define MAXCHANNELSCENE  5
+#endif
 
 // number of ko reserved for a channel
 #define KO_PER_CHANNEL_EK       30          //Number of KO per EK channel
@@ -41,9 +56,9 @@
 #define KO_OFFSET_TW_BLOCK             460         //Offset for Block 
 #define KO_OFFSET_TW_SWITCH            1           //Offset for Switch KO
 #define KO_OFFSET_TW_DIMABSOLUT        3           //Offset for Dim Absolut Brightness KO
-#define KO_OFFSET_TW_DIMKELVIN         4           //Offset for Dim Absolut Kelvin KO
+#define KO_OFFSET_TW_DIMABSOLUTKELVIN  4           //Offset for Dim Absolut Kelvin KO
 #define KO_OFFSET_TW_DIMRELATIV        11          //Offset for Dim Relativ Brithness KO
-//#define KO_OFFSET_TW_DIMRELATIV        12          //Offset for Dim Relativ Kelvin KO
+#define KO_OFFSET_TW_DIMRELATIVKELVIN  12          //Offset for Dim Relativ Kelvin KO
 #define KO_OFFSET_TW_STATUSONOFF       17          //Offset for OnOff KO
 #define KO_OFFSET_TW_STATUSBRIGHTNESS  18          //Offset for Brightness KO
 #define KO_OFFSET_TW_STATUSKELVIN      19          //Offset for Kelvin KO
@@ -116,6 +131,16 @@
 #define RGB_ParamDimCurve                 7      // Offset: 615, 647 usw. Text: Dimmkurve
 
 #define RGB_ParamCalcIndex(index) (index + (_channelIndex * RGB_ParamBlockSize) + RGB_ParamBlockOffset)
+
+// Scene per EK channel
+#define SceneEK_ParamBlockOffset        736      // Parameter für EK Scene startet bei 736
+#define SceneEK_ParamBlockSize           32      // Weitere Kanaele werden mit +32 berechnet
+#define SceneEK_ParamNum                  0      // Offset: +0 1 2 3 4 für Scene A, B, C, D, E 
+#define SceneEK_ParamAction               5      // Offset: +0 1 2 3 4 für Action A, B, C, D, E
+#define SceneEK_ParamValue               10      // Offset: +0 1 2 3 4 für Value A, B, C, D, E
+
+#define SceneEK_ParamCalcIndex(index) (index + (_channelIndex * SceneEK_ParamBlockSize) + SceneEK_ParamBlockOffset)
+
 // -----------------------------------------------------
 
 //--------------------OpenKNX Common---------------------------
@@ -158,6 +183,21 @@
 #define APP_PT_ShuntValue_Mask	0x000F
 // Offset: 3, Size: 4 Bit, Text: Wert des verbauten Messwiderstand
 #define ParamAPP_PT_ShuntValue ((uint)((knx.paramByte(3) >> APP_PT_ShuntValue_Shift) & APP_PT_ShuntValue_Mask))
+#define APP_PT_Func1BtnClick		0x0004
+#define APP_PT_Func1BtnClick_Shift	5
+#define APP_PT_Func1BtnClick_Mask	0x0003
+// Offset: 4, BitOffset: 1, Size: 2 Bit, Text: Aktion - Func1 Button Klick
+#define ParamAPP_PT_Func1BtnClick ((uint)((knx.paramByte(4) >> APP_PT_Func1BtnClick_Shift) & APP_PT_Func1BtnClick_Mask))
+#define APP_PT_Func1BtnDblClick		0x0004
+#define APP_PT_Func1BtnDblClick_Shift	3
+#define APP_PT_Func1BtnDblClick_Mask	0x0003
+// Offset: 4, BitOffset: 3, Size: 2 Bit, Text: Aktion - Func1 Button Doppelklick
+#define ParamAPP_PT_Func1BtnDblClick ((uint)((knx.paramByte(4) >> APP_PT_Func1BtnDblClick_Shift) & APP_PT_Func1BtnDblClick_Mask))
+#define APP_PT_Func1BtnLongClick		0x0004
+#define APP_PT_Func1BtnLongClick_Shift	1
+#define APP_PT_Func1BtnLongClick_Mask	0x0003
+// Offset: 4, BitOffset: 5, Size: 2 Bit, Text: Aktion - Func1 Button Langer Klick
+#define ParamAPP_PT_Func1BtnLongClick ((uint)((knx.paramByte(4) >> APP_PT_Func1BtnLongClick_Shift) & APP_PT_Func1BtnLongClick_Mask))
 // -----------------------------------------------------
 
 // ------------------- EK Channel ----------------------
@@ -271,6 +311,26 @@
 #define ParamAPP_PT_RGBDimCurve ((uint)((knx.paramByte(RGB_ParamCalcIndex(RGB_ParamDimCurve)) >> APP_PT_RGBDimCurve_Shift) & APP_PT_RGBDimCurve_Mask))
 // -----------------------------------------------------
 
+// ------------------- Scene EK Channel ----------------------
+#define APP_PT_EKSzNum		0x02E0
+#define APP_PT_EKSzNum_Shift	1
+#define APP_PT_EKSzNum_Mask	0x007F
+// Offset: 736, Size: 7 Bit, Text: 
+#define ParamAPP_PT_EKSzNum ((uint)((knx.paramByte(SceneEK_ParamCalcIndex(SceneEK_ParamNum + i)) >> APP_PT_EKSzNum_Shift) & APP_PT_EKSzNum_Mask))
+
+#define APP_PT_EKSzAction		0x02E5
+#define APP_PT_EKSzAction_Shift	5
+#define APP_PT_EKSzAction_Mask	0x0007
+// Offset: 741, Size: 3 Bit, Text: 
+#define ParamAPP_PT_EKSzAction ((uint)((knx.paramByte(SceneEK_ParamCalcIndex(SceneEK_ParamAction + i)) >> APP_PT_EKSzAction_Shift) & APP_PT_EKSzAction_Mask))
+
+#define APP_PT_EKSzValue		0x02EA
+#define APP_PT_EKSzValue_Shift	1
+#define APP_PT_EKSzValue_Mask	0x007F
+// Offset: 746, Size: 7 Bit, Text: 
+#define ParamAPP_PT_EKSzValue ((uint)((knx.paramByte(SceneEK_ParamCalcIndex(SceneEK_ParamValue + i)) >> APP_PT_EKSzValue_Shift) & APP_PT_EKSzValue_Mask))
+// -----------------------------------------------------
+
 //--------------------OpenKNX Common---------------------------
 #define BASE_KoDiagnose 7
 // Diagnose
@@ -294,289 +354,3 @@
 #define APP_KoKO_DayNight 30
 #define KoAPP_KO_DayNight knx.getGroupObject(30)
 // -----------------------------------------------------
-
-//!< Number: 101, Text: EK1: {{0:---}}, Function: Schalten
-#define APP_KoKO_ChannelASwitch 101
-#define KoAPP_KO_ChannelASwitch knx.getGroupObject(101)
-//!< Number: 103, Text: EK1: {{0:---}}, Function: Dimmen Absolut
-#define APP_KoKO_ChannelADimAbsolute 103
-#define KoAPP_KO_ChannelADimAbsolute knx.getGroupObject(103)
-//!< Number: 111, Text: EK1: {{0:---}}, Function: Dimmen Relativ
-#define APP_KoKO_ChannelADimRelativ 111
-#define KoAPP_KO_ChannelADimRelativ knx.getGroupObject(111)
-//!< Number: 117, Text: EK1: {{0:---}}, Function: Status An/Aus
-#define APP_KoKO_ChannelAStatusOnOff 117
-#define KoAPP_KO_ChannelAStatusOnOff knx.getGroupObject(117)
-//!< Number: 118, Text: EK1: {{0:---}}, Function: Status Helligkeit
-#define APP_KoKO_ChannelAStatusBrightness 118
-#define KoAPP_KO_ChannelAStatusBrightness knx.getGroupObject(118)
-//!< Number: 128, Text: EK1: {{0:---}}, Function: Szenensteuerung
-#define APP_KoKO_ChannelAScene 128
-#define KoAPP_KO_ChannelAScene knx.getGroupObject(128)
-//!< Number: 131, Text: EK2: {{0:---}}, Function: Schalten
-#define APP_KoKO_ChannelBSwitch 131
-#define KoAPP_KO_ChannelBSwitch knx.getGroupObject(131)
-//!< Number: 133, Text: EK2: {{0:---}}, Function: Dimmen Absolut
-#define APP_KoKO_ChannelBDimAbsolute 133
-#define KoAPP_KO_ChannelBDimAbsolute knx.getGroupObject(133)
-//!< Number: 141, Text: EK2: {{0:---}}, Function: Dimmen Relativ
-#define APP_KoKO_ChannelBDimRelativ 141
-#define KoAPP_KO_ChannelBDimRelativ knx.getGroupObject(141)
-//!< Number: 147, Text: EK2: {{0:---}}, Function: Status An/Aus
-#define APP_KoKO_ChannelBStatusOnOff 147
-#define KoAPP_KO_ChannelBStatusOnOff knx.getGroupObject(147)
-//!< Number: 148, Text: EK2: {{0:---}}, Function: Status Helligkeit
-#define APP_KoKO_ChannelBStatusBrightness 148
-#define KoAPP_KO_ChannelBStatusBrightness knx.getGroupObject(148)
-//!< Number: 158, Text: EK2: {{0:---}}, Function: Szenensteuerung
-#define APP_KoKO_ChannelBScene 158
-#define KoAPP_KO_ChannelBScene knx.getGroupObject(158)
-//!< Number: 161, Text: EK3: {{0:---}}, Function: Schalten
-#define APP_KoKO_ChannelCSwitch 161
-#define KoAPP_KO_ChannelCSwitch knx.getGroupObject(161)
-//!< Number: 163, Text: EK3: {{0:---}}, Function: Dimmen Absolut
-#define APP_KoKO_ChannelCDimAbsolute 163
-#define KoAPP_KO_ChannelCDimAbsolute knx.getGroupObject(163)
-//!< Number: 171, Text: EK3: {{0:---}}, Function: Dimmen Relativ
-#define APP_KoKO_ChannelCDimRelativ 171
-#define KoAPP_KO_ChannelCDimRelativ knx.getGroupObject(171)
-//!< Number: 177, Text: EK3: {{0:---}}, Function: Status An/Aus
-#define APP_KoKO_ChannelCStatusOnOff 177
-#define KoAPP_KO_ChannelCStatusOnOff knx.getGroupObject(177)
-//!< Number: 178, Text: EK3: {{0:---}}, Function: Status Helligkeit
-#define APP_KoKO_ChannelCStatusBrightness 178
-#define KoAPP_KO_ChannelCStatusBrightness knx.getGroupObject(178)
-//!< Number: 188, Text: EK3: {{0:---}}, Function: Szenensteuerung
-#define APP_KoKO_ChannelCScene 188
-#define KoAPP_KO_ChannelCScene knx.getGroupObject(188)
-//!< Number: 191, Text: EK4: {{0:---}}, Function: Schalten
-#define APP_KoKO_ChannelDSwitch 191
-#define KoAPP_KO_ChannelDSwitch knx.getGroupObject(191)
-//!< Number: 193, Text: EK4: {{0:---}}, Function: Dimmen Absolut
-#define APP_KoKO_ChannelDDimAbsolute 193
-#define KoAPP_KO_ChannelDDimAbsolute knx.getGroupObject(193)
-//!< Number: 201, Text: EK4: {{0:---}}, Function: Dimmen Relativ
-#define APP_KoKO_ChannelDDimRelativ 201
-#define KoAPP_KO_ChannelDDimRelativ knx.getGroupObject(201)
-//!< Number: 207, Text: EK4: {{0:---}}, Function: Status An/Aus
-#define APP_KoKO_ChannelDStatusOnOff 207
-#define KoAPP_KO_ChannelDStatusOnOff knx.getGroupObject(207)
-//!< Number: 208, Text: EK4 {{0:---}}, Function: Status Helligkeit
-#define APP_KoKO_ChannelDStatusBrightness 208
-#define KoAPP_KO_ChannelDStatusBrightness knx.getGroupObject(208)
-//!< Number: 218, Text: EK4: {{0:---}}, Function: Szenensteuerung
-#define APP_KoKO_ChannelDScene 218
-#define KoAPP_KO_ChannelDScene knx.getGroupObject(218)
-//!< Number: 221, Text: EK5: {{0:---}}, Function: Schalten
-#define APP_KoKO_ChannelESwitch 221
-#define KoAPP_KO_ChannelESwitch knx.getGroupObject(221)
-//!< Number: 223, Text: EK5: {{0:---}}, Function: Dimmen Absolut
-#define APP_KoKO_ChannelEDimAbsolute 223
-#define KoAPP_KO_ChannelEDimAbsolute knx.getGroupObject(223)
-//!< Number: 231, Text: EK5: {{0:---}}, Function: Dimmen Relativ
-#define APP_KoKO_ChannelEDimRelativ 231
-#define KoAPP_KO_ChannelEDimRelativ knx.getGroupObject(231)
-//!< Number: 237, Text: EK5: {{0:---}}, Function: Status An/Aus
-#define APP_KoKO_ChannelEStatusOnOff 237
-#define KoAPP_KO_ChannelEStatusOnOff knx.getGroupObject(237)
-//!< Number: 238, Text: EK5: {{0:---}}, Function: Status Helligkeit
-#define APP_KoKO_ChannelEStatusBrightness 238
-#define KoAPP_KO_ChannelEStatusBrightness knx.getGroupObject(238)
-//!< Number: 248, Text: EK5: {{0:---}}, Function: Szenensteuerung
-#define APP_KoKO_ChannelEScene 248
-#define KoAPP_KO_ChannelEScene knx.getGroupObject(248)
-//!< Number: 251, Text: EK6: {{0:---}}, Function: Schalten
-#define APP_KoKO_ChannelFSwitch 251
-#define KoAPP_KO_ChannelFSwitch knx.getGroupObject(251)
-//!< Number: 253, Text: EK6: {{0:---}}, Function: Dimmen Absolut
-#define APP_KoKO_ChannelFDimAbsolute 253
-#define KoAPP_KO_ChannelFDimAbsolute knx.getGroupObject(253)
-//!< Number: 261, Text: EK6: {{0:---}}, Function: Dimmen Relativ
-#define APP_KoKO_ChannelFDimRelativ 261
-#define KoAPP_KO_ChannelFDimRelativ knx.getGroupObject(261)
-//!< Number: 267, Text: EK6: {{0:---}}, Function: Status An/Aus
-#define APP_KoKO_ChannelFStatusOnOff 267
-#define KoAPP_KO_ChannelFStatusOnOff knx.getGroupObject(267)
-//!< Number: 268, Text: EK6: {{0:---}}, Function: Status Helligkeit
-#define APP_KoKO_ChannelFStatusBrightness 268
-#define KoAPP_KO_ChannelFStatusBrightness knx.getGroupObject(268)
-//!< Number: 278, Text: EK6: {{0:---}}, Function: Szenensteuerung
-#define APP_KoKO_ChannelFScene 278
-#define KoAPP_KO_ChannelFScene knx.getGroupObject(278)
-//!< Number: 461, Text: TW1: {{0:---}}, Function: Schalten
-#define APP_KoKO_ChannelTW1Switch 461
-#define KoAPP_KO_ChannelTW1Switch knx.getGroupObject(461)
-//!< Number: 463, Text: TW1: {{0:---}}, Function: Dimmen Absolut Helligkeit
-#define APP_KoKO_ChannelTW1DimAbsoluteBrightness 463
-#define KoAPP_KO_ChannelTW1DimAbsoluteBrightness knx.getGroupObject(463)
-//!< Number: 464, Text: TW1: {{0:---}}, Function: Dimmen Absolut Farbtemperatur (Kelvin)
-#define APP_KoKO_ChannelTW1DimAbsoluteColorTemp 464
-#define KoAPP_KO_ChannelTW1DimAbsoluteColorTemp knx.getGroupObject(464)
-//!< Number: 471, Text: TW1: {{0:---}}, Function: Dimmen Relativ Helligkeit
-#define APP_KoKO_ChannelTW1DimRelativBrightness 471
-#define KoAPP_KO_ChannelTW1DimRelativBrightness knx.getGroupObject(471)
-//!< Number: 472, Text: TW1: {{0:---}}, Function: Dimmen Relativ Farbtemperatur (Kelvin)
-#define APP_KoKO_ChannelTW1DimRelativColorTemp 472
-#define KoAPP_KO_ChannelTW1DimRelativColorTemp knx.getGroupObject(472)
-//!< Number: 477, Text: TW1: {{0:---}}, Function: Status An/Aus
-#define APP_KoKO_ChannelTW1StatusOnOff 477
-#define KoAPP_KO_ChannelTW1StatusOnOff knx.getGroupObject(477)
-//!< Number: 478, Text: TW1: {{0:---}}, Function: Status Helligkeit
-#define APP_KoKO_ChannelTW1StatusBrightness 478
-#define KoAPP_KO_ChannelTW1StatusBrightness knx.getGroupObject(478)
-//!< Number: 479, Text: TW1: {{0:---}}, Function: Status Farbtemperatur (Kelvin)
-#define APP_KoKO_ChannelTW1StatusColorTemp 479
-#define KoAPP_KO_ChannelTW1StatusColorTemp knx.getGroupObject(479)
-//!< Number: 488, Text: TW1: {{0:---}}, Function: Szenensteuerung
-#define APP_KoKO_ChannelTW1Scene 488
-#define KoAPP_KO_ChannelTW1Scene knx.getGroupObject(488)
-//!< Number: 491, Text: TW2: {{0:---}}, Function: Schalten
-#define APP_KoKO_ChannelTW2Switch 491
-#define KoAPP_KO_ChannelTW2Switch knx.getGroupObject(491)
-//!< Number: 493, Text: TW2: {{0:---}}, Function: Dimmen Absolut Helligkeit
-#define APP_KoKO_ChannelTW2DimAbsoluteBrightness 493
-#define KoAPP_KO_ChannelTW2DimAbsoluteBrightness knx.getGroupObject(493)
-//!< Number: 494, Text: TW2: {{0:---}}, Function: Dimmen Absolut Farbtemperatur (Kelvin)
-#define APP_KoKO_ChannelTW2DimAbsoluteColorTemp 494
-#define KoAPP_KO_ChannelTW2DimAbsoluteColorTemp knx.getGroupObject(494)
-//!< Number: 501, Text: TW2: {{0:---}}, Function: Dimmen Relativ Helligkeit
-#define APP_KoKO_ChannelTW2DimRelativBrightness 501
-#define KoAPP_KO_ChannelTW2DimRelativBrightness knx.getGroupObject(501)
-//!< Number: 502, Text: TW2: {{0:---}}, Function: Dimmen Relativ Farbtemperatur (Kelvin)
-#define APP_KoKO_ChannelTW2DimRelativColorTemp 502
-#define KoAPP_KO_ChannelTW2DimRelativColorTemp knx.getGroupObject(502)
-//!< Number: 507, Text: TW2: {{0:---}}, Function: Status An/Aus
-#define APP_KoKO_ChannelTW2StatusOnOff 507
-#define KoAPP_KO_ChannelTW2StatusOnOff knx.getGroupObject(507)
-//!< Number: 508, Text: TW2: {{0:---}}, Function: Status Helligkeit
-#define APP_KoKO_ChannelTW2StatusBrightness 508
-#define KoAPP_KO_ChannelTW2StatusBrightness knx.getGroupObject(508)
-//!< Number: 509, Text: TW2: {{0:---}}, Function: Status Farbtemperatur (Kelvin)
-#define APP_KoKO_ChannelTW2StatusColorTemp 509
-#define KoAPP_KO_ChannelTW2StatusColorTemp knx.getGroupObject(509)
-//!< Number: 518, Text: TW2: {{0:---}}, Function: Szenensteuerung
-#define APP_KoKO_ChannelTW2Scene 518
-#define KoAPP_KO_ChannelTW2Scene knx.getGroupObject(518)
-//!< Number: 521, Text: TW3: {{0:---}}, Function: Schalten
-#define APP_KoKO_ChannelTW3Switch 521
-#define KoAPP_KO_ChannelTW3Switch knx.getGroupObject(521)
-//!< Number: 523, Text: TW3: {{0:---}}, Function: Dimmen Absolut Helligkeit
-#define APP_KoKO_ChannelTW3DimAbsoluteBrightness 523
-#define KoAPP_KO_ChannelTW3DimAbsoluteBrightness knx.getGroupObject(523)
-//!< Number: 524, Text: TW3: {{0:---}}, Function: Dimmen Absolut Farbtemperatur (Kelvin)
-#define APP_KoKO_ChannelTW3DimAbsoluteColorTemp 524
-#define KoAPP_KO_ChannelTW3DimAbsoluteColorTemp knx.getGroupObject(524)
-//!< Number: 531, Text: TW3: {{0:---}}, Function: Dimmen Relativ Helligkeit
-#define APP_KoKO_ChannelTW3DimRelativBrightness 531
-#define KoAPP_KO_ChannelTW3DimRelativBrightness knx.getGroupObject(531)
-//!< Number: 532, Text: TW3: {{0:---}}, Function: Dimmen Relativ Farbtemperatur (Kelvin)
-#define APP_KoKO_ChannelTW3DimRelativColorTemp 532
-#define KoAPP_KO_ChannelTW3DimRelativColorTemp knx.getGroupObject(532)
-//!< Number: 537, Text: TW3: {{0:---}}, Function: Status An/Aus
-#define APP_KoKO_ChannelTW3StatusOnOff 537
-#define KoAPP_KO_ChannelTW3StatusOnOff knx.getGroupObject(537)
-//!< Number: 538, Text: TW3: {{0:---}}, Function: Status Helligkeit
-#define APP_KoKO_ChannelTW3StatusBrightness 538
-#define KoAPP_KO_ChannelTW3StatusBrightness knx.getGroupObject(538)
-//!< Number: 539, Text: TW3: {{0:---}}, Function: Status Farbtemperatur (Kelvin)
-#define APP_KoKO_ChannelTW3StatusColorTemp 539
-#define KoAPP_KO_ChannelTW3StatusColorTemp knx.getGroupObject(539)
-//!< Number: 548, Text: TW3: {{0:---}}, Function: Szenensteuerung
-#define APP_KoKO_ChannelTW3Scene 548
-#define KoAPP_KO_ChannelTW3Scene knx.getGroupObject(548)
-//!< Number: 641, Text: RGB1: {{0:---}}, Function: Schalten
-#define APP_KoKO_ChannelRGB1Switch 641
-#define KoAPP_KO_ChannelRGB1Switch knx.getGroupObject(641)
-//!< Number: 643, Text: RGB1: {{0:---}}, Function: Farbeinstellung (RGB)
-#define APP_KoKO_ChannelRGB1ColorRGB 643
-#define KoAPP_KO_ChannelRGB1ColorRGB knx.getGroupObject(643)
-//!< Number: 644, Text: RGB1: {{0:---}}, Function: Farbeinstellung (HSV)
-#define APP_KoKO_ChannelRGB1ColorHSV 644
-#define KoAPP_KO_ChannelRGB1ColorHSV knx.getGroupObject(644)
-//!< Number: 645, Text: RGB1: {{0:---}}, Function: Dimmen absolut (Farbton H)
-#define APP_KoKO_ChannelRGB1DimAbsoluteShadeH 645
-#define KoAPP_KO_ChannelRGB1DimAbsoluteShadeH knx.getGroupObject(645)
-//!< Number: 646, Text: RGB1: {{0:---}}, Function: Dimmen absolut (Sättigung S)
-#define APP_KoKO_ChannelRGB1DimAbsoluteSaturationS 646
-#define KoAPP_KO_ChannelRGB1DimAbsoluteSaturationS knx.getGroupObject(646)
-//!< Number: 647, Text: RGB1: {{0:---}}, Function: Dimmen absolut (Helligkeit V)
-#define APP_KoKO_ChannelRGB1DimAbsoluteBrightnessV 647
-#define KoAPP_KO_ChannelRGB1DimAbsoluteBrightnessV knx.getGroupObject(647)
-//!< Number: 651, Text: RGB1: {{0:---}}, Function: Dimmen relativ (Farbton H)
-#define APP_KoKO_ChannelRGB1DimRelativShadeH 651
-#define KoAPP_KO_ChannelRGB1DimRelativShadeH knx.getGroupObject(651)
-//!< Number: 652, Text: RGB1: {{0:---}}, Function: Dimmen relativ (Sättigung S)
-#define APP_KoKO_ChannelRGB1DimRelativSaturationS 652
-#define KoAPP_KO_ChannelRGB1DimRelativSaturationS knx.getGroupObject(652)
-//!< Number: 653, Text: RGB1: {{0:---}}, Function: Dimmen relativ (Helligkeit V)
-#define APP_KoKO_ChannelRGB1DimRelativBrightnessV 653
-#define KoAPP_KO_ChannelRGB1DimRelativBrightnessV knx.getGroupObject(653)
-//!< Number: 657, Text: RGB1: {{0:---}}, Function: Staus Ein/Aus
-#define APP_KoKO_ChannelRGB1StatusOnOff 657
-#define KoAPP_KO_ChannelRGB1StatusOnOff knx.getGroupObject(657)
-//!< Number: 658, Text: RGB1: {{0:---}}, Function: 3Byte Status Dimmwert (RGB)
-#define APP_KoKO_ChannelRGB1StatusColorRGB 658
-#define KoAPP_KO_ChannelRGB1StatusColorRGB knx.getGroupObject(658)
-//!< Number: 659, Text: RGB1: {{0:---}}, Function: 3Byte Status Dimmwert (HSV)
-#define APP_KoKO_ChannelRGB1StatusColorHSV 659
-#define KoAPP_KO_ChannelRGB1StatusColorHSV knx.getGroupObject(659)
-//!< Number: 660, Text: RGB1: {{0:---}}, Function: Status Dimmwert (Farbton H)
-#define APP_KoKO_ChannelRGB1StatusShadeH 660
-#define KoAPP_KO_ChannelRGB1StatusShadeH knx.getGroupObject(660)
-//!< Number: 661, Text: RGB1: {{0:---}}, Function: Status Dimmwert (Sättigung S)
-#define APP_KoKO_ChannelRGB1StatusSaturationS 661
-#define KoAPP_KO_ChannelRGB1StatusSaturationS knx.getGroupObject(661)
-//!< Number: 662, Text: RGB1: {{0:---}}, Function: Status Dimmwert (Helligkeit V)
-#define APP_KoKO_ChannelRGB1StatusBrightnessV 662
-#define KoAPP_KO_ChannelRGB1StatusBrightnessV knx.getGroupObject(662)
-//!< Number: 668, Text: RGB1: {{0:---}}, Function: Szenensteuerung
-#define APP_KoKO_ChannelRGB1Scene 668
-#define KoAPP_KO_ChannelRGB1Scene knx.getGroupObject(668)
-//!< Number: 671, Text: RGB2: {{0:---}}, Function: Schalten
-#define APP_KoKO_ChannelRGB2Switch 671
-#define KoAPP_KO_ChannelRGB2Switch knx.getGroupObject(671)
-//!< Number: 673, Text: RGB2: {{0:---}}, Function: Farbeinstellung (RGB)
-#define APP_KoKO_ChannelRGB2ColorRGB 673
-#define KoAPP_KO_ChannelRGB2ColorRGB knx.getGroupObject(673)
-//!< Number: 674, Text: RGB2: {{0:---}}, Function: Farbeinstellung (HSV)
-#define APP_KoKO_ChannelRGB2ColorHSV 674
-#define KoAPP_KO_ChannelRGB2ColorHSV knx.getGroupObject(674)
-//!< Number: 675, Text: RGB2: {{0:---}}, Function: Dimmen absolut (Farbton H)
-#define APP_KoKO_ChannelRGB2DimAbsoluteShadeH 675
-#define KoAPP_KO_ChannelRGB2DimAbsoluteShadeH knx.getGroupObject(675)
-//!< Number: 676, Text: RGB2: {{0:---}}, Function: Dimmen absolut (Sättigung S)
-#define APP_KoKO_ChannelRGB2DimAbsoluteSaturationS 676
-#define KoAPP_KO_ChannelRGB2DimAbsoluteSaturationS knx.getGroupObject(676)
-//!< Number: 677, Text: RGB2: {{0:---}}, Function: Dimmen absolut (Helligkeit V)
-#define APP_KoKO_ChannelRGB2DimAbsoluteBrightnessV 677
-#define KoAPP_KO_ChannelRGB2DimAbsoluteBrightnessV knx.getGroupObject(677)
-//!< Number: 681, Text: RGB2: {{0:---}}, Function: Dimmen relativ (Farbton H)
-#define APP_KoKO_ChannelRGB2DimRelativShadeH 681
-#define KoAPP_KO_ChannelRGB2DimRelativShadeH knx.getGroupObject(681)
-//!< Number: 682, Text: RGB2: {{0:---}}, Function: Dimmen relativ (Sättigung S)
-#define APP_KoKO_ChannelRGB2DimRelativSaturationS 682
-#define KoAPP_KO_ChannelRGB2DimRelativSaturationS knx.getGroupObject(682)
-//!< Number: 683, Text: RGB2: {{0:---}}, Function: Dimmen relativ (Helligkeit V)
-#define APP_KoKO_ChannelRGB2DimRelativBrightnessV 683
-#define KoAPP_KO_ChannelRGB2DimRelativBrightnessV knx.getGroupObject(683)
-//!< Number: 687, Text: RGB2: {{0:---}}, Function: Staus Ein/Aus
-#define APP_KoKO_ChannelRGB2StatusOnOff 687
-#define KoAPP_KO_ChannelRGB2StatusOnOff knx.getGroupObject(687)
-//!< Number: 688, Text: RGB2: {{0:---}}, Function: 3Byte Status Dimmwert (RGB)
-#define APP_KoKO_ChannelRGB2StatusColorRGB 688
-#define KoAPP_KO_ChannelRGB2StatusColorRGB knx.getGroupObject(688)
-//!< Number: 689, Text: RGB2: {{0:---}}, Function: 3Byte Status Dimmwert (HSV)
-#define APP_KoKO_ChannelRGB2StatusColorHSV 689
-#define KoAPP_KO_ChannelRGB2StatusColorHSV knx.getGroupObject(689)
-//!< Number: 690, Text: RGB2: {{0:---}}, Function: Status Dimmwert (Farbton H)
-#define APP_KoKO_ChannelRGB2StatusShadeH 690
-#define KoAPP_KO_ChannelRGB2StatusShadeH knx.getGroupObject(690)
-//!< Number: 691, Text: RGB2: {{0:---}}, Function: Status Dimmwert (Sättigung S)
-#define APP_KoKO_ChannelRGB2StatusSaturationS 691
-#define KoAPP_KO_ChannelRGB2StatusSaturationS knx.getGroupObject(691)
-//!< Number: 692, Text: RGB2: {{0:---}}, Function: Status Dimmwert (Helligkeit V)
-#define APP_KoKO_ChannelRGB2StatusBrightnessV 692
-#define KoAPP_KO_ChannelRGB2StatusBrightnessV knx.getGroupObject(692)
-//!< Number: 698, Text: RGB2: {{0:---}}, Function: Szenensteuerung
-#define APP_KoKO_ChannelRGB2Scene 698
-#define KoAPP_KO_ChannelRGB2Scene knx.getGroupObject(698)

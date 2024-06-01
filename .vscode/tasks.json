@@ -3,12 +3,13 @@
     // for the documentation about the tasks.json format
     "version": "2.0.0",
     "tasks": [
+        // --- BOARD_KNXLED_DK_06_V10 ---
         {
-            "label": "develop_LEDDK_USB_V1",
+            "label": "develop_LEDDK_06_USB_V10",
             "type": "shell",
             "command": "lib/OGM-Common/scripts/build/OpenKNX-Build.ps1",
             "args": [
-                "develop_LEDDK_USB_V1"
+                "develop_LEDDK_06_USB_V10"
             ],
             "group": "build",
             "problemMatcher": [],
@@ -16,17 +17,43 @@
             "dependsOn": ["Gen. Dependencies.txt"]
         },
         {
-            "label": "develop_LEDDK_JLINK_V1",
+            "label": "develop_LEDDK_06_JLINK_V10",
             "type": "shell",
             "command": "lib/OGM-Common/scripts/build/OpenKNX-Build.ps1",
             "args": [
-                "develop_LEDDK_JLINK_V1",
+                "develop_LEDDK_06_JLINK_V10",
             ],
             "group": "build",
             "problemMatcher": [],
             "dependsOrder": "sequence",
             "dependsOn": ["Gen. Dependencies.txt"]
         },
+        // --- BOARD_KNXLED_DK_12_V10 ---
+        {
+            "label": "develop_LEDDK_12_USB_V10",
+            "type": "shell",
+            "command": "lib/OGM-Common/scripts/build/OpenKNX-Build.ps1",
+            "args": [
+                "develop_LEDDK_12_USB_V10"
+            ],
+            "group": "build",
+            "problemMatcher": [],
+            "dependsOrder": "sequence",
+            "dependsOn": ["Gen. Dependencies.txt"]
+        },
+        {
+            "label": "develop_LEDDK_12_JLINK_V10",
+            "type": "shell",
+            "command": "lib/OGM-Common/scripts/build/OpenKNX-Build.ps1",
+            "args": [
+                "develop_LEDDK_12_JLINK_V10",
+            ],
+            "group": "build",
+            "problemMatcher": [],
+            "dependsOrder": "sequence",
+            "dependsOn": ["Gen. Dependencies.txt"]
+        },
+        // --- COMMON ---
         {
             "label": "OpenKNXproducer",
             "type": "shell",
@@ -77,8 +104,19 @@
             "dependsOn": ["Pull"]
         },
         // Build a release package for distribution
+        // --- BOARD_KNXLED_DK_06_V10 ---
         {
-            "label": "release_LEDDK_V1",
+            "label": "release_LEDDK_06_V10",
+            "type": "shell",
+            "command": "scripts/Build-Release.ps1",
+            "args": [
+            ],
+            "problemMatcher": [],
+            "group": "test"
+        },
+        // --- BOARD_KNXLED_DK_12_V10 ---
+        {
+            "label": "release_LEDDK_12_V10",
             "type": "shell",
             "command": "scripts/Build-Release.ps1",
             "args": [
