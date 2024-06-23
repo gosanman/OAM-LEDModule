@@ -6,7 +6,7 @@ DimChannel::DimChannel(uint8_t index) {
 
 DimChannel::~DimChannel() {}
 
-void DimChannel::setup(uint8_t* hwchannel, uint16_t startKO) {}
+void DimChannel::setup(uint8_t* hwchannel) {}
 
 void DimChannel::processInputKo(GroupObject &ko) {}
 

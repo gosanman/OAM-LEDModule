@@ -2,6 +2,7 @@
 #define HWCHANNEL_H
 
 #include "LEDModule.h"
+#include "DimChannel.h"
 #include <OpenKNX.h>
 
 // Dimmer  

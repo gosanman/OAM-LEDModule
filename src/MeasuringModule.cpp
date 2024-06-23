@@ -18,17 +18,13 @@ const std::string MeasuringModule::version() {
     return "0.1dev";
 }
 
-void MeasuringModule::setup() {
-    // Nothing to do on Core 0
-}
-
-void MeasuringModule::setup1() 
+void MeasuringModule::setup() 
 {
     // save default values from PA
-    measurementSend = ParamAPP_PT_SendMeasuredValues;
-    measurementSelectInterval = ParamAPP_PT_MeasurementInterval;
-    tempSensorPresent = ParamAPP_PT_TempSensorPresent;
-    shuntValue = ParamAPP_PT_ShuntValue;
+    measurementSend = ParamAPP_SendMeasuredValues;
+    measurementInterval = getTimeWithPattern(ParamAPP_MeasurementIntervalTime, ParamAPP_MeasurementIntervalBase);
+    tempSensorPresent = ParamAPP_TempSensorPresent;
+    shuntValue = ParamAPP_ShuntValue;
     maxcurrent = (shuntValue == 10) ? 8.0 : 16.0; // 0,010Ω = max.  8A, 0,005Ω = max. 16A
 
     // Init I2C connection and Lib
@@ -38,57 +34,69 @@ void MeasuringModule::setup1()
 
     // Debug
     logDebugP("Measuring send: %i", measurementSend);
-    logDebugP("Measuring interval: %i", MeasurementInterval[measurementSelectInterval]);
+    logDebugP("Measuring interval: %i", measurementInterval);
     logDebugP("Shunt value: %f", shuntValue / 1000);
     logDebugP("Max current in A: %f", maxcurrent);
     logDebugP("Temp sensor present: %i", tempSensorPresent);          
 }
 
-void MeasuringModule::loop() {
-    // Nothing to do on Core 0
+void MeasuringModule::setup1() {
+    // Nothing to do on Core 1
 }
 
-void MeasuringModule::loop1() {
+void MeasuringModule::loop() {
     // do nothing when not parameterized
     if (!knx.configured())
         return;
 
     if (measurementSend == 1) {
-        if (delayCheck(_lastMeasurementSend, MeasurementInterval[measurementSelectInterval])) {
-            _lastMeasurementSend = millis();
+        if (delayCheck(_lastMeasurementSend, measurementInterval)) {
             getSingleMeasurement();
+            _lastMeasurementSend = millis();
         }
     }
     //check if I2C connection possible, if not reset and init the pwm
     if (delayCheck(_timerCheckI2cConnection, 45000)) {
         checkI2cConnection();
         _timerCheckI2cConnection = millis();
-    }    
+    }
+    //check ina226 overflow every 30 seconds
+    if (delayCheck(_timerCheckOverflow, 30000)) {
+        checkI2cConnection();
+        _timerCheckOverflow = millis();
+    }     
+}
+
+void MeasuringModule::loop1() {
+    // Nothing to do on Core 1
 }
 
 void MeasuringModule::getSingleMeasurement()
 {
-    _ina226.readAndClearFlags();
     busVoltage_V = round(_ina226.getBusVoltage_V() * 10) / 10;  // rounded to one decimal places
     current_A = round(_ina226.getCurrent_A() * 100) / 100;      // rounded to two decimal places
-    power_W = round(_ina226.getBusPower_W() * 100) / 100;       // rounded to two decimal places
+    power_W = round(_ina226.getBusPower() / 1000 * 100) / 100;  // rounded to two decimal places
 
-    KoAPP_KO_VoltageV.value(busVoltage_V, DPT_Value_Electric_Potential);
-    KoAPP_KO_CurrentA.value(current_A, DPT_Value_Electric_Current);
-    KoAPP_KO_PowerW.value(power_W, DPT_Value_Power);
-
-    if (!_ina226.overflow) {
-        // Noch zu definieren, evtl. KO für Überlast
-        // logInfoP("Values OK - no overflow");
-    } else {
-        // Noch zu definieren, evtl. KO für Überlast und abschalten der Dim Funktion
-        // logInfoP("Overflow! Choose higher current range");
-    }
+    KoAPP_VoltageV.value(busVoltage_V, DPT_Value_Electric_Potential);
+    KoAPP_CurrentA.value(current_A, DPT_Value_Electric_Current);
+    KoAPP_PowerW.value(power_W, DPT_Value_Power);
 
     // run Temp Measurment if sensor present
     if (tempSensorPresent) {
         temperatur_C = _tmp100.getTemperature();
-        KoAPP_KO_TempC.value(temperatur_C, DPT_Value_Common_Temperature);
+        KoAPP_TempC.value(temperatur_C, DPT_Value_Common_Temperature);
+    }
+}
+
+void MeasuringModule::getOverflowValue()
+{
+    _ina226.readAndClearFlags();
+    if (_ina226.overflow) {
+        // power off all LED channels and reboot
+        logErrorP("Overflow %.2f", maxcurrent);
+        openknx.console.writeDiagenoseKo("OF");
+        delay(20);
+        openknx.restart();
     }
 }
 
@@ -156,11 +164,11 @@ bool MeasuringModule::initI2cConnection() {
     }
     delay(10);
     // Set default values for sensor
-    _ina226.setAverage(AVERAGE_128);                            // Anzahl Einzelmessungen für die Shunt- und Busspannungskonversion
+    _ina226.setAverage(AVERAGE_1);                              // Anzahl Einzelmessungen für die Shunt- und Busspannungskonversion
     _ina226.setConversionTime(CONV_TIME_1100);                  // Einstellung der A/D-Wandlungszeit für die Shunt- und Busspannung
     _ina226.setMeasureMode(CONTINUOUS);                         // Messmodus
     _ina226.setResistorRange(shuntValue / 1000, maxcurrent);    // Resistor 0.01 Ohm, Max current 8.0 A, 0,005 Ohm, Max current 16.0 A
-    _ina226.waitUntilConversionCompleted();      
+    _ina226.startSingleMeasurementNoWait();                     // Don't wait for conversion to complete     
 
     doResetI2c = false;
     return true;
@@ -193,6 +201,30 @@ bool MeasuringModule::checkI2cConnection() {
         return false;
     }
     return false;
+}
+
+uint32_t MeasuringModule::getTimeWithPattern(uint16_t time, uint8_t base) {
+    switch (base)
+    {
+        case TIMEBASE_TENTH_SECONDS:
+            return time * 100;
+            break;
+        case TIMEBASE_SECONDS:
+            return time * 1000;
+            break;
+        case TIMEBASE_MINUTES:
+            return time * 60000;
+            break;
+        case TIMEBASE_HOURS:
+            // for hour, we can only cover 1193 hours in milliseconds, we allow just 1000 here
+            if (time > 1000) 
+                time = 1000;
+            return time * 3600000;
+            break;
+        default:
+            return 0;
+            break;
+    }
 }
 
 MeasuringModule openknxMeasuringModule;

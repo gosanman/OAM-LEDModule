@@ -24,16 +24,17 @@ const std::string LEDModule::version() {
     return "0.1dev";
 }
 
-void LEDModule::setup() {
+void LEDModule::setup() 
+{
     // save default values from PA
-    operatinModeSelect = ParamAPP_PT_OperatingMode;
-    pwmFreqSelect = ParamAPP_PT_PwmFrequenz;
-    useDiagnoseKo = ParamAPP_PT_Diagnose;
+    operatinModeSelect = ParamAPP_OperatingMode;
+    pwmFreqSelect = ParamAPP_PwmFrequenz;
+    //useDiagnoseKo = ParamAPP_PT_Diagnose;
     
     // Debug
     logDebugP("Operating Mode: %i", operatinModeSelect);
     logDebugP("PWM frequenz: %i", pwmFreqSelect);
-    logDebugP("DayNight: %i", ParamAPP_PT_DayNight);
+    logDebugP("DayNight: %i", ParamAPP_DayNight);
 
     // Init I2C connection and Lib
     if (initI2cConnection()) {
@@ -48,47 +49,48 @@ void LEDModule::setup() {
     // Create dimmer groups based on the parameter PT_OperationMode
     // Pin 0 = A    Pin  6 = G
     // Pin 1 = B    Pin  7 = H
-    // Pin 2 = C    Pin  8 = I
-    // Pin 3 = D    Pin  9 = J
-    // Pin 4 = E    Pin 10 = K
-    // Pin 5 = F    Pin 11 = L
+    // Pin 2 = C    Pin  8 = I      _____________________   _______________________
+    // Pin 3 = D    Pin  9 = J      | V+ V+ G H I J K L |   | V+ V+ 6 7 8 9 10 11 |
+    // Pin 4 = E    Pin 10 = K      | V+ V+ A B C D E F |   | V+ V+ 0 1 2 3  4  5 |
+    // Pin 5 = F    Pin 11 = L      =====================   =======================
+
     switch (operatinModeSelect)
     {
     case 0:
     {
-        // 6xEK
+        // 6x EK
         #ifdef BOARD_KNXLED_DK_06_V10
             usedChannels = 6;
         #endif
-        // 12xEK
+        // 12x EK
         #ifdef BOARD_KNXLED_DK_12_V10
             usedChannels = 12;
         #endif
 
         for (uint8_t i = 0; i < usedChannels; ++i)
         {
-            channel[i] = new DimChannel_EK(i);
+            channelEK[i] = channel[i] = new DimChannel_EK(i);
             uint8_t hwchannel[] = {i};
-            channel[i]->setup(hwchannel, KO_OFFSET_EK_BLOCK + (i * KO_PER_CHANNEL_EK));
+            channel[i]->setup(hwchannel);
         }
     }
     break;
     case 1:
     {
-        // 3xTW
+        // 3x TW
         #ifdef BOARD_KNXLED_DK_06_V10
             usedChannels = 3;
         #endif
-        // 6xTW
+        // 6x TW
         #ifdef BOARD_KNXLED_DK_12_V10
             usedChannels = 6;
         #endif
 
         for (uint8_t i = 0; i < usedChannels; ++i)
         {
-            channel[i] = new DimChannel_TW(i);
+            channelTW[i] = channel[i] = new DimChannel_TW(i);
             uint8_t hwchannel[] = {static_cast<uint8_t>(i * 2), static_cast<uint8_t>(i * 2 + 1)};
-            channel[i]->setup(hwchannel, KO_OFFSET_TW_BLOCK + (i * KO_PER_CHANNEL_TW));
+            channel[i]->setup(hwchannel);
         }
     }
     break;
@@ -96,86 +98,119 @@ void LEDModule::setup() {
     {
         // 2xTW and 2xEK 
         #ifdef BOARD_KNXLED_DK_06_V10
-            channel[0] = new DimChannel_TW(0);
+            // 2x TW
+            channelTW[0] = channel[0] = new DimChannel_TW(0);
             uint8_t hwchannel0[] = {0, 1};
-            channel[0]->setup(hwchannel0, KO_OFFSET_TW_BLOCK + (0 * KO_PER_CHANNEL_TW));
-            channel[1] = new DimChannel_TW(1);
+            channel[0]->setup(hwchannel0);
+            channelTW[1] = channel[1] = new DimChannel_TW(1);
             uint8_t hwchannel1[] = {2, 3};
-            channel[1]->setup(hwchannel1, KO_OFFSET_TW_BLOCK + (1 * KO_PER_CHANNEL_TW));
-            channel[2] = new DimChannel_EK(0);
+            channel[1]->setup(hwchannel1);
+            // 2x EK
+            channelEK[0] = channel[2] = new DimChannel_EK(0);
             uint8_t hwchannel2[] = {4};
-            channel[2]->setup(hwchannel2, KO_OFFSET_EK_BLOCK + (0 * KO_PER_CHANNEL_EK));
-            channel[3] = new DimChannel_EK(1);
+            channel[2]->setup(hwchannel2);
+            channelEK[1] = channel[3] = new DimChannel_EK(1);
             uint8_t hwchannel3[] = {5};
-            channel[3]->setup(hwchannel3, KO_OFFSET_EK_BLOCK + (1 * KO_PER_CHANNEL_EK));
+            channel[3]->setup(hwchannel3);
             //used Channels
             usedChannels = 4;
         #endif
-        // 4xTW and 4xEK - TODO
+        // 4x TW and 4x EK
         #ifdef BOARD_KNXLED_DK_12_V10
-            channel[0] = new DimChannel_TW(0);
+            // 4x TW
+            channelTW[0] = channel[0] = new DimChannel_TW(0);
             uint8_t hwchannel0[] = {0, 1};
-            channel[0]->setup(hwchannel0, KO_OFFSET_TW_BLOCK + (0 * KO_PER_CHANNEL_TW));
-            channel[1] = new DimChannel_TW(1);
+            channel[0]->setup(hwchannel0);
+            channelTW[1] = channel[1] = new DimChannel_TW(1);
             uint8_t hwchannel1[] = {2, 3};
-            channel[1]->setup(hwchannel1, KO_OFFSET_TW_BLOCK + (1 * KO_PER_CHANNEL_TW));
-            channel[2] = new DimChannel_EK(0);
-            uint8_t hwchannel2[] = {4};
-            channel[2]->setup(hwchannel2, KO_OFFSET_EK_BLOCK + (0 * KO_PER_CHANNEL_EK));
-            channel[3] = new DimChannel_EK(1);
-            uint8_t hwchannel3[] = {5};
-            channel[3]->setup(hwchannel3, KO_OFFSET_EK_BLOCK + (1 * KO_PER_CHANNEL_EK));
+            channel[1]->setup(hwchannel1);
+            channelTW[2] = channel[2] = new DimChannel_TW(2);
+            uint8_t hwchannel2[] = {4, 5};
+            channel[2]->setup(hwchannel2);
+            channelTW[3] = channel[3] = new DimChannel_TW(3);
+            uint8_t hwchannel3[] = {6, 7};
+            channel[3]->setup(hwchannel3);
+            // 4x EK
+            channelEK[0] = channel[4] = new DimChannel_EK(0);
+            uint8_t hwchannel4[] = {8};
+            channel[4]->setup(hwchannel4);
+            channelEK[1] = channel[5] = new DimChannel_EK(1);
+            uint8_t hwchannel5[] = {9};
+            channel[5]->setup(hwchannel5);
+            channelEK[2] = channel[6] = new DimChannel_EK(2);
+            uint8_t hwchannel6[] = {10};
+            channel[6]->setup(hwchannel6);
+            channelEK[3] = channel[7] = new DimChannel_EK(3);
+            uint8_t hwchannel7[] = {11};
+            channel[7]->setup(hwchannel7);
             //used Channels
-            usedChannels = 4;
+            usedChannels = 8;
         #endif
     }
     break;
     case 3:
     {
-        // 2xRGB
+        // 2x RGB
         #ifdef BOARD_KNXLED_DK_06_V10
             usedChannels = 2;
         #endif
-        // 4xRGB
+        // 4x RGB
         #ifdef BOARD_KNXLED_DK_12_V10
             usedChannels = 4;
         #endif
 
         for (uint8_t i = 0; i < usedChannels; ++i)
         {
-            channel[i] = new DimChannel_RGB(i);
+            channelRGB[i] = channel[i] = new DimChannel_RGB(i);
             uint8_t hwchannel[] = {static_cast<uint8_t>(i * 3), static_cast<uint8_t>(i * 3 + 1), static_cast<uint8_t>(i * 3 + 2)};
-            channel[i]->setup(hwchannel, KO_OFFSET_RGB_BLOCK + (i * KO_PER_CHANNEL_RGB));
+            channel[i]->setup(hwchannel);
         }
     }
     break;
-    case 4: // 1x RGB + 1x TW + 1x EK
+    case 4:
     {
         // 1x RGB + 1x TW + 1x EK
         #ifdef BOARD_KNXLED_DK_06_V10
-            channel[0] = new DimChannel_EK(0);
+            // 1x EK
+            channelEK[0] = channel[0] = new DimChannel_EK(0);
             uint8_t hwchannel0[] = {0};
-            channel[0]->setup(hwchannel0, KO_OFFSET_EK_BLOCK + (0 * KO_PER_CHANNEL_EK));
-            channel[1] = new DimChannel_TW(0);
+            channel[0]->setup(hwchannel0);
+            // 1x TW
+            channelTW[0] = channel[1] = new DimChannel_TW(0);
             uint8_t hwchannel1[] = {1, 2};
-            channel[1]->setup(hwchannel1, KO_OFFSET_TW_BLOCK + (0 * KO_PER_CHANNEL_TW));
-            channel[2] = new DimChannel_RGB(0);
+            channel[1]->setup(hwchannel1);
+            // 1x RGB
+            channelRGB[0] = channel[2] = new DimChannel_RGB(0);
             uint8_t hwchannel2[] = {3, 4, 5};
-            channel[2]->setup(hwchannel2, KO_OFFSET_RGB_BLOCK + (0 * KO_PER_CHANNEL_RGB));
+            channel[2]->setup(hwchannel2);
+            //used Channels
             usedChannels = 3; 
         #endif  
-        // 2x RGB + 2x TW + 2x EK - TODO
+        // 2x RGB + 2x TW + 2x EK
         #ifdef BOARD_KNXLED_DK_12_V10
-            channel[0] = new DimChannel_EK(0);
-            uint8_t hwchannel0[] = {0};
-            channel[0]->setup(hwchannel0, KO_OFFSET_EK_BLOCK + (0 * KO_PER_CHANNEL_EK));
-            channel[1] = new DimChannel_TW(0);
-            uint8_t hwchannel1[] = {1, 2};
-            channel[1]->setup(hwchannel1, KO_OFFSET_TW_BLOCK + (0 * KO_PER_CHANNEL_TW));
-            channel[2] = new DimChannel_RGB(0);
-            uint8_t hwchannel2[] = {3, 4, 5};
-            channel[2]->setup(hwchannel2, KO_OFFSET_RGB_BLOCK + (0 * KO_PER_CHANNEL_RGB));
-            usedChannels = 3; 
+            // 2x RGB
+            channelRGB[0] = channel[0] = new DimChannel_RGB(0);
+            uint8_t hwchannel0[] = {0, 1, 2};
+            channel[0]->setup(hwchannel0);
+            channelRGB[1] = channel[1] = new DimChannel_RGB(1);
+            uint8_t hwchannel1[] = {6, 7, 8};
+            channel[1]->setup(hwchannel1);
+            // 2x TW
+            channelTW[0] = channel[2] = new DimChannel_TW(0);
+            uint8_t hwchannel2[] = {3, 4};
+            channel[2]->setup(hwchannel2);
+            channelTW[1] = channel[3] = new DimChannel_TW(1);
+            uint8_t hwchannel3[] = {9, 10};
+            channel[3]->setup(hwchannel3);
+            // 2x EK
+            channelEK[0] = channel[4] = new DimChannel_EK(0);
+            uint8_t hwchannel4[] = {5};
+            channel[4]->setup(hwchannel4);
+            channelEK[1] = channel[5] = new DimChannel_EK(1);
+            uint8_t hwchannel5[] = {11};
+            channel[5]->setup(hwchannel5);
+            //used Channels
+            usedChannels = 6; 
         #endif       
     }
     break;
@@ -183,35 +218,48 @@ void LEDModule::setup() {
     {
         // 1x RGB + 3x EK
         #ifdef BOARD_KNXLED_DK_06_V10
-            channel[0] = new DimChannel_EK(0);
+            //3x EK
+            channelEK[0] = channel[0] = new DimChannel_EK(0);
             uint8_t hwchannel0[] = {0};
-            channel[0]->setup(hwchannel0, KO_OFFSET_EK_BLOCK + (0 * KO_PER_CHANNEL_EK));
-            channel[1] = new DimChannel_EK(1);
+            channel[0]->setup(hwchannel0);
+            channelEK[1] = channel[1] = new DimChannel_EK(1);
             uint8_t hwchannel1[] = {1};
-            channel[1]->setup(hwchannel1, KO_OFFSET_EK_BLOCK + (1 * KO_PER_CHANNEL_EK));
-            channel[2] = new DimChannel_EK(2);
+            channel[1]->setup(hwchannel1);
+            channelEK[2] = channel[2] = new DimChannel_EK(2);
             uint8_t hwchannel2[] = {2};
-            channel[2]->setup(hwchannel2, KO_OFFSET_EK_BLOCK + (2 * KO_PER_CHANNEL_EK));
-            channel[3] = new DimChannel_RGB(1);
+            channel[2]->setup(hwchannel2);
+            // 1x RGB
+            channelRGB[0] = channel[3] = new DimChannel_RGB(0);
             uint8_t hwchannel3[] = {3, 4, 5};
-            channel[3]->setup(hwchannel3, KO_OFFSET_RGB_BLOCK + (1 * KO_PER_CHANNEL_RGB));
+            channel[3]->setup(hwchannel3);
+            //used Channels
             usedChannels = 4;
         #endif
-        // 2x RGB + 6x EK - TODO
+        // 1x RGB + 4x TW + 1x EK
         #ifdef BOARD_KNXLED_DK_12_V10
-            channel[0] = new DimChannel_EK(0);
-            uint8_t hwchannel0[] = {0};
-            channel[0]->setup(hwchannel0, KO_OFFSET_EK_BLOCK + (0 * KO_PER_CHANNEL_EK));
-            channel[1] = new DimChannel_EK(1);
-            uint8_t hwchannel1[] = {1};
-            channel[1]->setup(hwchannel1, KO_OFFSET_EK_BLOCK + (1 * KO_PER_CHANNEL_EK));
-            channel[2] = new DimChannel_EK(2);
-            uint8_t hwchannel2[] = {2};
-            channel[2]->setup(hwchannel2, KO_OFFSET_EK_BLOCK + (2 * KO_PER_CHANNEL_EK));
-            channel[3] = new DimChannel_RGB(1);
-            uint8_t hwchannel3[] = {3, 4, 5};
-            channel[3]->setup(hwchannel3, KO_OFFSET_RGB_BLOCK + (1 * KO_PER_CHANNEL_RGB));
-            usedChannels = 4;
+            // 1x RGB            
+            channelRGB[0] = channel[0] = new DimChannel_RGB(0);
+            uint8_t hwchannel0[] = {0, 1, 2};
+            channel[0]->setup(hwchannel0);
+            // 4x TW
+            channelTW[0] = channel[1] = new DimChannel_TW(0);
+            uint8_t hwchannel1[] = {3, 4};
+            channel[1]->setup(hwchannel1);
+            channelTW[1] = channel[2] = new DimChannel_TW(1);
+            uint8_t hwchannel2[] = {6, 7};
+            channel[2]->setup(hwchannel2);           
+            channelTW[2] = channel[3] = new DimChannel_TW(2);
+            uint8_t hwchannel3[] = {8, 9};
+            channel[3]->setup(hwchannel3);
+            channelTW[3] = channel[4] = new DimChannel_TW(3);
+            uint8_t hwchannel4[] = {10, 11};
+            channel[4]->setup(hwchannel4);   
+            // 1x EK
+            channelEK[0] = channel[5] = new DimChannel_EK(0);
+            uint8_t hwchannel5[] = {5};
+            channel[5]->setup(hwchannel5);
+            //used Channels
+            usedChannels = 6;
         #endif
     }
     break;
@@ -223,26 +271,29 @@ void LEDModule::setup() {
     #ifdef FUNC1_BUTTON_PIN
         openknx.func1Button.onShortClick([=] { 
             logDebugP("Func1 Button - pressed short");
-            uint8_t sett = ParamAPP_PT_Func1BtnClick;
+            uint8_t sett = ParamAPP_Func1BtnClick;
             handleFunc1(sett);
         });
         openknx.func1Button.onLongClick([=] { 
             logDebugP("Func1 Button - pressed long");
-            uint8_t sett = ParamAPP_PT_Func1BtnLongClick;
+            uint8_t sett = ParamAPP_Func1BtnLongClick;
             handleFunc1(sett);
         });
         openknx.func1Button.onDoubleClick([=] {
             logDebugP("Func1 Button - pressed double");
-            uint8_t sett = ParamAPP_PT_Func1BtnDblClick;
+            uint8_t sett = ParamAPP_Func1BtnDblClick;
             handleFunc1(sett);
         });
     #endif
 }
 
-void LEDModule::loop()
+void LEDModule::setup1() 
 {
-    for (int i = 0; i < usedChannels; i++)
-        channel[i]->task();
+    // Nothing to do on Core 1
+}
+
+void LEDModule::loop() 
+{
     //check if I2C connection possible, if not reset and init the pwm
     if (delayCheck(_timerCheckI2cConnection, 30000)) {
         checkI2cConnection();
@@ -250,15 +301,49 @@ void LEDModule::loop()
     }
 }
 
+void LEDModule::loop1() 
+{
+    for (int i = 0; i < usedChannels; i++)
+        channel[i]->task();
+}
+
 // Core function to set value, change if you use other hardware
-void LEDModule::setHwChannelValue(byte channel, byte value, int curve) {
+void LEDModule::setHwChannelValue(byte channel, byte value, int curve) 
+{
     _pwm.setPin(channel, curves[value][curve]);
 }
 
-void LEDModule::processInputKo(GroupObject &ko) {
-    // we have to check first, if external KO are used
+void LEDModule::processInputKo(GroupObject &ko) 
+{
     uint16_t koNum = ko.asap();
-    logDebugP("Got KO %i", koNum);
+    logDebugP("Received KO %i", koNum);
+    
+    // send Input KO to the correct dimmer class
+    // EK Dimmer Class
+    if (koNum >= EK_KoOffset && koNum < EK_KoOffset + EK_KoBlockSize * MAXCHANNELSEK)
+    {
+        int channelIndexEK = floor((koNum - EK_KoOffset) / EK_KoBlockSize);
+        logDebugP("For Channel EG %i", channelIndexEK);
+        channelEK[channelIndexEK]->processInputKo(ko);
+        return;
+    }
+    // TW Dimmer Class
+    if (koNum >= TW_KoOffset && koNum < TW_KoOffset + TW_KoBlockSize * MAXCHANNELSTW)
+    {
+        int channelIndexTW = floor((koNum - TW_KoOffset) / TW_KoBlockSize);
+        logDebugP("For Channel TW %i", channelIndexTW);
+        channelTW[channelIndexTW]->processInputKo(ko); 
+        return;
+    }
+    // RGB Dimmer Class
+    if (koNum >= RGB_KoOffset && koNum < RGB_KoOffset + RGB_KoBlockSize * MAXCHANNELSRGB)
+    {
+        int channelIndexRGB = floor((koNum - RGB_KoOffset) / RGB_KoBlockSize);
+        logDebugP("For Channel RGB %i", channelIndexRGB);
+        channelRGB[channelIndexRGB]->processInputKo(ko); 
+        return;
+    }
+
     switch(koNum)
     {
         //diagnose
@@ -267,30 +352,23 @@ void LEDModule::processInputKo(GroupObject &ko) {
             break;
 
         //Tag/Nacht Objekt
-        case APP_KoKO_DayNight:
+        case APP_KoDayNight:
             koHandleDayNight(ko);
             break;
+
+        default:
+            //logDebugP("unhandled KO: %i", ko.asap());
+            break;
     }    
-    // check if KO for Channels
-    if (koNum < 100) // KO not for Channels
-        return;
-    // send Input KO to the correct dimmer
-    int channelIndexEK = (koNum - KO_OFFSET_EK_BLOCK) / KO_PER_CHANNEL_EK;
-    if (channelIndexEK >= 0 && channelIndexEK < MAXCHANNELSEK) { channel[channelIndexEK]->processInputKo(ko); }
-    int channelIndexTW = (koNum - KO_OFFSET_TW_BLOCK) / KO_PER_CHANNEL_TW;
-    if (channelIndexTW >= 0 && channelIndexTW < MAXCHANNELSTW) { channel[channelIndexTW]->processInputKo(ko); }
-    int channelIndexRGB = (koNum - KO_OFFSET_RGB_BLOCK) / KO_PER_CHANNEL_RGB;
-    if (channelIndexRGB >= 0 && channelIndexRGB < MAXCHANNELSRGB) { channel[channelIndexRGB]->processInputKo(ko); }
 }
 
 void LEDModule::koHandleDayNight(GroupObject & ko)
 {
     bool value = ko.value(DPT_Switch);
-    if(ParamAPP_PT_DayNight) value = !value;
+    if (ParamAPP_DayNight) value = !value;
     logDebugP("Broadcast Day/Night %i to channels", value);
-    if(ParamAPP_PT_DayNight) value = !value;
 
-    for(int i = 0; i < usedChannels; i++)
+    for (int i = 0; i < usedChannels; i++)
         channel[i]->setDayNight(value);
 }
 
@@ -315,27 +393,30 @@ bool LEDModule::processCommand(const std::string cmd, bool diagnoseKo)
 {
     if (!diagnoseKo && (cmd.rfind("chon ", 0) == 0 || cmd.rfind("choff ", 0) == 0)) {
         _pwm.setPin(std::stoi(cmd.substr(cmd.find(' ') + 1)), std::stoi(cmd.rfind("chon", 0) == 0 ? "4095" : "0"));
-        openknx.logger.logWithPrefixAndValues("Channel", "Switch channel %i to %i", std::stoi(cmd.substr(cmd.find(' ') + 1)), std::stoi(cmd.rfind("chon", 0) == 0 ? "4095" : "0"));
+        openknx.logger.logWithPrefixAndValues("CH", "Switch channel %i to %i", std::stoi(cmd.substr(cmd.find(' ') + 1)), std::stoi(cmd.rfind("chon", 0) == 0 ? "4095" : "0"));
         return true;
     } else if (!diagnoseKo && cmd.rfind("chval ", 0) == 0) {
         _pwm.setPin(std::stoi(cmd.substr(cmd.find(' ') + 1)), std::stoi(cmd.substr(cmd.find(' ') + 3)));
-        openknx.logger.logWithPrefixAndValues("Channel", "Set value channel %i to %i", std::stoi(cmd.substr(cmd.find(' ') + 1)), std::stoi(cmd.substr(cmd.find(' ') + 3)));
+        openknx.logger.logWithPrefixAndValues("CH", "Set value channel %i to %i", std::stoi(cmd.substr(cmd.find(' ') + 1)), std::stoi(cmd.substr(cmd.find(' ') + 3)));
         return true;
     }
     return false;
 }
 
-void LEDModule::processBeforeRestart() {
+void LEDModule::processBeforeRestart() 
+{
     for (byte ch = 0; ch < MAXCHANNELSHW; ch++) {
         _pwm.setPin(ch, 0);
     }
 }
 
-void LEDModule::savePower() {
+void LEDModule::savePower() 
+{
     processBeforeRestart();
 }
 
-bool LEDModule::initI2cConnection() {
+bool LEDModule::initI2cConnection() 
+{
     _pwm = Adafruit_PWMServoDriver(I2C_PCA9685_DEVICE_ADDRESS, Wire1);
     // Call dependend init for led
     if (!_pwm.begin()) {
@@ -353,7 +434,8 @@ bool LEDModule::initI2cConnection() {
     return true;
 }
 
-bool LEDModule::checkI2cConnection() {
+bool LEDModule::checkI2cConnection() 
+{
     if (doResetI2c) { 
         return initI2cConnection();
     }
@@ -379,11 +461,13 @@ void LEDModule::handleFunc1(uint8_t setting)
         case PT_FuncClickAction_on:
             logDebugP("All channels on");
             for (byte ch = 0; ch < MAXCHANNELSHW; ch++) { _pwm.setPin(ch, 4095); }
+            _currentToggleState = 1;
             openknx.info1Led.on();
             break;
         case PT_FuncClickAction_off:
             logDebugP("All channels off");
             for (byte ch = 0; ch < MAXCHANNELSHW; ch++) { _pwm.setPin(ch, 0); }
+            _currentToggleState = 0;
             openknx.info1Led.off();
             break;
         case PT_FuncClickAction_toggle:
@@ -399,5 +483,33 @@ void LEDModule::handleFunc1(uint8_t setting)
     }
 }
 #endif
+
+bool LEDModule::processFunctionProperty(uint8_t objectIndex, uint8_t propertyId, uint8_t length, uint8_t *data, uint8_t *resultData, uint8_t &resultLength) 
+{
+    if (!knx.configured() || objectIndex != 160 || propertyId != 3)
+        return false;
+
+    switch(data[0])
+    {
+        case 1: // internal function ID
+            handleFunctionPropertySwitch(data, resultData, resultLength);
+            return true;
+        case 2:
+            //To-Do
+            return true;
+    }
+    return false;
+}
+
+void LEDModule::handleFunctionPropertySwitch(uint8_t *data, uint8_t *resultData, uint8_t &resultLength) 
+{
+    logInfoP("Function property: LED action switch");
+    logIndentUp();
+    _pwm.setPin(data[1], data[2] == 1 ? 4095 : 0);
+    resultData[0] = 0;
+    resultLength = 1;
+    logIndentDown();
+}
+
 
 LEDModule openknxLEDModule;

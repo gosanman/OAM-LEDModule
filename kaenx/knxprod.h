@@ -11,12 +11,16 @@
 #define PT_DimCurve_C 2
 #define PT_DimCurve_D 3
 #define PT_DimCurve_E 4
+#define PT_FuncClickAction_none 0
+#define PT_FuncClickAction_on 1
+#define PT_FuncClickAction_off 2
+#define PT_FuncClickAction_toggle 3
 //--------------------Allgemein---------------------------
 #define MAIN_OpenKnxId 0xAF
 #define MAIN_ApplicationNumber 0x01
 #define MAIN_ApplicationVersion 0x01
 #define MAIN_OrderNumber "OpenKnxLEDDimmer"
-#define MAIN_ParameterSize 175
+#define MAIN_ParameterSize 249
 #define MAIN_MaxKoNumber 482
 
 
@@ -94,11 +98,11 @@
 #define BASE_Share_ParamBlockOffset 8
 #define BASE_Share_ParamBlockSize 45
 #define EK_ParamBlockOffset 53
-#define EK_ParamBlockSize 3
-#define TW_ParamBlockOffset 89
-#define TW_ParamBlockSize 9
-#define RGB_ParamBlockOffset 143
-#define RGB_ParamBlockSize 8
+#define EK_ParamBlockSize 6
+#define TW_ParamBlockOffset 125
+#define TW_ParamBlockSize 14
+#define RGB_ParamBlockOffset 209
+#define RGB_ParamBlockSize 10
 #define BASE_Share_KoOffset 41
 #define BASE_Share_KoBlockSize 11
 #define EK_KoOffset 52
@@ -203,32 +207,60 @@
 #define ParamEK_UseOnValueIndex(X) knx.paramBit((EK_ParamBlockOffset + EK_ParamBlockSize * X + EK_UseOnValue), 0)
 // Offset: 0, Size: 1 Bit, Text: Einschaltverhalten
 #define ParamEK_UseOnValue knx.paramBit((EK_ParamBlockOffset + EK_ParamBlockSize * channelIndex() + EK_UseOnValue), 0)
-#define EK_OnBrightness		0x0000
+#define EK_UseNightValue		0x0000
+// Offset: 0, BitOffset: 1, Size: 1 Bit, Text: Einschaltverhalten - Nacht
+#define ParamEK_UseNightValueIndex(X) knx.paramBit((EK_ParamBlockOffset + EK_ParamBlockSize * X + EK_UseNightValue), 1)
+// Offset: 0, BitOffset: 1, Size: 1 Bit, Text: Einschaltverhalten - Nacht
+#define ParamEK_UseNightValue knx.paramBit((EK_ParamBlockOffset + EK_ParamBlockSize * channelIndex() + EK_UseNightValue), 1)
+#define EK_OnBrightness		0x0001
+#define EK_OnBrightness_Shift	1
 #define EK_OnBrightness_Mask	0x007F
-// Offset: 0, BitOffset: 1, Size: 7 Bit, Text: Einschalthelligkeit
-#define ParamEK_OnBrightnessIndex(X) ((uint)((knx.paramByte((EK_ParamBlockOffset + EK_ParamBlockSize * X + EK_OnBrightness))) & EK_OnBrightness_Mask))
-// Offset: 0, BitOffset: 1, Size: 7 Bit, Text: Einschalthelligkeit
-#define ParamEK_OnBrightness ((uint)((knx.paramByte((EK_ParamBlockOffset + EK_ParamBlockSize * channelIndex() + EK_OnBrightness))) & EK_OnBrightness_Mask))
-#define EK_RelativDimTime		0x0001
-#define EK_RelativDimTime_Shift	2
-#define EK_RelativDimTime_Mask	0x003F
-// Offset: 1, Size: 6 Bit, Text: Dimmgeschwindigkeit Relativ
+// Offset: 1, Size: 7 Bit, Text: Einschaltverhalten - Helligkeit
+#define ParamEK_OnBrightnessIndex(X) ((uint)((knx.paramByte((EK_ParamBlockOffset + EK_ParamBlockSize * X + EK_OnBrightness)) >> EK_OnBrightness_Shift) & EK_OnBrightness_Mask))
+// Offset: 1, Size: 7 Bit, Text: Einschaltverhalten - Helligkeit
+#define ParamEK_OnBrightness ((uint)((knx.paramByte((EK_ParamBlockOffset + EK_ParamBlockSize * channelIndex() + EK_OnBrightness)) >> EK_OnBrightness_Shift) & EK_OnBrightness_Mask))
+#define EK_NightBrightness		0x0002
+#define EK_NightBrightness_Shift	1
+#define EK_NightBrightness_Mask	0x007F
+// Offset: 2, Size: 7 Bit, Text: Einschaltverhalten - Helligkeit (Nacht)
+#define ParamEK_NightBrightnessIndex(X) ((uint)((knx.paramByte((EK_ParamBlockOffset + EK_ParamBlockSize * X + EK_NightBrightness)) >> EK_NightBrightness_Shift) & EK_NightBrightness_Mask))
+// Offset: 2, Size: 7 Bit, Text: Einschaltverhalten - Helligkeit (Nacht)
+#define ParamEK_NightBrightness ((uint)((knx.paramByte((EK_ParamBlockOffset + EK_ParamBlockSize * channelIndex() + EK_NightBrightness)) >> EK_NightBrightness_Shift) & EK_NightBrightness_Mask))
+#define EK_RelativDimTime		0x0003
+#define EK_RelativDimTime_Shift	1
+#define EK_RelativDimTime_Mask	0x007F
+// Offset: 3, Size: 7 Bit, Text: Zeit
 #define ParamEK_RelativDimTimeIndex(X) ((uint)((knx.paramByte((EK_ParamBlockOffset + EK_ParamBlockSize * X + EK_RelativDimTime)) >> EK_RelativDimTime_Shift) & EK_RelativDimTime_Mask))
-// Offset: 1, Size: 6 Bit, Text: Dimmgeschwindigkeit Relativ
+// Offset: 3, Size: 7 Bit, Text: Zeit
 #define ParamEK_RelativDimTime ((uint)((knx.paramByte((EK_ParamBlockOffset + EK_ParamBlockSize * channelIndex() + EK_RelativDimTime)) >> EK_RelativDimTime_Shift) & EK_RelativDimTime_Mask))
-#define EK_OnOffTime		0x0002
-#define EK_OnOffTime_Shift	3
-#define EK_OnOffTime_Mask	0x001F
-// Offset: 2, Size: 5 Bit, Text: Ein- und Ausschaltgeschwindigkeit
+#define EK_RelativDimBase		0x0000
+#define EK_RelativDimBase_Shift	4
+#define EK_RelativDimBase_Mask	0x0003
+// Offset: 0, BitOffset: 2, Size: 2 Bit, Text: Zeitbasis
+#define ParamEK_RelativDimBaseIndex(X) ((uint)((knx.paramByte((EK_ParamBlockOffset + EK_ParamBlockSize * X + EK_RelativDimBase)) >> EK_RelativDimBase_Shift) & EK_RelativDimBase_Mask))
+// Offset: 0, BitOffset: 2, Size: 2 Bit, Text: Zeitbasis
+#define ParamEK_RelativDimBase ((uint)((knx.paramByte((EK_ParamBlockOffset + EK_ParamBlockSize * channelIndex() + EK_RelativDimBase)) >> EK_RelativDimBase_Shift) & EK_RelativDimBase_Mask))
+#define EK_OnOffTime		0x0004
+#define EK_OnOffTime_Shift	1
+#define EK_OnOffTime_Mask	0x007F
+// Offset: 4, Size: 7 Bit, Text: Zeit
 #define ParamEK_OnOffTimeIndex(X) ((uint)((knx.paramByte((EK_ParamBlockOffset + EK_ParamBlockSize * X + EK_OnOffTime)) >> EK_OnOffTime_Shift) & EK_OnOffTime_Mask))
-// Offset: 2, Size: 5 Bit, Text: Ein- und Ausschaltgeschwindigkeit
+// Offset: 4, Size: 7 Bit, Text: Zeit
 #define ParamEK_OnOffTime ((uint)((knx.paramByte((EK_ParamBlockOffset + EK_ParamBlockSize * channelIndex() + EK_OnOffTime)) >> EK_OnOffTime_Shift) & EK_OnOffTime_Mask))
-#define EK_DimCurve		0x0002
+#define EK_OnOffBase		0x0000
+#define EK_OnOffBase_Shift	2
+#define EK_OnOffBase_Mask	0x0003
+// Offset: 0, BitOffset: 4, Size: 2 Bit, Text: Zeitbasis
+#define ParamEK_OnOffBaseIndex(X) ((uint)((knx.paramByte((EK_ParamBlockOffset + EK_ParamBlockSize * X + EK_OnOffBase)) >> EK_OnOffBase_Shift) & EK_OnOffBase_Mask))
+// Offset: 0, BitOffset: 4, Size: 2 Bit, Text: Zeitbasis
+#define ParamEK_OnOffBase ((uint)((knx.paramByte((EK_ParamBlockOffset + EK_ParamBlockSize * channelIndex() + EK_OnOffBase)) >> EK_OnOffBase_Shift) & EK_OnOffBase_Mask))
+#define EK_DimCurve		0x0005
+#define EK_DimCurve_Shift	5
 #define EK_DimCurve_Mask	0x0007
-// Offset: 2, BitOffset: 5, Size: 3 Bit, Text: Dimmkurve
-#define ParamEK_DimCurveIndex(X) ((uint)((knx.paramByte((EK_ParamBlockOffset + EK_ParamBlockSize * X + EK_DimCurve))) & EK_DimCurve_Mask))
-// Offset: 2, BitOffset: 5, Size: 3 Bit, Text: Dimmkurve
-#define ParamEK_DimCurve ((uint)((knx.paramByte((EK_ParamBlockOffset + EK_ParamBlockSize * channelIndex() + EK_DimCurve))) & EK_DimCurve_Mask))
+// Offset: 5, Size: 3 Bit, Text: Dimmkurve
+#define ParamEK_DimCurveIndex(X) ((uint)((knx.paramByte((EK_ParamBlockOffset + EK_ParamBlockSize * X + EK_DimCurve)) >> EK_DimCurve_Shift) & EK_DimCurve_Mask))
+// Offset: 5, Size: 3 Bit, Text: Dimmkurve
+#define ParamEK_DimCurve ((uint)((knx.paramByte((EK_ParamBlockOffset + EK_ParamBlockSize * channelIndex() + EK_DimCurve)) >> EK_DimCurve_Shift) & EK_DimCurve_Mask))
 //!< Number: 0, Text: EK{{argChan}}: {{0:---}}, Function: Schalten
 #define EK_KoSwitch 0
 #define KoEK_SwitchIndex(X) knx.getGroupObject(EK_KoOffset + EK_KoBlockSize * X + EK_KoSwitch)
@@ -270,39 +302,74 @@
 #define ParamTW_UseOnValueIndex(X) knx.paramBit((TW_ParamBlockOffset + TW_ParamBlockSize * X + TW_UseOnValue), 0)
 // Offset: 4, Size: 1 Bit, Text: Einschaltverhalten
 #define ParamTW_UseOnValue knx.paramBit((TW_ParamBlockOffset + TW_ParamBlockSize * channelIndex() + TW_UseOnValue), 0)
-#define TW_OnBrightness		0x0004
+#define TW_UseNightValue		0x0004
+// Offset: 4, BitOffset: 1, Size: 1 Bit, Text: Einschaltverhalten - Nacht
+#define ParamTW_UseNightValueIndex(X) knx.paramBit((TW_ParamBlockOffset + TW_ParamBlockSize * X + TW_UseNightValue), 1)
+// Offset: 4, BitOffset: 1, Size: 1 Bit, Text: Einschaltverhalten - Nacht
+#define ParamTW_UseNightValue knx.paramBit((TW_ParamBlockOffset + TW_ParamBlockSize * channelIndex() + TW_UseNightValue), 1)
+#define TW_OnBrightness		0x0005
+#define TW_OnBrightness_Shift	1
 #define TW_OnBrightness_Mask	0x007F
-// Offset: 4, BitOffset: 1, Size: 7 Bit, Text: Einschaltverhalten - Helligkeit
-#define ParamTW_OnBrightnessIndex(X) ((uint)((knx.paramByte((TW_ParamBlockOffset + TW_ParamBlockSize * X + TW_OnBrightness))) & TW_OnBrightness_Mask))
-// Offset: 4, BitOffset: 1, Size: 7 Bit, Text: Einschaltverhalten - Helligkeit
-#define ParamTW_OnBrightness ((uint)((knx.paramByte((TW_ParamBlockOffset + TW_ParamBlockSize * channelIndex() + TW_OnBrightness))) & TW_OnBrightness_Mask))
-#define TW_OnColorTemp		0x0005
+// Offset: 5, Size: 7 Bit, Text: Einschaltverhalten - Helligkeit
+#define ParamTW_OnBrightnessIndex(X) ((uint)((knx.paramByte((TW_ParamBlockOffset + TW_ParamBlockSize * X + TW_OnBrightness)) >> TW_OnBrightness_Shift) & TW_OnBrightness_Mask))
+// Offset: 5, Size: 7 Bit, Text: Einschaltverhalten - Helligkeit
+#define ParamTW_OnBrightness ((uint)((knx.paramByte((TW_ParamBlockOffset + TW_ParamBlockSize * channelIndex() + TW_OnBrightness)) >> TW_OnBrightness_Shift) & TW_OnBrightness_Mask))
+#define TW_NightBrightness		0x0006
+#define TW_NightBrightness_Shift	1
+#define TW_NightBrightness_Mask	0x007F
+// Offset: 6, Size: 7 Bit, Text: Einschaltverhalten - Helligkeit (Nacht)
+#define ParamTW_NightBrightnessIndex(X) ((uint)((knx.paramByte((TW_ParamBlockOffset + TW_ParamBlockSize * X + TW_NightBrightness)) >> TW_NightBrightness_Shift) & TW_NightBrightness_Mask))
+// Offset: 6, Size: 7 Bit, Text: Einschaltverhalten - Helligkeit (Nacht)
+#define ParamTW_NightBrightness ((uint)((knx.paramByte((TW_ParamBlockOffset + TW_ParamBlockSize * channelIndex() + TW_NightBrightness)) >> TW_NightBrightness_Shift) & TW_NightBrightness_Mask))
+#define TW_OnColorTemp		0x0007
 #define TW_OnColorTemp_Shift	2
 #define TW_OnColorTemp_Mask	0x3FFF
-// Offset: 5, Size: 14 Bit, Text: Einschaltverhalten - Farbtemperatur
+// Offset: 7, Size: 14 Bit, Text: Einschaltverhalten - Farbtemperatur
 #define ParamTW_OnColorTempIndex(X) ((uint)((knx.paramWord((TW_ParamBlockOffset + TW_ParamBlockSize * X + TW_OnColorTemp)) >> TW_OnColorTemp_Shift) & TW_OnColorTemp_Mask))
-// Offset: 5, Size: 14 Bit, Text: Einschaltverhalten - Farbtemperatur
+// Offset: 7, Size: 14 Bit, Text: Einschaltverhalten - Farbtemperatur
 #define ParamTW_OnColorTemp ((uint)((knx.paramWord((TW_ParamBlockOffset + TW_ParamBlockSize * channelIndex() + TW_OnColorTemp)) >> TW_OnColorTemp_Shift) & TW_OnColorTemp_Mask))
-#define TW_RelativDimTime		0x0007
-#define TW_RelativDimTime_Shift	2
-#define TW_RelativDimTime_Mask	0x003F
-// Offset: 7, Size: 6 Bit, Text: Dimmgeschwindigkeit Relativ
+#define TW_NightColorTemp		0x0009
+#define TW_NightColorTemp_Shift	2
+#define TW_NightColorTemp_Mask	0x3FFF
+// Offset: 9, Size: 14 Bit, Text: Einschaltverhalten - Farbtemperatur (Nacht)
+#define ParamTW_NightColorTempIndex(X) ((uint)((knx.paramWord((TW_ParamBlockOffset + TW_ParamBlockSize * X + TW_NightColorTemp)) >> TW_NightColorTemp_Shift) & TW_NightColorTemp_Mask))
+// Offset: 9, Size: 14 Bit, Text: Einschaltverhalten - Farbtemperatur (Nacht)
+#define ParamTW_NightColorTemp ((uint)((knx.paramWord((TW_ParamBlockOffset + TW_ParamBlockSize * channelIndex() + TW_NightColorTemp)) >> TW_NightColorTemp_Shift) & TW_NightColorTemp_Mask))
+#define TW_RelativDimTime		0x000B
+#define TW_RelativDimTime_Shift	1
+#define TW_RelativDimTime_Mask	0x007F
+// Offset: 11, Size: 7 Bit, Text: Zeit
 #define ParamTW_RelativDimTimeIndex(X) ((uint)((knx.paramByte((TW_ParamBlockOffset + TW_ParamBlockSize * X + TW_RelativDimTime)) >> TW_RelativDimTime_Shift) & TW_RelativDimTime_Mask))
-// Offset: 7, Size: 6 Bit, Text: Dimmgeschwindigkeit Relativ
+// Offset: 11, Size: 7 Bit, Text: Zeit
 #define ParamTW_RelativDimTime ((uint)((knx.paramByte((TW_ParamBlockOffset + TW_ParamBlockSize * channelIndex() + TW_RelativDimTime)) >> TW_RelativDimTime_Shift) & TW_RelativDimTime_Mask))
-#define TW_OnOffTime		0x0008
-#define TW_OnOffTime_Shift	3
-#define TW_OnOffTime_Mask	0x001F
-// Offset: 8, Size: 5 Bit, Text: Ein- und Ausschaltgeschwindigkeit
+#define TW_RelativDimBase		0x0004
+#define TW_RelativDimBase_Shift	4
+#define TW_RelativDimBase_Mask	0x0003
+// Offset: 4, BitOffset: 2, Size: 2 Bit, Text: Zeitbasis
+#define ParamTW_RelativDimBaseIndex(X) ((uint)((knx.paramByte((TW_ParamBlockOffset + TW_ParamBlockSize * X + TW_RelativDimBase)) >> TW_RelativDimBase_Shift) & TW_RelativDimBase_Mask))
+// Offset: 4, BitOffset: 2, Size: 2 Bit, Text: Zeitbasis
+#define ParamTW_RelativDimBase ((uint)((knx.paramByte((TW_ParamBlockOffset + TW_ParamBlockSize * channelIndex() + TW_RelativDimBase)) >> TW_RelativDimBase_Shift) & TW_RelativDimBase_Mask))
+#define TW_OnOffTime		0x000C
+#define TW_OnOffTime_Shift	1
+#define TW_OnOffTime_Mask	0x007F
+// Offset: 12, Size: 7 Bit, Text: Zeit
 #define ParamTW_OnOffTimeIndex(X) ((uint)((knx.paramByte((TW_ParamBlockOffset + TW_ParamBlockSize * X + TW_OnOffTime)) >> TW_OnOffTime_Shift) & TW_OnOffTime_Mask))
-// Offset: 8, Size: 5 Bit, Text: Ein- und Ausschaltgeschwindigkeit
+// Offset: 12, Size: 7 Bit, Text: Zeit
 #define ParamTW_OnOffTime ((uint)((knx.paramByte((TW_ParamBlockOffset + TW_ParamBlockSize * channelIndex() + TW_OnOffTime)) >> TW_OnOffTime_Shift) & TW_OnOffTime_Mask))
-#define TW_DimCurve		0x0008
+#define TW_OnOffBase		0x0004
+#define TW_OnOffBase_Shift	2
+#define TW_OnOffBase_Mask	0x0003
+// Offset: 4, BitOffset: 4, Size: 2 Bit, Text: Zeitbasis
+#define ParamTW_OnOffBaseIndex(X) ((uint)((knx.paramByte((TW_ParamBlockOffset + TW_ParamBlockSize * X + TW_OnOffBase)) >> TW_OnOffBase_Shift) & TW_OnOffBase_Mask))
+// Offset: 4, BitOffset: 4, Size: 2 Bit, Text: Zeitbasis
+#define ParamTW_OnOffBase ((uint)((knx.paramByte((TW_ParamBlockOffset + TW_ParamBlockSize * channelIndex() + TW_OnOffBase)) >> TW_OnOffBase_Shift) & TW_OnOffBase_Mask))
+#define TW_DimCurve		0x000D
+#define TW_DimCurve_Shift	5
 #define TW_DimCurve_Mask	0x0007
-// Offset: 8, BitOffset: 5, Size: 3 Bit, Text: Dimmkurve
-#define ParamTW_DimCurveIndex(X) ((uint)((knx.paramByte((TW_ParamBlockOffset + TW_ParamBlockSize * X + TW_DimCurve))) & TW_DimCurve_Mask))
-// Offset: 8, BitOffset: 5, Size: 3 Bit, Text: Dimmkurve
-#define ParamTW_DimCurve ((uint)((knx.paramByte((TW_ParamBlockOffset + TW_ParamBlockSize * channelIndex() + TW_DimCurve))) & TW_DimCurve_Mask))
+// Offset: 13, Size: 3 Bit, Text: Dimmkurve
+#define ParamTW_DimCurveIndex(X) ((uint)((knx.paramByte((TW_ParamBlockOffset + TW_ParamBlockSize * X + TW_DimCurve)) >> TW_DimCurve_Shift) & TW_DimCurve_Mask))
+// Offset: 13, Size: 3 Bit, Text: Dimmkurve
+#define ParamTW_DimCurve ((uint)((knx.paramByte((TW_ParamBlockOffset + TW_ParamBlockSize * channelIndex() + TW_DimCurve)) >> TW_DimCurve_Shift) & TW_DimCurve_Mask))
 //!< Number: 0, Text: TW{{argChan}}: {{0:---}}, Function: Schalten
 #define TW_KoSwitch 0
 #define KoTW_SwitchIndex(X) knx.getGroupObject(TW_KoOffset + TW_KoBlockSize * X + TW_KoSwitch)
@@ -343,9 +410,9 @@
 // Offset: 0, Size: 1 Bit, Text: Einschaltverhalten
 #define ParamRGB_UseOnColor knx.paramBit((RGB_ParamBlockOffset + RGB_ParamBlockSize * channelIndex() + RGB_UseOnColor), 0)
 #define RGB_UseNightColor		0x0000
-// Offset: 0, BitOffset: 1, Size: 1 Bit, Text: Einschaltverhalten Nacht
+// Offset: 0, BitOffset: 1, Size: 1 Bit, Text: Einschaltverhalten - Nacht
 #define ParamRGB_UseNightColorIndex(X) knx.paramBit((RGB_ParamBlockOffset + RGB_ParamBlockSize * X + RGB_UseNightColor), 1)
-// Offset: 0, BitOffset: 1, Size: 1 Bit, Text: Einschaltverhalten Nacht
+// Offset: 0, BitOffset: 1, Size: 1 Bit, Text: Einschaltverhalten - Nacht
 #define ParamRGB_UseNightColor knx.paramBit((RGB_ParamBlockOffset + RGB_ParamBlockSize * channelIndex() + RGB_UseNightColor), 1)
 #define RGB_OnColor		0x0001
 // Offset: 1, Size: 24 Bit (3 Byte), Text: Einschaltverhalten - Farbe
@@ -357,25 +424,41 @@
 #define ParamRGB_NightColorIndex(X) knx.paramData((RGB_ParamBlockOffset + RGB_ParamBlockSize * X + RGB_NightColor))
 // Offset: 4, Size: 24 Bit (3 Byte), Text: Einschaltverhalten - Farbe (Nacht)
 #define ParamRGB_NightColor knx.paramData((RGB_ParamBlockOffset + RGB_ParamBlockSize * channelIndex() + RGB_NightColor))
-#define RGB_RelativDimTime		0x0000
-#define RGB_RelativDimTime_Mask	0x003F
-// Offset: 0, BitOffset: 2, Size: 6 Bit, Text: Dimmgeschwindigkeit Relativ
-#define ParamRGB_RelativDimTimeIndex(X) ((uint)((knx.paramByte((RGB_ParamBlockOffset + RGB_ParamBlockSize * X + RGB_RelativDimTime))) & RGB_RelativDimTime_Mask))
-// Offset: 0, BitOffset: 2, Size: 6 Bit, Text: Dimmgeschwindigkeit Relativ
-#define ParamRGB_RelativDimTime ((uint)((knx.paramByte((RGB_ParamBlockOffset + RGB_ParamBlockSize * channelIndex() + RGB_RelativDimTime))) & RGB_RelativDimTime_Mask))
-#define RGB_OnOffTime		0x0007
-#define RGB_OnOffTime_Shift	3
-#define RGB_OnOffTime_Mask	0x001F
-// Offset: 7, Size: 5 Bit, Text: Ein- und Ausschaltgeschwindigkeit
+#define RGB_RelativDimTime		0x0007
+#define RGB_RelativDimTime_Shift	1
+#define RGB_RelativDimTime_Mask	0x007F
+// Offset: 7, Size: 7 Bit, Text: Zeit
+#define ParamRGB_RelativDimTimeIndex(X) ((uint)((knx.paramByte((RGB_ParamBlockOffset + RGB_ParamBlockSize * X + RGB_RelativDimTime)) >> RGB_RelativDimTime_Shift) & RGB_RelativDimTime_Mask))
+// Offset: 7, Size: 7 Bit, Text: Zeit
+#define ParamRGB_RelativDimTime ((uint)((knx.paramByte((RGB_ParamBlockOffset + RGB_ParamBlockSize * channelIndex() + RGB_RelativDimTime)) >> RGB_RelativDimTime_Shift) & RGB_RelativDimTime_Mask))
+#define RGB_RelativDimBase		0x0000
+#define RGB_RelativDimBase_Shift	4
+#define RGB_RelativDimBase_Mask	0x0003
+// Offset: 0, BitOffset: 2, Size: 2 Bit, Text: Zeitbasis
+#define ParamRGB_RelativDimBaseIndex(X) ((uint)((knx.paramByte((RGB_ParamBlockOffset + RGB_ParamBlockSize * X + RGB_RelativDimBase)) >> RGB_RelativDimBase_Shift) & RGB_RelativDimBase_Mask))
+// Offset: 0, BitOffset: 2, Size: 2 Bit, Text: Zeitbasis
+#define ParamRGB_RelativDimBase ((uint)((knx.paramByte((RGB_ParamBlockOffset + RGB_ParamBlockSize * channelIndex() + RGB_RelativDimBase)) >> RGB_RelativDimBase_Shift) & RGB_RelativDimBase_Mask))
+#define RGB_OnOffTime		0x0008
+#define RGB_OnOffTime_Shift	1
+#define RGB_OnOffTime_Mask	0x007F
+// Offset: 8, Size: 7 Bit, Text: Zeit
 #define ParamRGB_OnOffTimeIndex(X) ((uint)((knx.paramByte((RGB_ParamBlockOffset + RGB_ParamBlockSize * X + RGB_OnOffTime)) >> RGB_OnOffTime_Shift) & RGB_OnOffTime_Mask))
-// Offset: 7, Size: 5 Bit, Text: Ein- und Ausschaltgeschwindigkeit
+// Offset: 8, Size: 7 Bit, Text: Zeit
 #define ParamRGB_OnOffTime ((uint)((knx.paramByte((RGB_ParamBlockOffset + RGB_ParamBlockSize * channelIndex() + RGB_OnOffTime)) >> RGB_OnOffTime_Shift) & RGB_OnOffTime_Mask))
-#define RGB_DimCurve		0x0007
+#define RGB_OnOffBase		0x0000
+#define RGB_OnOffBase_Shift	2
+#define RGB_OnOffBase_Mask	0x0003
+// Offset: 0, BitOffset: 4, Size: 2 Bit, Text: Zeitbasis
+#define ParamRGB_OnOffBaseIndex(X) ((uint)((knx.paramByte((RGB_ParamBlockOffset + RGB_ParamBlockSize * X + RGB_OnOffBase)) >> RGB_OnOffBase_Shift) & RGB_OnOffBase_Mask))
+// Offset: 0, BitOffset: 4, Size: 2 Bit, Text: Zeitbasis
+#define ParamRGB_OnOffBase ((uint)((knx.paramByte((RGB_ParamBlockOffset + RGB_ParamBlockSize * channelIndex() + RGB_OnOffBase)) >> RGB_OnOffBase_Shift) & RGB_OnOffBase_Mask))
+#define RGB_DimCurve		0x0009
+#define RGB_DimCurve_Shift	5
 #define RGB_DimCurve_Mask	0x0007
-// Offset: 7, BitOffset: 5, Size: 3 Bit, Text: Dimmkurve
-#define ParamRGB_DimCurveIndex(X) ((uint)((knx.paramByte((RGB_ParamBlockOffset + RGB_ParamBlockSize * X + RGB_DimCurve))) & RGB_DimCurve_Mask))
-// Offset: 7, BitOffset: 5, Size: 3 Bit, Text: Dimmkurve
-#define ParamRGB_DimCurve ((uint)((knx.paramByte((RGB_ParamBlockOffset + RGB_ParamBlockSize * channelIndex() + RGB_DimCurve))) & RGB_DimCurve_Mask))
+// Offset: 9, Size: 3 Bit, Text: Dimmkurve
+#define ParamRGB_DimCurveIndex(X) ((uint)((knx.paramByte((RGB_ParamBlockOffset + RGB_ParamBlockSize * X + RGB_DimCurve)) >> RGB_DimCurve_Shift) & RGB_DimCurve_Mask))
+// Offset: 9, Size: 3 Bit, Text: Dimmkurve
+#define ParamRGB_DimCurve ((uint)((knx.paramByte((RGB_ParamBlockOffset + RGB_ParamBlockSize * channelIndex() + RGB_DimCurve)) >> RGB_DimCurve_Shift) & RGB_DimCurve_Mask))
 //!< Number: 0, Text: RGB{{argChan}}: {{0:---}}, Function: Schalten
 #define RGB_KoSwitch 0
 #define KoRGB_SwitchIndex(X) knx.getGroupObject(RGB_KoOffset + RGB_KoBlockSize * X + RGB_KoSwitch)

@@ -8,36 +8,30 @@ DimChannel_TW::~DimChannel_TW() {}
 
 const std::string DimChannel_TW::name()
 {
-    return "DimChannel_TW";
+    return "TW";
 }
 
-void DimChannel_TW::setup(uint8_t* hwchannel, uint16_t startKO) {
+void DimChannel_TW::setup(uint8_t* hwchannel) 
+{
     // Parameter
     m_hwchannel_ww = hwchannel[0];
     m_hwchannel_cw = hwchannel[1];
 
-    m_colortempww = ParamAPP_PT_TWColorTempWW;
-    m_colortempcw = ParamAPP_PT_TWColorTempKW;
-    m_useoncolortemp = ParamAPP_PT_TWUseOnColorTemp;
-    m_onbrightness = round(ParamAPP_PT_TWOnBrightness * 2.55);
-    m_oncolortemp = ParamAPP_PT_TWOnColorTemp;
-    m_durationrelativ = ParamAPP_PT_TWRelativDimTime * 1000;
-    m_durationabsolut = ParamAPP_PT_TWOnOffTime * 100;
-    m_curve = ParamAPP_PT_TWDimCurve;                               // 0=A, 1=B, 2=C, 3=D
+    m_colortempww = ParamTW_ColorTempWW;
+    m_colortempcw = ParamTW_ColorTempKW;
+    m_usedayvalue = ParamTW_UseOnValue;
+    m_daybrightness = round(ParamTW_OnBrightness * 2.55);
+    m_daycolortemp = ParamTW_OnColorTemp;
+    m_usenightvalue = ParamTW_UseNightValue;
+    m_nightbrightness = round(ParamTW_NightBrightness * 2.55);
+    m_nightcolortemp = ParamTW_NightColorTemp;
+    m_durationrelativ = getTimeWithPattern(ParamTW_RelativDimTime, ParamTW_RelativDimBase);
+    m_durationabsolut = getTimeWithPattern(ParamTW_OnOffTime, ParamTW_OnOffBase);
+    m_curve = ParamTW_DimCurve;                               // 0=A, 1=B, 2=C, 3=D, 4=E
 
-    _lastbrightness = 0;
-    _lastcolortemp = 0;
+    //_lastbrightness = 0;
+    //_lastcolortemp = 0;
   
-    // calculate KO Objects and save this
-    calc_ko_switch = startKO + KO_OFFSET_TW_SWITCH;
-    calc_ko_dimabsolut = startKO + KO_OFFSET_TW_DIMABSOLUT;
-    calc_ko_dimabsolutkelvin = startKO + KO_OFFSET_TW_DIMABSOLUTKELVIN;
-    calc_ko_dimrelativ = startKO + KO_OFFSET_TW_DIMRELATIV;
-    calc_ko_dimrelativkelvin = startKO + KO_OFFSET_TW_DIMRELATIVKELVIN;
-    calc_ko_statusonoff = startKO + KO_OFFSET_TW_STATUSONOFF;
-    calc_ko_statusbrightness = startKO + KO_OFFSET_TW_STATUSBRIGHTNESS;
-    calc_ko_statuskelvin = startKO + KO_OFFSET_TW_STATUSKELVIN;
-
     // setup hw channels
     hwchannels[m_hwchannel_ww] = new HWChannel(m_hwchannel_ww);
     hwchannels[m_hwchannel_cw] = new HWChannel(m_hwchannel_cw);
@@ -45,94 +39,183 @@ void DimChannel_TW::setup(uint8_t* hwchannel, uint16_t startKO) {
     hwchannels[m_hwchannel_cw]->setup(m_hwchannel_cw, m_curve, m_durationabsolut, m_durationrelativ);
 
     logDebugP("------------------ DEBUG -------------------");
-    logDebugP("KO Switch: %i", calc_ko_switch);
-    logDebugP("KO Dim Absolute: %i", calc_ko_dimabsolut);
-    logDebugP("KO Dim Absolut Kelvin: %i", calc_ko_dimabsolutkelvin);
-    logDebugP("KO Dim Relativ: %i", calc_ko_dimrelativ);
-    logDebugP("KO Dim Relativ Kelvin: %i", calc_ko_dimrelativkelvin);
-    logDebugP("KO Status OnOff: %i", calc_ko_statusonoff);
-    logDebugP("KO Status Brightness: %i", calc_ko_statusbrightness);
-    logDebugP("KO Status Kelvin: %i", calc_ko_statuskelvin);
+    logDebugP("Channel Index: %i", _channelIndex);
+    logDebugP("KO Switch: %i", calcKoNumber(TW_KoSwitch));
+    logDebugP("KO Dim Absolute Brightness: %i", calcKoNumber(TW_KoDimAbsoluteBrightness));
+    logDebugP("KO Dim Absolute Kelvin: %i", calcKoNumber(TW_KoDimAbsoluteColorTemp));
+    logDebugP("KO Dim Relativ Brightness: %i", calcKoNumber(TW_KoDimRelativBrightness));
+    logDebugP("KO Dim Relativ KW: %i", calcKoNumber(TW_KoDimRelativColorKW));
+    logDebugP("KO Status OnOff: %i", calcKoNumber(TW_KoStatusOnOff));
+    logDebugP("KO Status Brightness: %i", calcKoNumber(TW_KoStatusBrightness));
+    logDebugP("KO Status Kelvin: %i", calcKoNumber(TW_KoStatusColorTemp));
+    //logDebugP("KO Scene: %i", calcKoNumber(TW_KoScene));
     logDebugP("HW Port WW: %i", m_hwchannel_ww);
     logDebugP("HW Port CW: %i", m_hwchannel_cw);
-    logDebugP("PT ColorTemp WW: %i", m_colortempww);
-    logDebugP("PT ColorTemp CW: %i", m_colortempcw);
-    logDebugP("PT UseOnColorTemp: %i", m_useoncolortemp);
-    logDebugP("PT OnBrightness: %i", m_onbrightness);
-    logDebugP("PT OnColorTemp: %i", m_oncolortemp);
-    logDebugP("PT DurationRelativ WW: %i", m_durationrelativ);
-    logDebugP("PT DurationAbsolut WW: %i", m_durationabsolut);
-    logDebugP("PT DurationRelativ CW: %i", m_durationrelativ);
-    logDebugP("PT DurationAbsolut CW: %i", m_durationabsolut);
-    logDebugP("PT Curve WW: %i", m_curve);
-    logDebugP("PT Curve CW: %i", m_curve);
+    logDebugP("PT ColorTemp WW: %i K", m_colortempww);
+    logDebugP("PT ColorTemp CW: %i K", m_colortempcw);
+    logDebugP("PT UseDayValue: %i", m_usedayvalue);
+    logDebugP("PT DayBrightness: %i", m_daybrightness);
+    logDebugP("PT DayColorTemp: %i K", m_daycolortemp);
+    logDebugP("PT UseNightValue: %i", m_usenightvalue);
+    logDebugP("PT NightBrightness: %i", m_nightbrightness);
+    logDebugP("PT NightColorTemp: %i K", m_nightcolortemp);
+    logDebugP("PT DurationRelativ: %i", m_durationrelativ);
+    logDebugP("PT DurationAbsolut: %i", m_durationabsolut);
+    logDebugP("PT Curve: %i", m_curve);
     logDebugP("--------------------------------------------");
 }
 
-void DimChannel_TW::processInputKo(GroupObject &ko) {
-    uint16_t asap = ko.asap();
-    if (asap == calc_ko_switch)
+void DimChannel_TW::processInputKo(GroupObject &ko) 
+{
+    int channelKo = 0;
+    channelKo = (ko.asap() - TW_KoOffset) % TW_KoBlockSize;
+    logDebugP("Got SHORT KO %i", channelKo);
+
+    switch (channelKo)
     {
-        bool value = ko.value(DPT_Switch);
-        if (_lastbrightness == 0) { _lastbrightness = m_onbrightness; }
-        if (_lastcolortemp == 0)  { _lastcolortemp = m_oncolortemp;   }
-        logDebugP("Switch - Value: %i - Kelvin: %i - Brightness: %i", value, _lastcolortemp, _lastbrightness);
-        if (value) { // on
-            uint8_t percent = prozToDim(_lastbrightness, 3);
-            uint8_t percentWW = (percent*(m_colortempcw - _lastcolortemp))/(m_colortempcw - m_colortempww);
-            uint8_t percentCW = (percent*(_lastcolortemp - m_colortempww))/(m_colortempcw - m_colortempww);
-            logDebugP("protzToDim Correction Value - WW: %i CW: %i", percentWW, percentCW);
-            hwchannels[m_hwchannel_ww]->taskNewValue(percentWW);
-            hwchannels[m_hwchannel_cw]->taskNewValue(percentCW);
+    //Schalten
+    case TW_KoSwitch:
+        koHandleSwitch(ko);
+        break;
+
+    //Dimmen Absolut Brightness
+    case TW_KoDimAbsoluteBrightness:
+        koHandleDimmAbsBrightness(ko);
+        break;
+
+    //Dimmen Absolut ColorTemp
+    case TW_KoDimAbsoluteColorTemp:
+        koHandleDimmAbsColorTemp(ko);
+        break;
+
+    //Dimmen Relative Brightness
+    case TW_KoDimRelativBrightness:
+        koHandleDimmRelBrightness(ko);
+        break;
+
+    //Dimmen Relative KW
+    case TW_KoDimRelativColorKW:
+        koHandleDimmRelKw(ko);
+        break;
+
+    //Szenensteuerung
+    //case TW_KoScene:
+    //    koHandleScene(ko);
+    //    break;
+    }
+}
+
+void DimChannel_TW::koHandleSwitch(GroupObject &ko) 
+{
+    bool value = ko.value(DPT_Switch);
+    if (value) //on
+    {
+        if (isNight) 
+        {
+            if (m_usenightvalue) {
+                _currentValueTW[0] = m_nightbrightness;
+                _currentValueTW[1] = m_nightcolortemp;
+            } else {
+                _currentValueTW[0] = _lastNightValue[0];
+                _currentValueTW[1] = _lastNightValue[1];                
+            }   
+        } else {
+            if (m_usedayvalue) {
+                _currentValueTW[0] = m_daybrightness;
+                _currentValueTW[1] = m_daycolortemp;                
+            } else {
+                _currentValueTW[0] = _lastDayValue[0];
+                _currentValueTW[1] = _lastDayValue[1];                  
+            }
         }
-        else { // off
-            _lastbrightness = 0;
-            hwchannels[m_hwchannel_ww]->taskSoftOff();
-            hwchannels[m_hwchannel_cw]->taskSoftOff();   
+        logDebugP(isNight ? "Switch Night - with value: %i - Kelvin: %i - Brightness: %i" : "Switch Day - with value: %i - Kelvin: %i - Brightness: %i", value, _currentValueTW[1], _currentValueTW[0]);
+        sendDimValue();
+    }
+    else 
+    { // off
+        hwchannels[m_hwchannel_ww]->taskSoftOff();
+        hwchannels[m_hwchannel_cw]->taskSoftOff();   
+    }
+}
+
+void DimChannel_TW::koHandleDimmAbsBrightness(GroupObject &ko) 
+{
+    uint8_t brightness = ko.value(DPT_Percent_U8);
+    _currentValueTW[0] = brightness;
+    logDebugP("Dim Absolute - Kelvin: %i - Brightness: %i", _currentValueTW[1], _currentValueTW[0]);
+    sendDimValue();
+}
+
+void DimChannel_TW::koHandleDimmAbsColorTemp(GroupObject &ko) 
+{
+    uint16_t kelvin = ko.value(Dpt(7, 600));
+    _currentValueTW[1] = kelvin;
+    logDebugP("Dim Kelvin - Kelvin: %i - Brightness: %i", _currentValueTW[1], _currentValueTW[0]);
+    sendDimValue();
+}
+
+void DimChannel_TW::koHandleDimmRelBrightness(GroupObject &ko) 
+{
+    uint8_t direction = ko.value(Dpt(3,7,0));
+    uint8_t step = ko.value(Dpt(3,7,1));
+    logDebugP("Dim Relativ - Direction: %i, Step: %i", direction, step);
+    //direction true = dim up, false = dim down, step = 0 then stop
+    if (step == 0) {
+        hwchannels[m_hwchannel_ww]->taskStop();
+        hwchannels[m_hwchannel_cw]->taskStop();
+    }
+    else if (direction == 1) {
+        logDebugP("Dim Relativ - DimUp");
+        // code passt noch nicht
+    }
+    else if (direction == 0) {
+        logDebugP("Dim Relativ - DimDown");
+        // code passt noch nicht
+    }
+}
+
+void DimChannel_TW::koHandleDimmRelKw(GroupObject &ko) 
+{
+    uint8_t direction = ko.value(Dpt(3,7,0));
+    uint8_t step = ko.value(Dpt(3,7,1));
+    logDebugP("Dim Relativ - Direction: %i, Step: %i", direction, step);
+    //direction true = dim up, false = dim down, step = 0 then stop
+    if (step == 0) {
+        hwchannels[m_hwchannel_cw]->taskStop();
+        // Update für Kelvin muss noch berechnet werden
+    }
+    else if (direction == 1) {
+        logDebugP("Dim Relativ - DimUp");
+        hwchannels[m_hwchannel_cw]->taskDimUp();
+    }
+    else if (direction == 0) {
+        logDebugP("Dim Relativ - DimDown");
+        hwchannels[m_hwchannel_cw]->taskDimDown();
+    }
+}
+
+void DimChannel_TW::koHandleScene(GroupObject &ko) {
+    /*
+    uint8_t value;
+    uint8_t scene = ko.value(DPT_SceneNumber);
+    scene++; //increase value by one
+    logDebugP("Scene - Number: %i", scene);
+    for (uint8_t i = 0; i < MAXCHANNELSCENE; i++) {
+        uint8_t sceneparam = ParamAPP_PT_EKSzNum;
+        if (scene == sceneparam) {
+            uint8_t action = ParamAPP_PT_EKSzAction;
+            switch (action) {
+                case SC_EK_SetBrightness:
+                    value = round(ParamAPP_PT_EKSzValue * 2.55);
+                    hwchannels[m_hwchannel]->taskNewValue(value);
+                    break;
+                default:
+                    // do nothing
+                    break;
+            }
         }
     }
-    else if (asap == calc_ko_dimabsolut) {
-        uint8_t brightness = ko.value(DPT_Percent_U8);
-        _lastbrightness = brightness;
-        if (_lastcolortemp == 0) { _lastcolortemp = m_oncolortemp; }
-        logDebugP("Dim Absolute - Kelvin: %i - Brightness: %i", _lastcolortemp, _lastbrightness);
-        uint8_t percent = prozToDim(_lastbrightness, 3);
-        uint8_t percentWW = (percent*(m_colortempcw - _lastcolortemp))/(m_colortempcw - m_colortempww);
-        uint8_t percentCW = (percent*(_lastcolortemp - m_colortempww))/(m_colortempcw - m_colortempww);
-        logDebugP("protzToDim Correction Value - WW: %i CW %i", percentWW, percentCW); 
-        hwchannels[m_hwchannel_ww]->taskNewValue(percentWW);
-        hwchannels[m_hwchannel_cw]->taskNewValue(percentCW);
-    }
-    else if (asap == calc_ko_dimabsolutkelvin) {
-        uint16_t kelvin = ko.value(Dpt(7, 600));
-        _lastcolortemp = kelvin;
-        if (_lastbrightness == 0) { _lastbrightness = m_onbrightness; }
-        logDebugP("Dim Kelvin - Kelvin: %i - Brightness: %i", _lastcolortemp, _lastbrightness);
-        uint8_t percent = prozToDim(_lastbrightness, 3);
-        uint8_t percentWW = (percent*(m_colortempcw - _lastcolortemp))/(m_colortempcw - m_colortempww);
-        uint8_t percentCW = (percent*(_lastcolortemp - m_colortempww))/(m_colortempcw - m_colortempww);
-        logDebugP("protzToDim Correction Value - WW: %i CW %i", percentWW, percentCW);
-        hwchannels[m_hwchannel_ww]->taskNewValue(percentWW);
-        hwchannels[m_hwchannel_cw]->taskNewValue(percentCW); 
-    }
-    else if (asap == calc_ko_dimrelativ) {
-        uint8_t direction = ko.value(Dpt(3,7,0));
-        uint8_t step = ko.value(Dpt(3,7,1));
-        logDebugP("Dim Relativ - Direction: %i, Step: %i", direction, step);
-        //direction true = dim up, false = dim down, step = 0 then stop
-        if (step == 0) {
-            hwchannels[m_hwchannel_ww]->taskStop();
-            hwchannels[m_hwchannel_cw]->taskStop();
-        }
-        else if (direction == 1) {
-            logDebugP("Dim Relativ - DimUp");
-            // code passt noch nicht
-        }
-        else if (direction == 0) {
-            logDebugP("Dim Relativ - DimDown");
-            // code passt noch nicht
-        }
-    }
+    */
 }
 
 void DimChannel_TW::setDayNight(bool value) {
@@ -142,36 +225,89 @@ void DimChannel_TW::setDayNight(bool value) {
 void DimChannel_TW::task() {
     hwchannels[m_hwchannel_ww]->task();
     hwchannels[m_hwchannel_cw]->task();
-    //run ko update every 500ms
-    _currentTaskRun = millis();
-    if (_currentTaskRun - _lastTaskRun >= 500) {
+    //run ko update every 100ms
+    _currentUpdateRun = millis();
+    if (_currentUpdateRun - _lastUpdatekRun >= 100) {
         updateDimValue();
-        _lastTaskRun = millis();
+        _lastUpdatekRun = millis();
     }
+}
+
+uint16_t DimChannel_TW::calcKoNumber(int koNum)
+{
+    return koNum + (TW_KoBlockSize * _channelIndex) + TW_KoOffset;
+}
+
+void DimChannel_TW::sendKoStateOnChange(uint16_t koNr, const KNXValue &value, const Dpt &type)
+{
+    GroupObject &ko = knx.getGroupObject(calcKoNumber(koNr));
+    if(ko.valueNoSendCompare(value, type))
+        ko.objectWritten();
+}
+
+void DimChannel_TW::sendDimValue()
+{
+    uint8_t percent = prozToDim(_currentValueTW[0], 3);
+    uint8_t percentWW = (percent*(m_colortempcw - _currentValueTW[1]))/(m_colortempcw - m_colortempww);
+    uint8_t percentCW = (percent*(_currentValueTW[1] - m_colortempww))/(m_colortempcw - m_colortempww);
+    logDebugP("protzToDim Correction Value - WW: %i CW: %i", percentWW, percentCW);
+    hwchannels[m_hwchannel_ww]->taskNewValue(percentWW);
+    hwchannels[m_hwchannel_cw]->taskNewValue(percentCW);
 }
 
 void DimChannel_TW::updateDimValue() {
     if (hwchannels[m_hwchannel_ww]->isBusy() || hwchannels[m_hwchannel_cw]->isBusy()) { return; }
-    if (!hwchannels[m_hwchannel_ww]->updateAvailable() || !hwchannels[m_hwchannel_cw]->updateAvailable()) { return; }
+    if (hwchannels[m_hwchannel_ww]->updateAvailable() || hwchannels[m_hwchannel_cw]->updateAvailable()) 
+    {
+        hwchannels[m_hwchannel_ww]->resetUpdateFlag();
+        hwchannels[m_hwchannel_cw]->resetUpdateFlag();
+        uint8_t ww = hwchannels[m_hwchannel_ww]->getCurrentValue();
+        uint8_t cw = hwchannels[m_hwchannel_cw]->getCurrentValue();
 
-    hwchannels[m_hwchannel_ww]->resetUpdateFlag();
-    hwchannels[m_hwchannel_cw]->resetUpdateFlag();
-    byte value_ww = hwchannels[m_hwchannel_ww]->getCurrentValue();
-    byte value_cw = hwchannels[m_hwchannel_cw]->getCurrentValue();
-
-    if (value_ww != _lastvalue_ww || value_cw != _lastvalue_cw) {
-        if (value_ww != 0 || value_cw != 0) {
-            knx.getGroupObject(calc_ko_statusonoff).value((bool)1, DPT_Switch);
+        if (ww != 0 || cw != 0) {
+            sendKoStateOnChange(TW_KoStatusOnOff, (bool)1, DPT_Switch);
         } else {
-            knx.getGroupObject(calc_ko_statusonoff).value((bool)0, DPT_Switch);
+            sendKoStateOnChange(TW_KoStatusOnOff, (bool)0, DPT_Switch);
         }
-        knx.getGroupObject(calc_ko_statuskelvin).value(_lastcolortemp, Dpt(7, 600));
-        knx.getGroupObject(calc_ko_statusbrightness).value(_lastbrightness, DPT_Percent_U8);
-        _lastvalue_ww = value_ww;
-        _lastvalue_cw = value_cw;
-    }    
+
+        if (isNight) {
+            _lastNightValue[0] = _currentValueTW[0];  
+            _lastNightValue[1] = _currentValueTW[1];
+        } else {
+            _lastDayValue[0] = _currentValueTW[0];
+            _lastDayValue[1] = _currentValueTW[1];
+        }
+
+        sendKoStateOnChange(TW_KoStatusBrightness, _currentValueTW[0], DPT_Percent_U8);
+        sendKoStateOnChange(TW_KoStatusColorTemp, _currentValueTW[1], Dpt(7, 600));
+    }
 }
 
 uint16_t DimChannel_TW::prozToDim(uint8_t value, uint8_t curve) {
     return proztable[value][curve];
-}  
+} 
+
+uint32_t DimChannel_TW::getTimeWithPattern(uint16_t time, uint8_t base)
+{
+    switch (base)
+    {
+        case TIMEBASE_TENTH_SECONDS:
+            return time * 100;
+            break;
+        case TIMEBASE_SECONDS:
+            return time * 1000;
+            break;
+        case TIMEBASE_MINUTES:
+            return time * 60000;
+            break;
+        case TIMEBASE_HOURS:
+            // for hour, we can only cover 1193 hours in milliseconds, we allow just 1000 here
+            if (time > 1000) 
+                time = 1000;
+            return time * 3600000;
+            break;
+        default:
+            return 0;
+            break;
+    }
+}

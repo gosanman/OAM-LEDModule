@@ -1,7 +1,8 @@
 #ifndef MEASURINGMODULE_H
 #define MEASURINGMODULE_H
 
-#include "LIB_INA226.h"
+//#include "LIB_INA226.h"
+#include "INA226_WE.h"
 #include "LIB_TEMP100.h"
 #include <OpenKNX.h>
 #include "hardware.h"
@@ -10,14 +11,19 @@
     #pragma warn "MeasuringModule needs OPENKNX_DUALCORE"
 #endif
 
+#define TIMEBASE_SECONDS        0
+#define TIMEBASE_MINUTES        1
+#define TIMEBASE_HOURS          2
+#define TIMEBASE_TENTH_SECONDS  3
+
 class MeasuringModule : public OpenKNX::Module
 {
 public:
     MeasuringModule();
     void setup() override;
-    void setup1() override;
+    void setup1();
     void loop() override;
-    void loop1() override;
+    void loop1();
     const std::string name() override;
     const std::string version() override;
     
@@ -29,14 +35,13 @@ public:
     static MeasuringModule *_instance;
 
 private:
-    float shuntValue = 0;               // value will divided by 1000
+    float shuntValue = 0;                   // value will divided by 1000
     float maxcurrent = 0;
-    byte measurementSend = 1;           // 0=No, 1=Yes
-    byte tempSensorPresent = 0;         // 0=No, 1=Yes
-    int measurementSelectInterval = 1;  // 0=5sec, 1=10sec, 2=30sec, 3=60sec
+    byte measurementSend = 1;               // 0=No, 1=Yes
+    byte tempSensorPresent = 0;             // 0=No, 1=Yes
+    uint32_t measurementInterval = 60000;   
     uint32_t _lastMeasurementSend = 0;
 
-    int MeasurementInterval[4] = {5000, 10000, 30000, 60000};
     float shuntVoltage_mV = 0.0;
     float loadVoltage_V = 0.0;
     float busVoltage_V = 0.0;
@@ -47,11 +52,15 @@ private:
     
     float temperatur_C = 0.0;
 
+    uint32_t _timerCheckOverflow = 0;
     uint32_t _timerCheckI2cConnection = 0;
     bool doResetI2c = false;
 
     bool initI2cConnection();
     bool checkI2cConnection();
+    void getOverflowValue();
+
+    uint32_t getTimeWithPattern(uint16_t time, uint8_t base);
 
     INA226_WE _ina226;
     TMP100_WE _tmp100;

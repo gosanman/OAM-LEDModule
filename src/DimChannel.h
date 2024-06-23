@@ -15,7 +15,8 @@ public:
     virtual const std::string name() = 0;
 
     //dimmchannel
-    virtual void setup(uint8_t* hwchannel, uint16_t startKO);
+    //virtual void setup(uint8_t* hwchannel, uint16_t startKO);
+    virtual void setup(uint8_t* hwchannel);
     virtual void processInputKo(GroupObject &ko);
     virtual void task();
     virtual void setDayNight(bool value);

@@ -7,6 +7,11 @@
 #include "LEDModule.h"
 #include "HwChannel.h"
 
+#define TIMEBASE_SECONDS        0
+#define TIMEBASE_MINUTES        1
+#define TIMEBASE_HOURS          2
+#define TIMEBASE_TENTH_SECONDS  3
+
 // scene actions
 #define SC_EK_None              0
 #define SC_EK_SetBrightness     1
@@ -20,39 +25,46 @@ public:
     const std::string name() override;
 
     //dimmchannel
-    void setup(uint8_t* hwchannel, uint16_t startKO) override;
+    void setup(uint8_t* hwchannel) override;
     void processInputKo(GroupObject &ko) override;
     void task() override;
 
     void setDayNight(bool value) override;
 
 private:
-    uint8_t m_curve;
     uint8_t m_hwchannel;
-    uint16_t m_startko;
-    bool m_useonbrightness;
-    uint8_t m_onbrightness;
+
+    bool m_usedayvalue;
+    uint8_t m_dayvalue = 255;
+    bool m_usenightvalue;
+    uint8_t m_nightvalue = 25;
     uint16_t m_durationrelativ;
     uint16_t m_durationabsolut;
-    
-    uint16_t calc_ko_switch;
-    uint16_t calc_ko_dimabsolute;
-    uint16_t calc_ko_dimrelativ;
-    uint16_t calc_ko_scene;
-    uint16_t calc_ko_statusonoff;
-    uint16_t calc_ko_statusbrightness;
+    uint8_t m_curve;
 
     uint8_t _index;
 
-    uint8_t _lastbrightness = 0;
-    uint8_t _setbrightness = 0;
+    uint8_t _lastUpdateValue = 0;
+	uint8_t _lastDayValue = 255;
+	uint8_t _lastNightValue = 25;
 
     uint32_t _currentTaskRun = 0;
     uint32_t _lastTaskRun = 0;
+    bool _updateAvailable = false;
 
     bool isNight = false;
 
+    void koHandleSwitch(GroupObject &ko);
+    void koHandleDimmAbs(GroupObject &ko);
+    void koHandleDimmRel(GroupObject &ko);
+    void koHandleScene(GroupObject &ko);
+
+    uint16_t calcKoNumber(int koNum);
+    void sendKoStateOnChange(uint16_t koNr, const KNXValue &value, const Dpt &type);
+    void getDimValue();
     void updateDimValue();
+
+    uint32_t getTimeWithPattern(uint16_t time, uint8_t base);
 
     HWChannel *hwchannels[MAXCHANNELSHW]; 
 };
