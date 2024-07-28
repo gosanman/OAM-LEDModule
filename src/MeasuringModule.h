@@ -27,7 +27,11 @@ public:
     const std::string name() override;
     const std::string version() override;
     
-    void getSingleMeasurement();
+    void readFlash(const uint8_t *buffer, const uint16_t size) override;
+    void writeFlash() override;
+    uint16_t flashSize() override;
+
+    void sendSingleMeasurement();
     void showHelp() override;
     bool processCommand(const std::string cmd, bool diagnoseKo);
 
@@ -41,6 +45,7 @@ private:
     byte tempSensorPresent = 0;             // 0=No, 1=Yes
     uint32_t measurementInterval = 60000;   
     uint32_t _lastMeasurementSend = 0;
+    uint32_t _lastMeasurementGet = 0;
 
     float shuntVoltage_mV = 0.0;
     float loadVoltage_V = 0.0;
@@ -49,6 +54,7 @@ private:
     float current_A = 0.0;
     float power_mW = 0.0;
     float power_W = 0.0;
+    float totalEnergy_Wh = 0.0;
     
     float temperatur_C = 0.0;
 
@@ -56,6 +62,7 @@ private:
     uint32_t _timerCheckI2cConnection = 0;
     bool doResetI2c = false;
 
+    void getSingleMeasurement();
     bool initI2cConnection();
     bool checkI2cConnection();
     void getOverflowValue();

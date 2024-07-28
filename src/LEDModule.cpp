@@ -27,11 +27,23 @@ const std::string LEDModule::version() {
 void LEDModule::setup() 
 {
     // save default values from PA
-    operatinModeSelect = ParamAPP_OperatingMode;
+    deviceSelect = ParamAPP_ControllerType;
     pwmFreqSelect = ParamAPP_PwmFrequenz;
-    //useDiagnoseKo = ParamAPP_PT_Diagnose;
     
+    switch (deviceSelect)
+    {
+    case 0: // BOARD_KNXLED_DK_06_V10 - LED-DK-06x24V
+        operatinModeSelect = ParamAPP_OperatingMode;
+        logInfoP("Device: LED-DK-06x24V - 6-Kanal OpenKNX LED Dimmer");
+        break;
+    case 1: // BOARD_KNXLED_DK_12_V10 - LED-DK-12x24V
+        operatinModeSelect = ParamAPP_OperatingMode - 10;
+        logInfoP("Device: LED-DK-12x24V - 12-Kanal OpenKNX LED Dimmer");
+        break;
+    }
+
     // Debug
+    logDebugP("Selected Device: %i", deviceSelect);
     logDebugP("Operating Mode: %i", operatinModeSelect);
     logDebugP("PWM frequenz: %i", pwmFreqSelect);
     logDebugP("DayNight: %i", ParamAPP_DayNight);
@@ -96,7 +108,7 @@ void LEDModule::setup()
     break;
     case 2:
     {
-        // 2xTW and 2xEK 
+        // 2xTW + 2xEK 
         #ifdef BOARD_KNXLED_DK_06_V10
             // 2x TW
             channelTW[0] = channel[0] = new DimChannel_TW(0);
@@ -115,7 +127,7 @@ void LEDModule::setup()
             //used Channels
             usedChannels = 4;
         #endif
-        // 4x TW and 4x EK
+        // 4x TW + 4x EK
         #ifdef BOARD_KNXLED_DK_12_V10
             // 4x TW
             channelTW[0] = channel[0] = new DimChannel_TW(0);
@@ -318,7 +330,6 @@ void LEDModule::processInputKo(GroupObject &ko)
     uint16_t koNum = ko.asap();
     logDebugP("Received KO %i", koNum);
     
-    // send Input KO to the correct dimmer class
     // EK Dimmer Class
     if (koNum >= EK_KoOffset && koNum < EK_KoOffset + EK_KoBlockSize * MAXCHANNELSEK)
     {
@@ -346,8 +357,8 @@ void LEDModule::processInputKo(GroupObject &ko)
 
     switch(koNum)
     {
-        //diagnose
-        case BASE_KoDiagnose:
+        //Diagnose
+        case BASE_Share_KoOffset + BASE_KoDiagnose:
             openknx.console.processDiagnoseKo(ko);
             break;
 
@@ -405,9 +416,14 @@ bool LEDModule::processCommand(const std::string cmd, bool diagnoseKo)
 
 void LEDModule::processBeforeRestart() 
 {
-    for (byte ch = 0; ch < MAXCHANNELSHW; ch++) {
-        _pwm.setPin(ch, 0);
-    }
+    //_pwm.write8(Adafruit_PWMServoDriver::PCA9685_ALLLED_OFF_H, 0x10);
+    //for (byte ch = 0; ch < MAXCHANNELSHW; ch++) {
+    //    _pwm.setPin(ch, 0);
+    //}
+    Wire1.beginTransmission(I2C_PCA9685_DEVICE_ADDRESS);
+    Wire1.write(0xFD);  // Adresse des ALL_LED_OFF_H Registers
+    Wire1.write(0x10);  // Setze das Bit 4 im ALL_LED_OFF_H Register
+    Wire1.endTransmission();
 }
 
 void LEDModule::savePower() 
@@ -446,7 +462,7 @@ bool LEDModule::checkI2cConnection()
         return true;
     } else {
         logErrorP("PCA9685 PWM not available via I2C %d", result);
-        openknx.console.writeDiagenoseKo("ER I2C PWM");
+        openknx.console.writeDiagenoseKo("ER I2C PWM %d", result);
         doResetI2c = true;
         return false;
     }
@@ -486,7 +502,7 @@ void LEDModule::handleFunc1(uint8_t setting)
 
 bool LEDModule::processFunctionProperty(uint8_t objectIndex, uint8_t propertyId, uint8_t length, uint8_t *data, uint8_t *resultData, uint8_t &resultLength) 
 {
-    if (!knx.configured() || objectIndex != 160 || propertyId != 3)
+    if (!knx.configured() || objectIndex != 160 || propertyId != 6)
         return false;
 
     switch(data[0])
@@ -510,6 +526,5 @@ void LEDModule::handleFunctionPropertySwitch(uint8_t *data, uint8_t *resultData,
     resultLength = 1;
     logIndentDown();
 }
-
 
 LEDModule openknxLEDModule;

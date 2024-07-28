@@ -44,11 +44,12 @@ void DimChannel_TW::setup(uint8_t* hwchannel)
     logDebugP("KO Dim Absolute Brightness: %i", calcKoNumber(TW_KoDimAbsoluteBrightness));
     logDebugP("KO Dim Absolute Kelvin: %i", calcKoNumber(TW_KoDimAbsoluteColorTemp));
     logDebugP("KO Dim Relativ Brightness: %i", calcKoNumber(TW_KoDimRelativBrightness));
-    logDebugP("KO Dim Relativ KW: %i", calcKoNumber(TW_KoDimRelativColorKW));
+    logDebugP("KO Dim Relativ KW: %i", calcKoNumber(TW_KoDimRelativKW));
     logDebugP("KO Status OnOff: %i", calcKoNumber(TW_KoStatusOnOff));
     logDebugP("KO Status Brightness: %i", calcKoNumber(TW_KoStatusBrightness));
     logDebugP("KO Status Kelvin: %i", calcKoNumber(TW_KoStatusColorTemp));
-    //logDebugP("KO Scene: %i", calcKoNumber(TW_KoScene));
+    logDebugP("KO Status KW: %i", calcKoNumber(TW_KoStatusKW));
+    logDebugP("KO Scene: %i", calcKoNumber(TW_KoSceneNumber));
     logDebugP("HW Port WW: %i", m_hwchannel_ww);
     logDebugP("HW Port CW: %i", m_hwchannel_cw);
     logDebugP("PT ColorTemp WW: %i K", m_colortempww);
@@ -94,14 +95,14 @@ void DimChannel_TW::processInputKo(GroupObject &ko)
         break;
 
     //Dimmen Relative KW
-    case TW_KoDimRelativColorKW:
+    case TW_KoDimRelativKW:
         koHandleDimmRelKw(ko);
         break;
 
     //Szenensteuerung
-    //case TW_KoScene:
-    //    koHandleScene(ko);
-    //    break;
+    case TW_KoSceneNumber:
+        koHandleScene(ko);
+        break;
     }
 }
 
@@ -140,8 +141,8 @@ void DimChannel_TW::koHandleSwitch(GroupObject &ko)
 
 void DimChannel_TW::koHandleDimmAbsBrightness(GroupObject &ko) 
 {
-    uint8_t brightness = ko.value(DPT_Percent_U8);
-    _currentValueTW[0] = brightness;
+    uint8_t brightness = ko.value(DPT_Scaling);
+    _currentValueTW[0] = round(brightness * 2.55);
     logDebugP("Dim Absolute - Kelvin: %i - Brightness: %i", _currentValueTW[1], _currentValueTW[0]);
     sendDimValue();
 }
@@ -163,14 +164,15 @@ void DimChannel_TW::koHandleDimmRelBrightness(GroupObject &ko)
     if (step == 0) {
         hwchannels[m_hwchannel_ww]->taskStop();
         hwchannels[m_hwchannel_cw]->taskStop();
+        // To-Do
     }
     else if (direction == 1) {
         logDebugP("Dim Relativ - DimUp");
-        // code passt noch nicht
+        // TO-DO
     }
     else if (direction == 0) {
         logDebugP("Dim Relativ - DimDown");
-        // code passt noch nicht
+        // To-Do
     }
 }
 
@@ -182,7 +184,7 @@ void DimChannel_TW::koHandleDimmRelKw(GroupObject &ko)
     //direction true = dim up, false = dim down, step = 0 then stop
     if (step == 0) {
         hwchannels[m_hwchannel_cw]->taskStop();
-        // Update für Kelvin muss noch berechnet werden
+        // To-DO - Update für Kelvin muss noch berechnet werden
     }
     else if (direction == 1) {
         logDebugP("Dim Relativ - DimUp");
@@ -195,27 +197,40 @@ void DimChannel_TW::koHandleDimmRelKw(GroupObject &ko)
 }
 
 void DimChannel_TW::koHandleScene(GroupObject &ko) {
-    /*
-    uint8_t value;
     uint8_t scene = ko.value(DPT_SceneNumber);
     scene++; //increase value by one
     logDebugP("Scene - Number: %i", scene);
     for (uint8_t i = 0; i < MAXCHANNELSCENE; i++) {
-        uint8_t sceneparam = ParamAPP_PT_EKSzNum;
+        uint8_t sceneparam = ((int8_t)((knx.paramByte((TW_ParamBlockOffset + TW_ParamBlockSize * channelIndex() + TW_SceneNumberA + i)))));
         if (scene == sceneparam) {
-            uint8_t action = ParamAPP_PT_EKSzAction;
+            uint8_t action = ((uint)((knx.paramByte((TW_ParamBlockOffset + TW_ParamBlockSize * channelIndex() + TW_SceneActionA + i)))));
             switch (action) {
-                case SC_EK_SetBrightness:
-                    value = round(ParamAPP_PT_EKSzValue * 2.55);
-                    hwchannels[m_hwchannel]->taskNewValue(value);
+                case SC_TW_None:
+                     // do nothing
                     break;
-                default:
-                    // do nothing
+                case SC_TW_OnValueDayNight:
+                    sendDimValue();
+                    break;                   
+                case SC_TW_SetBrightness:
+                    _currentValueTW[0] = round(((uint)((knx.paramByte((TW_ParamBlockOffset + TW_ParamBlockSize * channelIndex() + TW_SceneBrightnessA + i))))) * 2.55);
+                    sendDimValue();
+                    break;
+                case SC_TW_SetColorTemp:
+                    _currentValueTW[1] = ((uint)((knx.paramWord((TW_ParamBlockOffset + TW_ParamBlockSize * channelIndex() + TW_SceneKelvinA + (i * 2))))));
+                    sendDimValue();
+                    break;
+                case SC_TW_SetBoth:
+                    _currentValueTW[0] = round(((uint)((knx.paramByte((TW_ParamBlockOffset + TW_ParamBlockSize * channelIndex() + TW_SceneBrightnessA + i))))) * 2.55);
+                    _currentValueTW[1] = ((uint)((knx.paramWord((TW_ParamBlockOffset + TW_ParamBlockSize * channelIndex() + TW_SceneKelvinA + (i * 2))))));
+                    sendDimValue();
+                    break;
+                case SC_EK_Off:
+                    hwchannels[m_hwchannel_ww]->taskSoftOff();
+                    hwchannels[m_hwchannel_cw]->taskSoftOff(); 
                     break;
             }
         }
     }
-    */
 }
 
 void DimChannel_TW::setDayNight(bool value) {
@@ -266,6 +281,7 @@ void DimChannel_TW::updateDimValue() {
 
         if (ww != 0 || cw != 0) {
             sendKoStateOnChange(TW_KoStatusOnOff, (bool)1, DPT_Switch);
+            //To-Do - Berechnung von Kelvin und Brightness aus WW sowie CM
         } else {
             sendKoStateOnChange(TW_KoStatusOnOff, (bool)0, DPT_Switch);
         }
@@ -278,8 +294,9 @@ void DimChannel_TW::updateDimValue() {
             _lastDayValue[1] = _currentValueTW[1];
         }
 
-        sendKoStateOnChange(TW_KoStatusBrightness, _currentValueTW[0], DPT_Percent_U8);
+        sendKoStateOnChange(TW_KoStatusBrightness, (uint8_t)(_currentValueTW[0] / 2.55), DPT_Scaling);
         sendKoStateOnChange(TW_KoStatusColorTemp, _currentValueTW[1], Dpt(7, 600));
+        sendKoStateOnChange(TW_KoStatusKW, (uint8_t)(cw / 2.55), DPT_Scaling);
     }
 }
 

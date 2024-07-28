@@ -12,6 +12,14 @@
 #define TIMEBASE_HOURS          2
 #define TIMEBASE_TENTH_SECONDS  3
 
+// scene actions
+#define SC_TW_None              0
+#define SC_TW_OnValueDayNight   1
+#define SC_TW_SetBrightness     2
+#define SC_TW_SetColorTemp      3
+#define SC_TW_SetBoth           4
+#define SC_EK_Off               9
+
 class LEDModule;
 class DimChannel_TW : public DimChannel
 {
@@ -45,23 +53,12 @@ private:
 
     uint8_t _index;
 
-    uint16_t _currentValueTW[2];    // 0 = Brightness, 1 = Kelvin
+    uint16_t _currentValueTW[2] = {255, 4000};    // 0 = Brightness, 1 = Kelvin
     uint16_t _lastDayValue[2] = {255, 4000};      // 0 = Brightness, 1 = Kelvin
     uint16_t _lastNightValue[2] = {100, 4000};    // 0 = Brightness, 1 = Kelvin
 
     uint32_t _currentUpdateRun = 0;
     uint32_t _lastUpdatekRun = 0;
-
-    //uint8_t _lastbrightness = 0;
-    //uint16_t _lastcolortemp = 0;
-    //uint8_t _setbrightness = 0;
-    //uint16_t _setcolortemp = 0;
-    
-    //uint8_t _lastvalue_ww = 0;
-    //uint8_t _lastvalue_cw = 0;
-
-    //uint32_t _currentTaskRun = 0;
-    //uint32_t _lastTaskRun = 0;
 
     bool isNight = false;
 

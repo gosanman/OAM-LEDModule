@@ -1,7 +1,6 @@
 #pragma once
 
 #ifdef BOARD_KNXLED_DK_06_V10
-    #define SAVE_INTERRUPT_PIN 5
     #define PROG_LED_PIN 6
     #define PROG_LED_PIN_ACTIVE_ON HIGH
     #define PROG_BUTTON_PIN 7
@@ -18,8 +17,9 @@
 
 //#define PROG_BUTTON_PIN_INTERRUPT_ON FALLING
 
-#define KNX_UART_RX_PIN 1 // Use GP01 as KNX RX
-#define KNX_UART_TX_PIN 0 // Use GP00 as KNX TX
+#define KNX_UART_RX_PIN 1 // Use GPIO01 as KNX RX PIN
+#define KNX_UART_TX_PIN 0 // Use GPIO00 as KNX TX PIN
+#define SAVE_INTERRUPT_PIN 5 // Use GPIO05 as KNX SAVE PIN
 
 #define WIRE1_SDA 14  // Use GP14 as I2C1 SDA
 #define WIRE1_SCL 15  // Use GP15 as I2C1 SCL

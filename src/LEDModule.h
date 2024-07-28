@@ -41,6 +41,7 @@ public:
     bool processFunctionProperty(uint8_t objectIndex, uint8_t propertyId, uint8_t length, uint8_t *data, uint8_t *resultData, uint8_t &resultLength) override;
 
 private:
+    int8_t deviceSelect = 0;        // 0=LED-DK-06x24V, 1=LED-DK-12x24V
     int8_t operatinModeSelect = 0;  // 0=6xEK, 1=1xRGBCTT, 2=1xRGBW and 1xEK, 3=1xRGB and 2xEK, 4=1xRGB and 1xTW, 5=2xTW and 1xEK, 6=1xTW and 3xEK
     int16_t pwmFreqSelect = 488;    // 211, 488, 600, 832, 1000, 1200
     bool useDiagnoseKo = 0;

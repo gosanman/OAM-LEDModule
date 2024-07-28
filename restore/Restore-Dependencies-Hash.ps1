@@ -9,7 +9,7 @@ FILEPATH: restore/Restore-Dependencies-Branch.ps1
 param(
   # Set the Git checkout mode
   [ValidateSet("Branch", "Hash")]
-  [string]$GitCheckoutMode = "Hash", # Default is Branch
+  [string]$GitCheckoutMode = "Hash", # Default is Hash
 
   # Force the script to recreate symbolic links
   [switch]$ForceRecreateSymLinks = $true, # Default is $true

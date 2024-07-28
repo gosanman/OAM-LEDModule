@@ -38,17 +38,17 @@
 #define MAIN_ApplicationNumber 0x01
 #define MAIN_ApplicationVersion 0x01
 #define MAIN_OrderNumber "OpenKnxLEDDimmer"
-#define MAIN_ParameterSize 249
-#define MAIN_MaxKoNumber 482
+#define MAIN_ParameterSize 703
+#define MAIN_MaxKoNumber 676
 
 
-#define APP_Device		0x0000
+#define APP_ControllerType		0x0000
 // Offset: 0, Size: 1 Bit, Text: Gerät
-#define ParamAPP_Device knx.paramBit(APP_Device, 0)
+#define ParamAPP_ControllerType knx.paramBit(APP_ControllerType, 0)
 #define APP_OperatingMode		0x0000
-#define APP_OperatingMode_Shift	3
-#define APP_OperatingMode_Mask	0x000F
-// Offset: 0, BitOffset: 1, Size: 4 Bit, Text: Betriebsmodus
+#define APP_OperatingMode_Shift	1
+#define APP_OperatingMode_Mask	0x003F
+// Offset: 0, BitOffset: 1, Size: 6 Bit, Text: Betriebsmodus
 #define ParamAPP_OperatingMode ((uint)((knx.paramByte(APP_OperatingMode) >> APP_OperatingMode_Shift) & APP_OperatingMode_Mask))
 #define APP_PwmFrequenz		0x0001
 #define APP_PwmFrequenz_Shift	5
@@ -56,29 +56,29 @@
 // Offset: 1, Size: 11 Bit, Text: PWM Frequenz
 #define ParamAPP_PwmFrequenz ((uint)((knx.paramWord(APP_PwmFrequenz) >> APP_PwmFrequenz_Shift) & APP_PwmFrequenz_Mask))
 #define APP_SendMeasuredValues		0x0000
-// Offset: 0, BitOffset: 5, Size: 1 Bit, Text: Messwerte zyklisch senden
-#define ParamAPP_SendMeasuredValues knx.paramBit(APP_SendMeasuredValues, 5)
-#define APP_TempSensorPresent		0x0000
-// Offset: 0, BitOffset: 6, Size: 1 Bit, Text: Temperatursensor verbaut
-#define ParamAPP_TempSensorPresent knx.paramBit(APP_TempSensorPresent, 6)
-#define APP_MeasurementIntervalTime		0x0003
+// Offset: 0, BitOffset: 7, Size: 1 Bit, Text: Messwerte zyklisch senden
+#define ParamAPP_SendMeasuredValues knx.paramBit(APP_SendMeasuredValues, 7)
+#define APP_TempSensorPresent		0x0003
+// Offset: 3, Size: 1 Bit, Text: Temperatursensor verbaut
+#define ParamAPP_TempSensorPresent knx.paramBit(APP_TempSensorPresent, 0)
+#define APP_MeasurementIntervalTime		0x0004
 #define APP_MeasurementIntervalTime_Shift	2
 #define APP_MeasurementIntervalTime_Mask	0x3FFF
-// Offset: 3, Size: 14 Bit, Text: Zeit
+// Offset: 4, Size: 14 Bit, Text: Zeit
 #define ParamAPP_MeasurementIntervalTime ((uint)((knx.paramWord(APP_MeasurementIntervalTime) >> APP_MeasurementIntervalTime_Shift) & APP_MeasurementIntervalTime_Mask))
 #define ParamAPP_MeasurementIntervalTimeMS (paramDelay(ParamAPP_MeasurementIntervalTime))
-#define APP_MeasurementIntervalBase		0x0005
-#define APP_MeasurementIntervalBase_Shift	6
+#define APP_MeasurementIntervalBase		0x0003
+#define APP_MeasurementIntervalBase_Shift	5
 #define APP_MeasurementIntervalBase_Mask	0x0003
-// Offset: 5, Size: 2 Bit, Text: Zeitbasis
+// Offset: 3, BitOffset: 1, Size: 2 Bit, Text: Zeitbasis
 #define ParamAPP_MeasurementIntervalBase ((uint)((knx.paramByte(APP_MeasurementIntervalBase) >> APP_MeasurementIntervalBase_Shift) & APP_MeasurementIntervalBase_Mask))
-#define APP_ShuntValue		0x0005
-#define APP_ShuntValue_Shift	2
+#define APP_ShuntValue		0x0003
+#define APP_ShuntValue_Shift	1
 #define APP_ShuntValue_Mask	0x000F
-// Offset: 5, BitOffset: 2, Size: 4 Bit, Text: Wert des verbauten Messwiderstand
+// Offset: 3, BitOffset: 3, Size: 4 Bit, Text: Wert des verbauten Messwiderstand
 #define ParamAPP_ShuntValue ((uint)((knx.paramByte(APP_ShuntValue) >> APP_ShuntValue_Shift) & APP_ShuntValue_Mask))
-#define APP_DayNight		0x0000
-// Offset: 0, BitOffset: 7, Size: 1 Bit, Text: Tag/Nacht Objekt
+#define APP_DayNight		0x0003
+// Offset: 3, BitOffset: 7, Size: 1 Bit, Text: Tag/Nacht Objekt
 #define ParamAPP_DayNight knx.paramBit(APP_DayNight, 7)
 #define APP_Func1BtnClick		0x0006
 #define APP_Func1BtnClick_Shift	4
@@ -94,6 +94,18 @@
 #define APP_Func1BtnLongClick_Mask	0x000F
 // Offset: 7, Size: 4 Bit, Text: Aktion - Func1 Button Langer Klick
 #define ParamAPP_Func1BtnLongClick ((uint)((knx.paramByte(APP_Func1BtnLongClick) >> APP_Func1BtnLongClick_Shift) & APP_Func1BtnLongClick_Mask))
+#define APP_AlarmOverVoltage		0x0008
+// Offset: 8, Size: 16 Bit (2 Byte), Text: Grenzwert Überspannung
+#define ParamAPP_AlarmOverVoltage knx.paramFloat(APP_AlarmOverVoltage, Float_Enc_DPT9)
+#define APP_AlarmUnderVoltage		0x000A
+// Offset: 10, Size: 16 Bit (2 Byte), Text: Grenzwert Unterpannung
+#define ParamAPP_AlarmUnderVoltage knx.paramFloat(APP_AlarmUnderVoltage, Float_Enc_DPT9)
+#define APP_AlarmOverTemp		0x000C
+// Offset: 12, Size: 16 Bit (2 Byte), Text: Übertemperaturabschaltung bei
+#define ParamAPP_AlarmOverTemp knx.paramFloat(APP_AlarmOverTemp, Float_Enc_DPT9)
+#define APP_AlarmOverCurrent		0x000E
+// Offset: 14, Size: 16 Bit (2 Byte), Text: Grenzwert Überstrom
+#define ParamAPP_AlarmOverCurrent knx.paramFloat(APP_AlarmOverCurrent, Float_Enc_DPT9)
 //!< Number: 31, Text: Spannung, Function: Messwert
 #define APP_KoVoltageV 31
 #define KoAPP_VoltageV knx.getGroupObject(APP_KoVoltageV)
@@ -109,26 +121,41 @@
 //!< Number: 40, Text: Tag/Nacht, Function: Allgemein
 #define APP_KoDayNight 40
 #define KoAPP_DayNight knx.getGroupObject(APP_KoDayNight)
+//!< Number: 45, Text: Überspannung, Function: Alarm
+#define APP_KoAlarmOverVoltage 45
+#define KoAPP_AlarmOverVoltage knx.getGroupObject(APP_KoAlarmOverVoltage)
+//!< Number: 46, Text: Unterspannung, Function: Alarm
+#define APP_KoAlarmUnderVoltage 46
+#define KoAPP_AlarmUnderVoltage knx.getGroupObject(APP_KoAlarmUnderVoltage)
+//!< Number: 47, Text: Übertemperatur, Function: Alarm
+#define APP_KoAlarmOverTemp 47
+#define KoAPP_AlarmOverTemp knx.getGroupObject(APP_KoAlarmOverTemp)
+//!< Number: 48, Text: Überstrom, Function: Alarm
+#define APP_KoAlarmOverCurrent 48
+#define KoAPP_AlarmOverCurrent knx.getGroupObject(APP_KoAlarmOverCurrent)
+//!< Number: 34, Text: Wirkleistung (Wh), Function: Zähler
+#define APP_KoActivePowerWh 34
+#define KoAPP_ActivePowerWh knx.getGroupObject(APP_KoActivePowerWh)
 
 //---------------------Modules----------------------------
 
 //-----Module specific starts
-#define BASE_Share_ParamBlockOffset 8
+#define BASE_Share_ParamBlockOffset 16
 #define BASE_Share_ParamBlockSize 45
-#define EK_ParamBlockOffset 53
-#define EK_ParamBlockSize 6
-#define TW_ParamBlockOffset 125
-#define TW_ParamBlockSize 14
-#define RGB_ParamBlockOffset 209
-#define RGB_ParamBlockSize 10
-#define BASE_Share_KoOffset 41
+#define EK_ParamBlockOffset 61
+#define EK_ParamBlockSize 21
+#define TW_ParamBlockOffset 313
+#define TW_ParamBlockSize 39
+#define RGB_ParamBlockOffset 547
+#define RGB_ParamBlockSize 39
+#define BASE_Share_KoOffset 49
 #define BASE_Share_KoBlockSize 11
-#define EK_KoOffset 52
-#define EK_KoBlockSize 18
-#define TW_KoOffset 268
-#define TW_KoBlockSize 19
-#define RGB_KoOffset 382
-#define RGB_KoBlockSize 25
+#define EK_KoOffset 60
+#define EK_KoBlockSize 28
+#define TW_KoOffset 396
+#define TW_KoBlockSize 28
+#define RGB_KoOffset 564
+#define RGB_KoBlockSize 28
 
 //-----Module: Common Share
 #define BASE_StartupDelayBase		0x0000
@@ -279,6 +306,81 @@
 #define ParamEK_DimCurveIndex(X) ((uint)((knx.paramByte((EK_ParamBlockOffset + EK_ParamBlockSize * X + EK_DimCurve)) >> EK_DimCurve_Shift) & EK_DimCurve_Mask))
 // Offset: 5, Size: 3 Bit, Text: Dimmkurve
 #define ParamEK_DimCurve ((uint)((knx.paramByte((EK_ParamBlockOffset + EK_ParamBlockSize * channelIndex() + EK_DimCurve)) >> EK_DimCurve_Shift) & EK_DimCurve_Mask))
+#define EK_SceneNumberA		0x0006
+// Offset: 6, Size: 8 Bit (1 Byte), Text: 
+#define ParamEK_SceneNumberAIndex(X) ((int8_t)((knx.paramByte((EK_ParamBlockOffset + EK_ParamBlockSize * X + EK_SceneNumberA)))))
+// Offset: 6, Size: 8 Bit (1 Byte), Text: 
+#define ParamEK_SceneNumberA ((int8_t)((knx.paramByte((EK_ParamBlockOffset + EK_ParamBlockSize * channelIndex() + EK_SceneNumberA)))))
+#define EK_SceneNumberB		0x0007
+// Offset: 7, Size: 8 Bit (1 Byte), Text: 
+#define ParamEK_SceneNumberBIndex(X) ((int8_t)((knx.paramByte((EK_ParamBlockOffset + EK_ParamBlockSize * X + EK_SceneNumberB)))))
+// Offset: 7, Size: 8 Bit (1 Byte), Text: 
+#define ParamEK_SceneNumberB ((int8_t)((knx.paramByte((EK_ParamBlockOffset + EK_ParamBlockSize * channelIndex() + EK_SceneNumberB)))))
+#define EK_SceneNumberC		0x0008
+// Offset: 8, Size: 8 Bit (1 Byte), Text: 
+#define ParamEK_SceneNumberCIndex(X) ((int8_t)((knx.paramByte((EK_ParamBlockOffset + EK_ParamBlockSize * X + EK_SceneNumberC)))))
+// Offset: 8, Size: 8 Bit (1 Byte), Text: 
+#define ParamEK_SceneNumberC ((int8_t)((knx.paramByte((EK_ParamBlockOffset + EK_ParamBlockSize * channelIndex() + EK_SceneNumberC)))))
+#define EK_SceneNumberD		0x0009
+// Offset: 9, Size: 8 Bit (1 Byte), Text: 
+#define ParamEK_SceneNumberDIndex(X) ((int8_t)((knx.paramByte((EK_ParamBlockOffset + EK_ParamBlockSize * X + EK_SceneNumberD)))))
+// Offset: 9, Size: 8 Bit (1 Byte), Text: 
+#define ParamEK_SceneNumberD ((int8_t)((knx.paramByte((EK_ParamBlockOffset + EK_ParamBlockSize * channelIndex() + EK_SceneNumberD)))))
+#define EK_SceneNumberE		0x000A
+// Offset: 10, Size: 8 Bit (1 Byte), Text: 
+#define ParamEK_SceneNumberEIndex(X) ((int8_t)((knx.paramByte((EK_ParamBlockOffset + EK_ParamBlockSize * X + EK_SceneNumberE)))))
+// Offset: 10, Size: 8 Bit (1 Byte), Text: 
+#define ParamEK_SceneNumberE ((int8_t)((knx.paramByte((EK_ParamBlockOffset + EK_ParamBlockSize * channelIndex() + EK_SceneNumberE)))))
+#define EK_SceneActionA		0x000B
+// Offset: 11, Size: 8 Bit (1 Byte), Text: 
+#define ParamEK_SceneActionAIndex(X) ((uint)((knx.paramByte((EK_ParamBlockOffset + EK_ParamBlockSize * X + EK_SceneActionA)))))
+// Offset: 11, Size: 8 Bit (1 Byte), Text: 
+#define ParamEK_SceneActionA ((uint)((knx.paramByte((EK_ParamBlockOffset + EK_ParamBlockSize * channelIndex() + EK_SceneActionA)))))
+#define EK_SceneActionB		0x000C
+// Offset: 12, Size: 8 Bit (1 Byte), Text: 
+#define ParamEK_SceneActionBIndex(X) ((uint)((knx.paramByte((EK_ParamBlockOffset + EK_ParamBlockSize * X + EK_SceneActionB)))))
+// Offset: 12, Size: 8 Bit (1 Byte), Text: 
+#define ParamEK_SceneActionB ((uint)((knx.paramByte((EK_ParamBlockOffset + EK_ParamBlockSize * channelIndex() + EK_SceneActionB)))))
+#define EK_SceneActionC		0x000D
+// Offset: 13, Size: 8 Bit (1 Byte), Text: 
+#define ParamEK_SceneActionCIndex(X) ((uint)((knx.paramByte((EK_ParamBlockOffset + EK_ParamBlockSize * X + EK_SceneActionC)))))
+// Offset: 13, Size: 8 Bit (1 Byte), Text: 
+#define ParamEK_SceneActionC ((uint)((knx.paramByte((EK_ParamBlockOffset + EK_ParamBlockSize * channelIndex() + EK_SceneActionC)))))
+#define EK_SceneActionD		0x000E
+// Offset: 14, Size: 8 Bit (1 Byte), Text: 
+#define ParamEK_SceneActionDIndex(X) ((uint)((knx.paramByte((EK_ParamBlockOffset + EK_ParamBlockSize * X + EK_SceneActionD)))))
+// Offset: 14, Size: 8 Bit (1 Byte), Text: 
+#define ParamEK_SceneActionD ((uint)((knx.paramByte((EK_ParamBlockOffset + EK_ParamBlockSize * channelIndex() + EK_SceneActionD)))))
+#define EK_SceneActionE		0x000F
+// Offset: 15, Size: 8 Bit (1 Byte), Text: 
+#define ParamEK_SceneActionEIndex(X) ((uint)((knx.paramByte((EK_ParamBlockOffset + EK_ParamBlockSize * X + EK_SceneActionE)))))
+// Offset: 15, Size: 8 Bit (1 Byte), Text: 
+#define ParamEK_SceneActionE ((uint)((knx.paramByte((EK_ParamBlockOffset + EK_ParamBlockSize * channelIndex() + EK_SceneActionE)))))
+#define EK_SceneBrightnessA		0x0010
+// Offset: 16, Size: 8 Bit (1 Byte), Text: 
+#define ParamEK_SceneBrightnessAIndex(X) ((uint)((knx.paramByte((EK_ParamBlockOffset + EK_ParamBlockSize * X + EK_SceneBrightnessA)))))
+// Offset: 16, Size: 8 Bit (1 Byte), Text: 
+#define ParamEK_SceneBrightnessA ((uint)((knx.paramByte((EK_ParamBlockOffset + EK_ParamBlockSize * channelIndex() + EK_SceneBrightnessA)))))
+#define EK_SceneBrightnessB		0x0011
+// Offset: 17, Size: 8 Bit (1 Byte), Text: 
+#define ParamEK_SceneBrightnessBIndex(X) ((uint)((knx.paramByte((EK_ParamBlockOffset + EK_ParamBlockSize * X + EK_SceneBrightnessB)))))
+// Offset: 17, Size: 8 Bit (1 Byte), Text: 
+#define ParamEK_SceneBrightnessB ((uint)((knx.paramByte((EK_ParamBlockOffset + EK_ParamBlockSize * channelIndex() + EK_SceneBrightnessB)))))
+#define EK_SceneBrightnessC		0x0012
+// Offset: 18, Size: 8 Bit (1 Byte), Text: 
+#define ParamEK_SceneBrightnessCIndex(X) ((uint)((knx.paramByte((EK_ParamBlockOffset + EK_ParamBlockSize * X + EK_SceneBrightnessC)))))
+// Offset: 18, Size: 8 Bit (1 Byte), Text: 
+#define ParamEK_SceneBrightnessC ((uint)((knx.paramByte((EK_ParamBlockOffset + EK_ParamBlockSize * channelIndex() + EK_SceneBrightnessC)))))
+#define EK_SceneBrightnessD		0x0013
+// Offset: 19, Size: 8 Bit (1 Byte), Text: 
+#define ParamEK_SceneBrightnessDIndex(X) ((uint)((knx.paramByte((EK_ParamBlockOffset + EK_ParamBlockSize * X + EK_SceneBrightnessD)))))
+// Offset: 19, Size: 8 Bit (1 Byte), Text: 
+#define ParamEK_SceneBrightnessD ((uint)((knx.paramByte((EK_ParamBlockOffset + EK_ParamBlockSize * channelIndex() + EK_SceneBrightnessD)))))
+#define EK_SceneBrightnessE		0x0014
+// Offset: 20, Size: 8 Bit (1 Byte), Text: 
+#define ParamEK_SceneBrightnessEIndex(X) ((uint)((knx.paramByte((EK_ParamBlockOffset + EK_ParamBlockSize * X + EK_SceneBrightnessE)))))
+// Offset: 20, Size: 8 Bit (1 Byte), Text: 
+#define ParamEK_SceneBrightnessE ((uint)((knx.paramByte((EK_ParamBlockOffset + EK_ParamBlockSize * channelIndex() + EK_SceneBrightnessE)))))
 //!< Number: 0, Text: EK{{argChan}}: {{0:---}}, Function: Schalten
 #define EK_KoSwitch 0
 #define KoEK_SwitchIndex(X) knx.getGroupObject(EK_KoOffset + EK_KoBlockSize * X + EK_KoSwitch)
@@ -299,6 +401,10 @@
 #define EK_KoStatusBrightness 17
 #define KoEK_StatusBrightnessIndex(X) knx.getGroupObject(EK_KoOffset + EK_KoBlockSize * X + EK_KoStatusBrightness)
 #define KoEK_StatusBrightness knx.getGroupObject(EK_KoOffset + EK_KoBlockSize * channelIndex() + EK_KoStatusBrightness)
+//!< Number: 27, Text: EK{{argChan}}: {{0:---}}, Function: Szene
+#define EK_KoSceneNumber 27
+#define KoEK_SceneNumberIndex(X) knx.getGroupObject(EK_KoOffset + EK_KoBlockSize * X + EK_KoSceneNumber)
+#define KoEK_SceneNumber knx.getGroupObject(EK_KoOffset + EK_KoBlockSize * channelIndex() + EK_KoSceneNumber)
 
 //-----Module: TW
 #define TW_ColorTempWW		0x0000
@@ -340,19 +446,15 @@
 // Offset: 6, Size: 7 Bit, Text: Einschaltverhalten - Helligkeit (Nacht)
 #define ParamTW_NightBrightness ((uint)((knx.paramByte((TW_ParamBlockOffset + TW_ParamBlockSize * channelIndex() + TW_NightBrightness)) >> TW_NightBrightness_Shift) & TW_NightBrightness_Mask))
 #define TW_OnColorTemp		0x0007
-#define TW_OnColorTemp_Shift	2
-#define TW_OnColorTemp_Mask	0x3FFF
-// Offset: 7, Size: 14 Bit, Text: Einschaltverhalten - Farbtemperatur
-#define ParamTW_OnColorTempIndex(X) ((uint)((knx.paramWord((TW_ParamBlockOffset + TW_ParamBlockSize * X + TW_OnColorTemp)) >> TW_OnColorTemp_Shift) & TW_OnColorTemp_Mask))
-// Offset: 7, Size: 14 Bit, Text: Einschaltverhalten - Farbtemperatur
-#define ParamTW_OnColorTemp ((uint)((knx.paramWord((TW_ParamBlockOffset + TW_ParamBlockSize * channelIndex() + TW_OnColorTemp)) >> TW_OnColorTemp_Shift) & TW_OnColorTemp_Mask))
+// Offset: 7, Size: 16 Bit (2 Byte), Text: Einschaltverhalten - Farbtemperatur
+#define ParamTW_OnColorTempIndex(X) ((uint)((knx.paramWord((TW_ParamBlockOffset + TW_ParamBlockSize * X + TW_OnColorTemp)))))
+// Offset: 7, Size: 16 Bit (2 Byte), Text: Einschaltverhalten - Farbtemperatur
+#define ParamTW_OnColorTemp ((uint)((knx.paramWord((TW_ParamBlockOffset + TW_ParamBlockSize * channelIndex() + TW_OnColorTemp)))))
 #define TW_NightColorTemp		0x0009
-#define TW_NightColorTemp_Shift	2
-#define TW_NightColorTemp_Mask	0x3FFF
-// Offset: 9, Size: 14 Bit, Text: Einschaltverhalten - Farbtemperatur (Nacht)
-#define ParamTW_NightColorTempIndex(X) ((uint)((knx.paramWord((TW_ParamBlockOffset + TW_ParamBlockSize * X + TW_NightColorTemp)) >> TW_NightColorTemp_Shift) & TW_NightColorTemp_Mask))
-// Offset: 9, Size: 14 Bit, Text: Einschaltverhalten - Farbtemperatur (Nacht)
-#define ParamTW_NightColorTemp ((uint)((knx.paramWord((TW_ParamBlockOffset + TW_ParamBlockSize * channelIndex() + TW_NightColorTemp)) >> TW_NightColorTemp_Shift) & TW_NightColorTemp_Mask))
+// Offset: 9, Size: 16 Bit (2 Byte), Text: Einschaltverhalten - Farbtemperatur (Nacht)
+#define ParamTW_NightColorTempIndex(X) ((uint)((knx.paramWord((TW_ParamBlockOffset + TW_ParamBlockSize * X + TW_NightColorTemp)))))
+// Offset: 9, Size: 16 Bit (2 Byte), Text: Einschaltverhalten - Farbtemperatur (Nacht)
+#define ParamTW_NightColorTemp ((uint)((knx.paramWord((TW_ParamBlockOffset + TW_ParamBlockSize * channelIndex() + TW_NightColorTemp)))))
 #define TW_RelativDimTime		0x000B
 #define TW_RelativDimTime_Shift	1
 #define TW_RelativDimTime_Mask	0x007F
@@ -388,6 +490,106 @@
 #define ParamTW_DimCurveIndex(X) ((uint)((knx.paramByte((TW_ParamBlockOffset + TW_ParamBlockSize * X + TW_DimCurve)) >> TW_DimCurve_Shift) & TW_DimCurve_Mask))
 // Offset: 13, Size: 3 Bit, Text: Dimmkurve
 #define ParamTW_DimCurve ((uint)((knx.paramByte((TW_ParamBlockOffset + TW_ParamBlockSize * channelIndex() + TW_DimCurve)) >> TW_DimCurve_Shift) & TW_DimCurve_Mask))
+#define TW_SceneNumberA		0x000E
+// Offset: 14, Size: 8 Bit (1 Byte), Text: 
+#define ParamTW_SceneNumberAIndex(X) ((int8_t)((knx.paramByte((TW_ParamBlockOffset + TW_ParamBlockSize * X + TW_SceneNumberA)))))
+// Offset: 14, Size: 8 Bit (1 Byte), Text: 
+#define ParamTW_SceneNumberA ((int8_t)((knx.paramByte((TW_ParamBlockOffset + TW_ParamBlockSize * channelIndex() + TW_SceneNumberA)))))
+#define TW_SceneNumberB		0x000F
+// Offset: 15, Size: 8 Bit (1 Byte), Text: 
+#define ParamTW_SceneNumberBIndex(X) ((int8_t)((knx.paramByte((TW_ParamBlockOffset + TW_ParamBlockSize * X + TW_SceneNumberB)))))
+// Offset: 15, Size: 8 Bit (1 Byte), Text: 
+#define ParamTW_SceneNumberB ((int8_t)((knx.paramByte((TW_ParamBlockOffset + TW_ParamBlockSize * channelIndex() + TW_SceneNumberB)))))
+#define TW_SceneNumberC		0x0010
+// Offset: 16, Size: 8 Bit (1 Byte), Text: 
+#define ParamTW_SceneNumberCIndex(X) ((int8_t)((knx.paramByte((TW_ParamBlockOffset + TW_ParamBlockSize * X + TW_SceneNumberC)))))
+// Offset: 16, Size: 8 Bit (1 Byte), Text: 
+#define ParamTW_SceneNumberC ((int8_t)((knx.paramByte((TW_ParamBlockOffset + TW_ParamBlockSize * channelIndex() + TW_SceneNumberC)))))
+#define TW_SceneNumberD		0x0011
+// Offset: 17, Size: 8 Bit (1 Byte), Text: 
+#define ParamTW_SceneNumberDIndex(X) ((int8_t)((knx.paramByte((TW_ParamBlockOffset + TW_ParamBlockSize * X + TW_SceneNumberD)))))
+// Offset: 17, Size: 8 Bit (1 Byte), Text: 
+#define ParamTW_SceneNumberD ((int8_t)((knx.paramByte((TW_ParamBlockOffset + TW_ParamBlockSize * channelIndex() + TW_SceneNumberD)))))
+#define TW_SceneNumberE		0x0012
+// Offset: 18, Size: 8 Bit (1 Byte), Text: 
+#define ParamTW_SceneNumberEIndex(X) ((int8_t)((knx.paramByte((TW_ParamBlockOffset + TW_ParamBlockSize * X + TW_SceneNumberE)))))
+// Offset: 18, Size: 8 Bit (1 Byte), Text: 
+#define ParamTW_SceneNumberE ((int8_t)((knx.paramByte((TW_ParamBlockOffset + TW_ParamBlockSize * channelIndex() + TW_SceneNumberE)))))
+#define TW_SceneActionA		0x0013
+// Offset: 19, Size: 8 Bit (1 Byte), Text: 
+#define ParamTW_SceneActionAIndex(X) ((uint)((knx.paramByte((TW_ParamBlockOffset + TW_ParamBlockSize * X + TW_SceneActionA)))))
+// Offset: 19, Size: 8 Bit (1 Byte), Text: 
+#define ParamTW_SceneActionA ((uint)((knx.paramByte((TW_ParamBlockOffset + TW_ParamBlockSize * channelIndex() + TW_SceneActionA)))))
+#define TW_SceneActionB		0x0014
+// Offset: 20, Size: 8 Bit (1 Byte), Text: 
+#define ParamTW_SceneActionBIndex(X) ((uint)((knx.paramByte((TW_ParamBlockOffset + TW_ParamBlockSize * X + TW_SceneActionB)))))
+// Offset: 20, Size: 8 Bit (1 Byte), Text: 
+#define ParamTW_SceneActionB ((uint)((knx.paramByte((TW_ParamBlockOffset + TW_ParamBlockSize * channelIndex() + TW_SceneActionB)))))
+#define TW_SceneActionC		0x0015
+// Offset: 21, Size: 8 Bit (1 Byte), Text: 
+#define ParamTW_SceneActionCIndex(X) ((uint)((knx.paramByte((TW_ParamBlockOffset + TW_ParamBlockSize * X + TW_SceneActionC)))))
+// Offset: 21, Size: 8 Bit (1 Byte), Text: 
+#define ParamTW_SceneActionC ((uint)((knx.paramByte((TW_ParamBlockOffset + TW_ParamBlockSize * channelIndex() + TW_SceneActionC)))))
+#define TW_SceneActionD		0x0016
+// Offset: 22, Size: 8 Bit (1 Byte), Text: 
+#define ParamTW_SceneActionDIndex(X) ((uint)((knx.paramByte((TW_ParamBlockOffset + TW_ParamBlockSize * X + TW_SceneActionD)))))
+// Offset: 22, Size: 8 Bit (1 Byte), Text: 
+#define ParamTW_SceneActionD ((uint)((knx.paramByte((TW_ParamBlockOffset + TW_ParamBlockSize * channelIndex() + TW_SceneActionD)))))
+#define TW_SceneActionE		0x0017
+// Offset: 23, Size: 8 Bit (1 Byte), Text: 
+#define ParamTW_SceneActionEIndex(X) ((uint)((knx.paramByte((TW_ParamBlockOffset + TW_ParamBlockSize * X + TW_SceneActionE)))))
+// Offset: 23, Size: 8 Bit (1 Byte), Text: 
+#define ParamTW_SceneActionE ((uint)((knx.paramByte((TW_ParamBlockOffset + TW_ParamBlockSize * channelIndex() + TW_SceneActionE)))))
+#define TW_SceneBrightnessA		0x0018
+// Offset: 24, Size: 8 Bit (1 Byte), Text: 
+#define ParamTW_SceneBrightnessAIndex(X) ((uint)((knx.paramByte((TW_ParamBlockOffset + TW_ParamBlockSize * X + TW_SceneBrightnessA)))))
+// Offset: 24, Size: 8 Bit (1 Byte), Text: 
+#define ParamTW_SceneBrightnessA ((uint)((knx.paramByte((TW_ParamBlockOffset + TW_ParamBlockSize * channelIndex() + TW_SceneBrightnessA)))))
+#define TW_SceneBrightnessB		0x0019
+// Offset: 25, Size: 8 Bit (1 Byte), Text: 
+#define ParamTW_SceneBrightnessBIndex(X) ((uint)((knx.paramByte((TW_ParamBlockOffset + TW_ParamBlockSize * X + TW_SceneBrightnessB)))))
+// Offset: 25, Size: 8 Bit (1 Byte), Text: 
+#define ParamTW_SceneBrightnessB ((uint)((knx.paramByte((TW_ParamBlockOffset + TW_ParamBlockSize * channelIndex() + TW_SceneBrightnessB)))))
+#define TW_SceneBrightnessC		0x001A
+// Offset: 26, Size: 8 Bit (1 Byte), Text: 
+#define ParamTW_SceneBrightnessCIndex(X) ((uint)((knx.paramByte((TW_ParamBlockOffset + TW_ParamBlockSize * X + TW_SceneBrightnessC)))))
+// Offset: 26, Size: 8 Bit (1 Byte), Text: 
+#define ParamTW_SceneBrightnessC ((uint)((knx.paramByte((TW_ParamBlockOffset + TW_ParamBlockSize * channelIndex() + TW_SceneBrightnessC)))))
+#define TW_SceneBrightnessD		0x001B
+// Offset: 27, Size: 8 Bit (1 Byte), Text: 
+#define ParamTW_SceneBrightnessDIndex(X) ((uint)((knx.paramByte((TW_ParamBlockOffset + TW_ParamBlockSize * X + TW_SceneBrightnessD)))))
+// Offset: 27, Size: 8 Bit (1 Byte), Text: 
+#define ParamTW_SceneBrightnessD ((uint)((knx.paramByte((TW_ParamBlockOffset + TW_ParamBlockSize * channelIndex() + TW_SceneBrightnessD)))))
+#define TW_SceneBrightnessE		0x001C
+// Offset: 28, Size: 8 Bit (1 Byte), Text: 
+#define ParamTW_SceneBrightnessEIndex(X) ((uint)((knx.paramByte((TW_ParamBlockOffset + TW_ParamBlockSize * X + TW_SceneBrightnessE)))))
+// Offset: 28, Size: 8 Bit (1 Byte), Text: 
+#define ParamTW_SceneBrightnessE ((uint)((knx.paramByte((TW_ParamBlockOffset + TW_ParamBlockSize * channelIndex() + TW_SceneBrightnessE)))))
+#define TW_SceneKelvinA		0x001D
+// Offset: 29, Size: 16 Bit (2 Byte), Text: 
+#define ParamTW_SceneKelvinAIndex(X) ((uint)((knx.paramWord((TW_ParamBlockOffset + TW_ParamBlockSize * X + TW_SceneKelvinA)))))
+// Offset: 29, Size: 16 Bit (2 Byte), Text: 
+#define ParamTW_SceneKelvinA ((uint)((knx.paramWord((TW_ParamBlockOffset + TW_ParamBlockSize * channelIndex() + TW_SceneKelvinA)))))
+#define TW_SceneKelvinB		0x001F
+// Offset: 31, Size: 16 Bit (2 Byte), Text: 
+#define ParamTW_SceneKelvinBIndex(X) ((uint)((knx.paramWord((TW_ParamBlockOffset + TW_ParamBlockSize * X + TW_SceneKelvinB)))))
+// Offset: 31, Size: 16 Bit (2 Byte), Text: 
+#define ParamTW_SceneKelvinB ((uint)((knx.paramWord((TW_ParamBlockOffset + TW_ParamBlockSize * channelIndex() + TW_SceneKelvinB)))))
+#define TW_SceneKelvinC		0x0021
+// Offset: 33, Size: 16 Bit (2 Byte), Text: 
+#define ParamTW_SceneKelvinCIndex(X) ((uint)((knx.paramWord((TW_ParamBlockOffset + TW_ParamBlockSize * X + TW_SceneKelvinC)))))
+// Offset: 33, Size: 16 Bit (2 Byte), Text: 
+#define ParamTW_SceneKelvinC ((uint)((knx.paramWord((TW_ParamBlockOffset + TW_ParamBlockSize * channelIndex() + TW_SceneKelvinC)))))
+#define TW_SceneKelvinD		0x0023
+// Offset: 35, Size: 16 Bit (2 Byte), Text: 
+#define ParamTW_SceneKelvinDIndex(X) ((uint)((knx.paramWord((TW_ParamBlockOffset + TW_ParamBlockSize * X + TW_SceneKelvinD)))))
+// Offset: 35, Size: 16 Bit (2 Byte), Text: 
+#define ParamTW_SceneKelvinD ((uint)((knx.paramWord((TW_ParamBlockOffset + TW_ParamBlockSize * channelIndex() + TW_SceneKelvinD)))))
+#define TW_SceneKelvinE		0x0025
+// Offset: 37, Size: 16 Bit (2 Byte), Text: 
+#define ParamTW_SceneKelvinEIndex(X) ((uint)((knx.paramWord((TW_ParamBlockOffset + TW_ParamBlockSize * X + TW_SceneKelvinE)))))
+// Offset: 37, Size: 16 Bit (2 Byte), Text: 
+#define ParamTW_SceneKelvinE ((uint)((knx.paramWord((TW_ParamBlockOffset + TW_ParamBlockSize * channelIndex() + TW_SceneKelvinE)))))
 //!< Number: 0, Text: TW{{argChan}}: {{0:---}}, Function: Schalten
 #define TW_KoSwitch 0
 #define KoTW_SwitchIndex(X) knx.getGroupObject(TW_KoOffset + TW_KoBlockSize * X + TW_KoSwitch)
@@ -405,9 +607,9 @@
 #define KoTW_DimRelativBrightnessIndex(X) knx.getGroupObject(TW_KoOffset + TW_KoBlockSize * X + TW_KoDimRelativBrightness)
 #define KoTW_DimRelativBrightness knx.getGroupObject(TW_KoOffset + TW_KoBlockSize * channelIndex() + TW_KoDimRelativBrightness)
 //!< Number: 11, Text: TW{{argChan}}: {{0:---}}, Function: Dimmen Relativ Anteil (KW)
-#define TW_KoDimRelativColorKW 11
-#define KoTW_DimRelativColorKWIndex(X) knx.getGroupObject(TW_KoOffset + TW_KoBlockSize * X + TW_KoDimRelativColorKW)
-#define KoTW_DimRelativColorKW knx.getGroupObject(TW_KoOffset + TW_KoBlockSize * channelIndex() + TW_KoDimRelativColorKW)
+#define TW_KoDimRelativKW 11
+#define KoTW_DimRelativKWIndex(X) knx.getGroupObject(TW_KoOffset + TW_KoBlockSize * X + TW_KoDimRelativKW)
+#define KoTW_DimRelativKW knx.getGroupObject(TW_KoOffset + TW_KoBlockSize * channelIndex() + TW_KoDimRelativKW)
 //!< Number: 16, Text: TW{{argChan}}: {{0:---}}, Function: Status An/Aus
 #define TW_KoStatusOnOff 16
 #define KoTW_StatusOnOffIndex(X) knx.getGroupObject(TW_KoOffset + TW_KoBlockSize * X + TW_KoStatusOnOff)
@@ -420,6 +622,14 @@
 #define TW_KoStatusColorTemp 18
 #define KoTW_StatusColorTempIndex(X) knx.getGroupObject(TW_KoOffset + TW_KoBlockSize * X + TW_KoStatusColorTemp)
 #define KoTW_StatusColorTemp knx.getGroupObject(TW_KoOffset + TW_KoBlockSize * channelIndex() + TW_KoStatusColorTemp)
+//!< Number: 19, Text: TW{{argChan}}: {{0:---}}, Function: Status Anteil (KW)
+#define TW_KoStatusKW 19
+#define KoTW_StatusKWIndex(X) knx.getGroupObject(TW_KoOffset + TW_KoBlockSize * X + TW_KoStatusKW)
+#define KoTW_StatusKW knx.getGroupObject(TW_KoOffset + TW_KoBlockSize * channelIndex() + TW_KoStatusKW)
+//!< Number: 27, Text: TW{{argChan}}: {{0:---}}, Function: Szene
+#define TW_KoSceneNumber 27
+#define KoTW_SceneNumberIndex(X) knx.getGroupObject(TW_KoOffset + TW_KoBlockSize * X + TW_KoSceneNumber)
+#define KoTW_SceneNumber knx.getGroupObject(TW_KoOffset + TW_KoBlockSize * channelIndex() + TW_KoSceneNumber)
 
 //-----Module: RGB
 #define RGB_UseOnColor		0x0000
@@ -477,6 +687,86 @@
 #define ParamRGB_DimCurveIndex(X) ((uint)((knx.paramByte((RGB_ParamBlockOffset + RGB_ParamBlockSize * X + RGB_DimCurve)) >> RGB_DimCurve_Shift) & RGB_DimCurve_Mask))
 // Offset: 9, Size: 3 Bit, Text: Dimmkurve
 #define ParamRGB_DimCurve ((uint)((knx.paramByte((RGB_ParamBlockOffset + RGB_ParamBlockSize * channelIndex() + RGB_DimCurve)) >> RGB_DimCurve_Shift) & RGB_DimCurve_Mask))
+#define RGB_GammaCorrection		0x000A
+// Offset: 10, Size: 32 Bit (4 Byte), Text: Gamma Korrektur
+#define ParamRGB_GammaCorrectionIndex(X) knx.paramFloat((RGB_ParamBlockOffset + RGB_ParamBlockSize * X + RGB_GammaCorrection), Float_Enc_IEEE754Single)
+// Offset: 10, Size: 32 Bit (4 Byte), Text: Gamma Korrektur
+#define ParamRGB_GammaCorrection knx.paramFloat((RGB_ParamBlockOffset + RGB_ParamBlockSize * channelIndex() + RGB_GammaCorrection), Float_Enc_IEEE754Single)
+#define RGB_SceneNumberA		0x000E
+// Offset: 14, Size: 8 Bit (1 Byte), Text: 
+#define ParamRGB_SceneNumberAIndex(X) ((int8_t)((knx.paramByte((RGB_ParamBlockOffset + RGB_ParamBlockSize * X + RGB_SceneNumberA)))))
+// Offset: 14, Size: 8 Bit (1 Byte), Text: 
+#define ParamRGB_SceneNumberA ((int8_t)((knx.paramByte((RGB_ParamBlockOffset + RGB_ParamBlockSize * channelIndex() + RGB_SceneNumberA)))))
+#define RGB_SceneNumberB		0x000F
+// Offset: 15, Size: 8 Bit (1 Byte), Text: 
+#define ParamRGB_SceneNumberBIndex(X) ((int8_t)((knx.paramByte((RGB_ParamBlockOffset + RGB_ParamBlockSize * X + RGB_SceneNumberB)))))
+// Offset: 15, Size: 8 Bit (1 Byte), Text: 
+#define ParamRGB_SceneNumberB ((int8_t)((knx.paramByte((RGB_ParamBlockOffset + RGB_ParamBlockSize * channelIndex() + RGB_SceneNumberB)))))
+#define RGB_SceneNumberC		0x0010
+// Offset: 16, Size: 8 Bit (1 Byte), Text: 
+#define ParamRGB_SceneNumberCIndex(X) ((int8_t)((knx.paramByte((RGB_ParamBlockOffset + RGB_ParamBlockSize * X + RGB_SceneNumberC)))))
+// Offset: 16, Size: 8 Bit (1 Byte), Text: 
+#define ParamRGB_SceneNumberC ((int8_t)((knx.paramByte((RGB_ParamBlockOffset + RGB_ParamBlockSize * channelIndex() + RGB_SceneNumberC)))))
+#define RGB_SceneNumberD		0x0011
+// Offset: 17, Size: 8 Bit (1 Byte), Text: 
+#define ParamRGB_SceneNumberDIndex(X) ((int8_t)((knx.paramByte((RGB_ParamBlockOffset + RGB_ParamBlockSize * X + RGB_SceneNumberD)))))
+// Offset: 17, Size: 8 Bit (1 Byte), Text: 
+#define ParamRGB_SceneNumberD ((int8_t)((knx.paramByte((RGB_ParamBlockOffset + RGB_ParamBlockSize * channelIndex() + RGB_SceneNumberD)))))
+#define RGB_SceneNumberE		0x0012
+// Offset: 18, Size: 8 Bit (1 Byte), Text: 
+#define ParamRGB_SceneNumberEIndex(X) ((int8_t)((knx.paramByte((RGB_ParamBlockOffset + RGB_ParamBlockSize * X + RGB_SceneNumberE)))))
+// Offset: 18, Size: 8 Bit (1 Byte), Text: 
+#define ParamRGB_SceneNumberE ((int8_t)((knx.paramByte((RGB_ParamBlockOffset + RGB_ParamBlockSize * channelIndex() + RGB_SceneNumberE)))))
+#define RGB_SceneActionA		0x0013
+// Offset: 19, Size: 8 Bit (1 Byte), Text: 
+#define ParamRGB_SceneActionAIndex(X) ((uint)((knx.paramByte((RGB_ParamBlockOffset + RGB_ParamBlockSize * X + RGB_SceneActionA)))))
+// Offset: 19, Size: 8 Bit (1 Byte), Text: 
+#define ParamRGB_SceneActionA ((uint)((knx.paramByte((RGB_ParamBlockOffset + RGB_ParamBlockSize * channelIndex() + RGB_SceneActionA)))))
+#define RGB_SceneActionB		0x0014
+// Offset: 20, Size: 8 Bit (1 Byte), Text: 
+#define ParamRGB_SceneActionBIndex(X) ((uint)((knx.paramByte((RGB_ParamBlockOffset + RGB_ParamBlockSize * X + RGB_SceneActionB)))))
+// Offset: 20, Size: 8 Bit (1 Byte), Text: 
+#define ParamRGB_SceneActionB ((uint)((knx.paramByte((RGB_ParamBlockOffset + RGB_ParamBlockSize * channelIndex() + RGB_SceneActionB)))))
+#define RGB_SceneActionC		0x0015
+// Offset: 21, Size: 8 Bit (1 Byte), Text: 
+#define ParamRGB_SceneActionCIndex(X) ((uint)((knx.paramByte((RGB_ParamBlockOffset + RGB_ParamBlockSize * X + RGB_SceneActionC)))))
+// Offset: 21, Size: 8 Bit (1 Byte), Text: 
+#define ParamRGB_SceneActionC ((uint)((knx.paramByte((RGB_ParamBlockOffset + RGB_ParamBlockSize * channelIndex() + RGB_SceneActionC)))))
+#define RGB_SceneActionD		0x0016
+// Offset: 22, Size: 8 Bit (1 Byte), Text: 
+#define ParamRGB_SceneActionDIndex(X) ((uint)((knx.paramByte((RGB_ParamBlockOffset + RGB_ParamBlockSize * X + RGB_SceneActionD)))))
+// Offset: 22, Size: 8 Bit (1 Byte), Text: 
+#define ParamRGB_SceneActionD ((uint)((knx.paramByte((RGB_ParamBlockOffset + RGB_ParamBlockSize * channelIndex() + RGB_SceneActionD)))))
+#define RGB_SceneActionE		0x0017
+// Offset: 23, Size: 8 Bit (1 Byte), Text: 
+#define ParamRGB_SceneActionEIndex(X) ((uint)((knx.paramByte((RGB_ParamBlockOffset + RGB_ParamBlockSize * X + RGB_SceneActionE)))))
+// Offset: 23, Size: 8 Bit (1 Byte), Text: 
+#define ParamRGB_SceneActionE ((uint)((knx.paramByte((RGB_ParamBlockOffset + RGB_ParamBlockSize * channelIndex() + RGB_SceneActionE)))))
+#define RGB_SceneColorA		0x0018
+// Offset: 24, Size: 24 Bit (3 Byte), Text: 
+#define ParamRGB_SceneColorAIndex(X) knx.paramData((RGB_ParamBlockOffset + RGB_ParamBlockSize * X + RGB_SceneColorA))
+// Offset: 24, Size: 24 Bit (3 Byte), Text: 
+#define ParamRGB_SceneColorA knx.paramData((RGB_ParamBlockOffset + RGB_ParamBlockSize * channelIndex() + RGB_SceneColorA))
+#define RGB_SceneColorB		0x001B
+// Offset: 27, Size: 24 Bit (3 Byte), Text: 
+#define ParamRGB_SceneColorBIndex(X) knx.paramData((RGB_ParamBlockOffset + RGB_ParamBlockSize * X + RGB_SceneColorB))
+// Offset: 27, Size: 24 Bit (3 Byte), Text: 
+#define ParamRGB_SceneColorB knx.paramData((RGB_ParamBlockOffset + RGB_ParamBlockSize * channelIndex() + RGB_SceneColorB))
+#define RGB_SceneColorC		0x001E
+// Offset: 30, Size: 24 Bit (3 Byte), Text: 
+#define ParamRGB_SceneColorCIndex(X) knx.paramData((RGB_ParamBlockOffset + RGB_ParamBlockSize * X + RGB_SceneColorC))
+// Offset: 30, Size: 24 Bit (3 Byte), Text: 
+#define ParamRGB_SceneColorC knx.paramData((RGB_ParamBlockOffset + RGB_ParamBlockSize * channelIndex() + RGB_SceneColorC))
+#define RGB_SceneColorD		0x0021
+// Offset: 33, Size: 24 Bit (3 Byte), Text: 
+#define ParamRGB_SceneColorDIndex(X) knx.paramData((RGB_ParamBlockOffset + RGB_ParamBlockSize * X + RGB_SceneColorD))
+// Offset: 33, Size: 24 Bit (3 Byte), Text: 
+#define ParamRGB_SceneColorD knx.paramData((RGB_ParamBlockOffset + RGB_ParamBlockSize * channelIndex() + RGB_SceneColorD))
+#define RGB_SceneColorE		0x0024
+// Offset: 36, Size: 24 Bit (3 Byte), Text: 
+#define ParamRGB_SceneColorEIndex(X) knx.paramData((RGB_ParamBlockOffset + RGB_ParamBlockSize * X + RGB_SceneColorE))
+// Offset: 36, Size: 24 Bit (3 Byte), Text: 
+#define ParamRGB_SceneColorE knx.paramData((RGB_ParamBlockOffset + RGB_ParamBlockSize * channelIndex() + RGB_SceneColorE))
 //!< Number: 0, Text: RGB{{argChan}}: {{0:---}}, Function: Schalten
 #define RGB_KoSwitch 0
 #define KoRGB_SwitchIndex(X) knx.getGroupObject(RGB_KoOffset + RGB_KoBlockSize * X + RGB_KoSwitch)
@@ -573,3 +863,7 @@
 #define RGB_KoStatusColorB 24
 #define KoRGB_StatusColorBIndex(X) knx.getGroupObject(RGB_KoOffset + RGB_KoBlockSize * X + RGB_KoStatusColorB)
 #define KoRGB_StatusColorB knx.getGroupObject(RGB_KoOffset + RGB_KoBlockSize * channelIndex() + RGB_KoStatusColorB)
+//!< Number: 27, Text: RGB{{argChan}}: {{0:---}}, Function: Szene
+#define RGB_KoSceneNumber 27
+#define KoRGB_SceneNumberIndex(X) knx.getGroupObject(RGB_KoOffset + RGB_KoBlockSize * X + RGB_KoSceneNumber)
+#define KoRGB_SceneNumber knx.getGroupObject(RGB_KoOffset + RGB_KoBlockSize * channelIndex() + RGB_KoSceneNumber)

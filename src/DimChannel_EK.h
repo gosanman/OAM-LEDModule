@@ -14,7 +14,9 @@
 
 // scene actions
 #define SC_EK_None              0
-#define SC_EK_SetBrightness     1
+#define SC_EK_OnValueDayNight   1
+#define SC_EK_SetBrightness     2
+#define SC_EK_Off               9
 
 //class LEDModule;
 class DimChannel_EK : public DimChannel
@@ -44,13 +46,12 @@ private:
 
     uint8_t _index;
 
-    uint8_t _lastUpdateValue = 0;
+    uint8_t _currentValueEK = 0;
 	uint8_t _lastDayValue = 255;
 	uint8_t _lastNightValue = 25;
 
-    uint32_t _currentTaskRun = 0;
-    uint32_t _lastTaskRun = 0;
-    bool _updateAvailable = false;
+    uint32_t _currentUpdateRun = 0;
+    uint32_t _lastUpdatekRun = 0;
 
     bool isNight = false;
 
@@ -61,7 +62,8 @@ private:
 
     uint16_t calcKoNumber(int koNum);
     void sendKoStateOnChange(uint16_t koNr, const KNXValue &value, const Dpt &type);
-    void getDimValue();
+    //void getDimValue();
+    void sendDimValue(); 
     void updateDimValue();
 
     uint32_t getTimeWithPattern(uint16_t time, uint8_t base);

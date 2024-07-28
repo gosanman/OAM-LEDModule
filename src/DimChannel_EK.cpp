@@ -35,7 +35,7 @@ void DimChannel_EK::setup(uint8_t* hwchannel)
     logDebugP("KO Dim Relativ: %i", calcKoNumber(EK_KoDimRelativ));
     logDebugP("KO Status OnOff: %i", calcKoNumber(EK_KoStatusOnOff));
     logDebugP("KO Status Brightness: %i", calcKoNumber(EK_KoStatusBrightness));
-    //logDebugP("KO Scene: %i", calcKoNumber(EK_KoScene));
+    logDebugP("KO Scene: %i", calcKoNumber(EK_KoSceneNumber));
     logDebugP("HW Port: %i", m_hwchannel);
     logDebugP("PT UseDayValue: %i", m_usedayvalue);
     logDebugP("PT DayBrightness: %i", m_dayvalue);
@@ -71,9 +71,9 @@ void DimChannel_EK::processInputKo(GroupObject &ko)
         break;
     
     //Szenensteuerung
-    //case EK_KoScene:
-    //    koHandleScene(ko);
-    //    break;
+    case EK_KoSceneNumber:
+        koHandleScene(ko);
+        break;
     }
 }
 
@@ -82,11 +82,10 @@ void DimChannel_EK::koHandleSwitch(GroupObject &ko)
     bool value = ko.value(DPT_Switch);
     if (value) //on
     {
-        uint8_t onValue = isNight ? (m_usenightvalue ? m_nightvalue : _lastNightValue)
+        _currentValueEK = isNight ? (m_usenightvalue ? m_nightvalue : _lastNightValue)
                                   : (m_usedayvalue ? m_dayvalue : _lastDayValue);
-        logDebugP(isNight ? "Switch Night - with value %i" : "Switch Day - with value %i", onValue);
-        hwchannels[m_hwchannel]->taskNewValue(onValue);
-        (isNight ? _lastNightValue : _lastDayValue) = onValue;
+        logDebugP(isNight ? "Switch Night - with value %i" : "Switch Day - with value %i", _currentValueEK);
+        sendDimValue();
     }
     else //off
     {
@@ -96,10 +95,11 @@ void DimChannel_EK::koHandleSwitch(GroupObject &ko)
 
 void DimChannel_EK::koHandleDimmAbs(GroupObject &ko) 
 {
-    uint8_t brightness = ko.value(DPT_Percent_U8);
+    uint8_t brightness = ko.value(DPT_Scaling);
     logDebugP("Dim Absolut with value %i", brightness);
-    hwchannels[m_hwchannel]->taskNewValue(brightness);
-    (isNight ? _lastNightValue : _lastDayValue) = brightness;
+
+    _currentValueEK = round(brightness * 2.55);
+    sendDimValue();
 }
 
 void DimChannel_EK::koHandleDimmRel(GroupObject &ko) 
@@ -120,26 +120,30 @@ void DimChannel_EK::koHandleDimmRel(GroupObject &ko)
 }
 
 void DimChannel_EK::koHandleScene(GroupObject &ko) {
-    /*
     uint8_t scene = ko.value(DPT_SceneNumber);
     scene++; //increase value by one
     logDebugP("Scene - Number: %i", scene);
     for (uint8_t i = 0; i < MAXCHANNELSCENE; i++) {
-        uint8_t sceneparam = ParamAPP_PT_EKSzNum;
+        uint8_t sceneparam = ((int8_t)((knx.paramByte((EK_ParamBlockOffset + EK_ParamBlockSize * channelIndex() + EK_SceneNumberA + i)))));
         if (scene == sceneparam) {
-            uint8_t action = ParamAPP_PT_EKSzAction;
+            uint8_t action = ((uint)((knx.paramByte((EK_ParamBlockOffset + EK_ParamBlockSize * channelIndex() + EK_SceneActionA + i)))));
             switch (action) {
-                case SC_EK_SetBrightness:
-                    uint8_t value = round(ParamAPP_PT_EKSzValue * 2.55);
-                    hwchannels[m_hwchannel]->taskNewValue(value);
-                    break;
-                default:
+                case SC_EK_None: 
                     // do nothing
+                    break;
+                case SC_EK_OnValueDayNight:
+                    sendDimValue();
+                    break;
+                case SC_EK_SetBrightness:
+                    _currentValueEK = round(((uint)((knx.paramByte((EK_ParamBlockOffset + EK_ParamBlockSize * channelIndex() + EK_SceneBrightnessA + i))))) * 2.55);
+                    sendDimValue();
+                    break;
+                case SC_EK_Off:
+                    hwchannels[m_hwchannel]->taskSoftOff();
                     break;
             }
         }
     }
-    */
 }
 
 void DimChannel_EK::setDayNight(bool value) {
@@ -149,12 +153,11 @@ void DimChannel_EK::setDayNight(bool value) {
 void DimChannel_EK::task() 
 {
     hwchannels[m_hwchannel]->task();
-    //run ko update every 500ms
-    _currentTaskRun = millis();
-    if (_currentTaskRun - _lastTaskRun >= 500) {
-        getDimValue();
-        if (_updateAvailable) { updateDimValue(); }
-        _lastTaskRun = millis();
+    //run ko update every 100ms
+    _currentUpdateRun = millis();
+    if (_currentUpdateRun - _lastUpdatekRun >= 100) {
+        updateDimValue();
+        _lastUpdatekRun = millis();
     }
 }
 
@@ -170,26 +173,30 @@ void DimChannel_EK::sendKoStateOnChange(uint16_t koNr, const KNXValue &value, co
         ko.objectWritten();
 }
 
-void DimChannel_EK::getDimValue()
+void DimChannel_EK::sendDimValue()
 {
-    if (hwchannels[m_hwchannel]->isBusy()) { return; }
-    if (!hwchannels[m_hwchannel]->updateAvailable()) { return; }
-        
-    hwchannels[m_hwchannel]->resetUpdateFlag();
-    _lastUpdateValue = hwchannels[m_hwchannel]->getCurrentValue();
-    _updateAvailable = true;
+    hwchannels[m_hwchannel]->taskNewValue(_currentValueEK);
 }
 
 void DimChannel_EK::updateDimValue() 
 {
-    logDebugP("Update available");
-    if (_lastUpdateValue != 0) { 
-        sendKoStateOnChange(EK_KoStatusOnOff, (bool)1, DPT_Switch);
-    } else {
-        sendKoStateOnChange(EK_KoStatusOnOff, (bool)0, DPT_Switch);
+    if (hwchannels[m_hwchannel]->isBusy()) { return; }
+    if (hwchannels[m_hwchannel]->updateAvailable()) 
+    { 
+        hwchannels[m_hwchannel]->resetUpdateFlag();
+        uint8_t ek = hwchannels[m_hwchannel]->getCurrentValue();
+
+        if (ek != 0) { 
+            sendKoStateOnChange(EK_KoStatusOnOff, (bool)1, DPT_Switch);
+            _currentValueEK = ek;
+        } else {
+            sendKoStateOnChange(EK_KoStatusOnOff, (bool)0, DPT_Switch);
+        }
+
+        (isNight ? _lastNightValue : _lastDayValue) = _currentValueEK;
+
+        sendKoStateOnChange(EK_KoStatusBrightness, (uint8_t)(_currentValueEK / 2.55), DPT_Scaling);
     }
-    sendKoStateOnChange(EK_KoStatusBrightness, _lastUpdateValue, DPT_Percent_U8);
-    _updateAvailable = false;
 }
 
 uint32_t DimChannel_EK::getTimeWithPattern(uint16_t time, uint8_t base) 
