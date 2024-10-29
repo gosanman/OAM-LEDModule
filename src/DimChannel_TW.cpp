@@ -29,9 +29,6 @@ void DimChannel_TW::setup(uint8_t* hwchannel)
     m_durationabsolut = getTimeWithPattern(ParamTW_OnOffTime, ParamTW_OnOffBase);
     m_curve = ParamTW_DimCurve;                               // 0=A, 1=B, 2=C, 3=D, 4=E
 
-    //_lastbrightness = 0;
-    //_lastcolortemp = 0;
-  
     // setup hw channels
     hwchannels[m_hwchannel_ww] = new HWChannel(m_hwchannel_ww);
     hwchannels[m_hwchannel_cw] = new HWChannel(m_hwchannel_cw);
@@ -141,8 +138,11 @@ void DimChannel_TW::koHandleSwitch(GroupObject &ko)
 
 void DimChannel_TW::koHandleDimmAbsBrightness(GroupObject &ko) 
 {
-    uint8_t brightness = ko.value(DPT_Scaling);
-    _currentValueTW[0] = round(brightness * 2.55);
+    uint8_t brightness = ko.value(DPT_Percent_U8);
+    //double originalValue = (brightness / 100.0) * 255.0;
+    //_currentValueTW[0] = (uint8_t)round(originalValue);
+    //_currentValueTW[0] = round(brightness * 2.55);
+    _currentValueTW[0] = brightness;
     logDebugP("Dim Absolute - Kelvin: %i - Brightness: %i", _currentValueTW[1], _currentValueTW[0]);
     sendDimValue();
 }
@@ -294,9 +294,11 @@ void DimChannel_TW::updateDimValue() {
             _lastDayValue[1] = _currentValueTW[1];
         }
 
-        sendKoStateOnChange(TW_KoStatusBrightness, (uint8_t)(_currentValueTW[0] / 2.55), DPT_Scaling);
+        //sendKoStateOnChange(TW_KoStatusBrightness, (uint8_t)round(_currentValueTW[0] / 2.55), DPT_Scaling);
+        sendKoStateOnChange(TW_KoStatusBrightness, _currentValueTW[0], DPT_Percent_U8);
         sendKoStateOnChange(TW_KoStatusColorTemp, _currentValueTW[1], Dpt(7, 600));
-        sendKoStateOnChange(TW_KoStatusKW, (uint8_t)(cw / 2.55), DPT_Scaling);
+        //sendKoStateOnChange(TW_KoStatusKW, (uint8_t)round(cw / 2.55), DPT_Scaling);
+        sendKoStateOnChange(TW_KoStatusKW, cw, DPT_Percent_U8);
     }
 }
 

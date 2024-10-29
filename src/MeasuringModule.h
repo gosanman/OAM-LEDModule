@@ -1,7 +1,6 @@
 #ifndef MEASURINGMODULE_H
 #define MEASURINGMODULE_H
 
-//#include "LIB_INA226.h"
 #include "INA226_WE.h"
 #include "LIB_TEMP100.h"
 #include <OpenKNX.h>
@@ -41,11 +40,29 @@ public:
 private:
     float shuntValue = 0;                   // value will divided by 1000
     float maxcurrent = 0;
-    byte measurementSend = 1;               // 0=No, 1=Yes
-    byte tempSensorPresent = 0;             // 0=No, 1=Yes
+    bool measurementSend = true;            // 0=No, 1=Yes
+    bool tempSensorPresent = false;         // 0=No, 1=Yes
     uint32_t measurementInterval = 60000;   
     uint32_t _lastMeasurementSend = 0;
     uint32_t _lastMeasurementGet = 0;
+
+    bool checkTemp = false;
+    float overTemp = 0;
+    bool checkVoltage = false;
+    float overVoltage = 0;
+    float underVoltage = 0;
+    bool checkCurrent = false;
+    float overCurrent = 0;
+
+    // Status flags for alarms
+    bool overTempTriggered = false;
+    bool overVoltageTriggered = false;
+    bool underVoltageTriggered = false;
+    bool overCurrentTriggered = false;
+
+    float elapsedTime_s = 0;
+    unsigned long currentTime = 0;
+    unsigned long lastUpdateTime = 0;
 
     float shuntVoltage_mV = 0.0;
     float loadVoltage_V = 0.0;
@@ -60,12 +77,17 @@ private:
 
     uint32_t _timerCheckOverflow = 0;
     uint32_t _timerCheckI2cConnection = 0;
-    bool doResetI2c = false;
+    bool doResetI2cTemp = false;
+    bool doResetI2cIna = false;
 
     void getSingleMeasurement();
-    bool initI2cConnection();
-    bool checkI2cConnection();
+    bool initI2cConnectionTemp();
+    bool checkI2cConnectionTemp();
+    bool initI2cConnectionIna();
+    bool checkI2cConnectionIna();
     void getOverflowValue();
+    void checkAlarmDefinitions();
+    void checkAndTriggerAlarm(bool condition, bool &triggeredFlag, uint16_t alarmKo, const String &messageDiagnoseKo);
 
     uint32_t getTimeWithPattern(uint16_t time, uint8_t base);
 

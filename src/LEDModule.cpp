@@ -49,9 +49,8 @@ void LEDModule::setup()
     logDebugP("DayNight: %i", ParamAPP_DayNight);
 
     // Init I2C connection and Lib
-    if (initI2cConnection()) {
-        logInfoP("Init pwm I2C connection sucessful");
-    }
+    _pwm = Adafruit_PWMServoDriver(I2C_PCA9685_DEVICE_ADDRESS, Wire1);
+    initI2cConnection();
 
     // Set all Channels off for a defined status
     for (byte ch = 0; ch < MAXCHANNELSHW; ch++) {
@@ -62,21 +61,18 @@ void LEDModule::setup()
     // Pin 0 = A    Pin  6 = G
     // Pin 1 = B    Pin  7 = H
     // Pin 2 = C    Pin  8 = I      _____________________   _______________________
-    // Pin 3 = D    Pin  9 = J      | V+ V+ G H I J K L |   | V+ V+ 6 7 8 9 10 11 |
-    // Pin 4 = E    Pin 10 = K      | V+ V+ A B C D E F |   | V+ V+ 0 1 2 3  4  5 |
-    // Pin 5 = F    Pin 11 = L      =====================   =======================
+    // Pin 3 = D    Pin  9 = J      | V+ V+ G H I J K L |   | V+ V+ 6 7 8 9 10 11 |   __________________
+    // Pin 4 = E    Pin 10 = K      | V+ V+ A B C D E F |   | V+ V+ 0 1 2 3  4  5 |   | V+ 0 1 2 3 4 5 |
+    // Pin 5 = F    Pin 11 = L      =====================   =======================   ==================
 
     switch (operatinModeSelect)
     {
     case 0:
     {
-        // 6x EK
-        #ifdef BOARD_KNXLED_DK_06_V10
-            usedChannels = 6;
-        #endif
-        // 12x EK
-        #ifdef BOARD_KNXLED_DK_12_V10
-            usedChannels = 12;
+        #if defined(BOARD_KNXLED_DK_06_V10)
+            usedChannels = 6;   // 6x EK
+        #elif defined(BOARD_KNXLED_DK_12_V10)
+            usedChannels = 12;  // 12x EK
         #endif
 
         for (uint8_t i = 0; i < usedChannels; ++i)
@@ -89,13 +85,10 @@ void LEDModule::setup()
     break;
     case 1:
     {
-        // 3x TW
-        #ifdef BOARD_KNXLED_DK_06_V10
-            usedChannels = 3;
-        #endif
-        // 6x TW
-        #ifdef BOARD_KNXLED_DK_12_V10
-            usedChannels = 6;
+        #if defined(BOARD_KNXLED_DK_06_V10)
+            usedChannels = 3;   // 3x TW
+        #elif defined(BOARD_KNXLED_DK_12_V10)
+            usedChannels = 6;   // 6x TW
         #endif
 
         for (uint8_t i = 0; i < usedChannels; ++i)
@@ -162,13 +155,10 @@ void LEDModule::setup()
     break;
     case 3:
     {
-        // 2x RGB
-        #ifdef BOARD_KNXLED_DK_06_V10
-            usedChannels = 2;
-        #endif
-        // 4x RGB
-        #ifdef BOARD_KNXLED_DK_12_V10
-            usedChannels = 4;
+        #if defined(BOARD_KNXLED_DK_06_V10)
+            usedChannels = 2;   // 2x RGB
+        #elif defined(BOARD_KNXLED_DK_12_V10)
+            usedChannels = 4;   // 4x RGB
         #endif
 
         for (uint8_t i = 0; i < usedChannels; ++i)
@@ -185,15 +175,15 @@ void LEDModule::setup()
         #ifdef BOARD_KNXLED_DK_06_V10
             // 1x EK
             channelEK[0] = channel[0] = new DimChannel_EK(0);
-            uint8_t hwchannel0[] = {0};
+            uint8_t hwchannel0[] = {5};
             channel[0]->setup(hwchannel0);
             // 1x TW
             channelTW[0] = channel[1] = new DimChannel_TW(0);
-            uint8_t hwchannel1[] = {1, 2};
+            uint8_t hwchannel1[] = {3, 4};
             channel[1]->setup(hwchannel1);
             // 1x RGB
             channelRGB[0] = channel[2] = new DimChannel_RGB(0);
-            uint8_t hwchannel2[] = {3, 4, 5};
+            uint8_t hwchannel2[] = {0, 1, 2};
             channel[2]->setup(hwchannel2);
             //used Channels
             usedChannels = 3; 
@@ -232,17 +222,17 @@ void LEDModule::setup()
         #ifdef BOARD_KNXLED_DK_06_V10
             //3x EK
             channelEK[0] = channel[0] = new DimChannel_EK(0);
-            uint8_t hwchannel0[] = {0};
+            uint8_t hwchannel0[] = {3};
             channel[0]->setup(hwchannel0);
             channelEK[1] = channel[1] = new DimChannel_EK(1);
-            uint8_t hwchannel1[] = {1};
+            uint8_t hwchannel1[] = {4};
             channel[1]->setup(hwchannel1);
             channelEK[2] = channel[2] = new DimChannel_EK(2);
-            uint8_t hwchannel2[] = {2};
+            uint8_t hwchannel2[] = {5};
             channel[2]->setup(hwchannel2);
             // 1x RGB
             channelRGB[0] = channel[3] = new DimChannel_RGB(0);
-            uint8_t hwchannel3[] = {3, 4, 5};
+            uint8_t hwchannel3[] = {0, 1, 2};
             channel[3]->setup(hwchannel3);
             //used Channels
             usedChannels = 4;
@@ -388,16 +378,9 @@ void LEDModule::showHelp()
     openknx.logger.color(CONSOLE_HEADLINE_COLOR);
     openknx.logger.log("======================== LED Module ============================================");
     openknx.logger.color(0);
-    #ifdef BOARD_KNXLED_DK_06_V10
-        openknx.console.printHelpLine("chon <ch>", "Switch Channel 0-5 on");
-        openknx.console.printHelpLine("choff <ch>", "Switch Channel 0-5 off");
-        openknx.console.printHelpLine("chval <ch> <value>", "Switch Channel 0-5 to value 0-4095");
-    #endif
-    #ifdef BOARD_KNXLED_DK_12_V10
-        openknx.console.printHelpLine("chon <ch>", "Switch Channel 0-11 on");
-        openknx.console.printHelpLine("choff <ch>", "Switch Channel 0-11 off");
-        openknx.console.printHelpLine("chval <ch> <value>", "Switch Channel 0-11 to value 0-4095");
-    #endif
+    logInfo("chon <ch>", "Switch Channel 0-%i on", LED_HW_CHANNEL_COUNT - 1);
+    logInfo("choff <ch>", "Switch Channel 0-%i off", LED_HW_CHANNEL_COUNT - 1);
+    logInfo("chval <ch> <value>", "Switch Channel 0-%i to value 0-4095", LED_HW_CHANNEL_COUNT - 1);
 }
 
 bool LEDModule::processCommand(const std::string cmd, bool diagnoseKo) 
@@ -416,10 +399,6 @@ bool LEDModule::processCommand(const std::string cmd, bool diagnoseKo)
 
 void LEDModule::processBeforeRestart() 
 {
-    //_pwm.write8(Adafruit_PWMServoDriver::PCA9685_ALLLED_OFF_H, 0x10);
-    //for (byte ch = 0; ch < MAXCHANNELSHW; ch++) {
-    //    _pwm.setPin(ch, 0);
-    //}
     Wire1.beginTransmission(I2C_PCA9685_DEVICE_ADDRESS);
     Wire1.write(0xFD);  // Adresse des ALL_LED_OFF_H Registers
     Wire1.write(0x10);  // Setze das Bit 4 im ALL_LED_OFF_H Register
@@ -433,19 +412,16 @@ void LEDModule::savePower()
 
 bool LEDModule::initI2cConnection() 
 {
-    _pwm = Adafruit_PWMServoDriver(I2C_PCA9685_DEVICE_ADDRESS, Wire1);
-    // Call dependend init for led
+    // Call dependend begin for led
     if (!_pwm.begin()) {
         logErrorP("ERROR: initialization for PCA9685 failed...");
         doResetI2c = true;
         return false;
     }
-    delay(10);
     // Set default values for led
-    _pwm.setOscillatorFrequency(25000000);
-    _pwm.setPWMFreq(pwmFreqSelect);         // 1600 is the maximum PWM frequency
-    _pwm.setOutputMode(true);               // External N-type driver, set to output mode INVRT = 0 OUTDRV = 1
-    
+    _pwm.setPWMFreq(pwmFreqSelect);             // 1600 is the maximum PWM frequency
+    _pwm.setOutputMode(true);                   // External N-type driver, set to output mode INVRT = 0 OUTDRV = 1
+    logInfoP("Init pwm I2C connection for PCA9685 sucessful");
     doResetI2c = false;
     return true;
 }
@@ -455,18 +431,15 @@ bool LEDModule::checkI2cConnection()
     if (doResetI2c) { 
         return initI2cConnection();
     }
-    byte result;
     Wire1.beginTransmission(I2C_PCA9685_DEVICE_ADDRESS);
-    result = Wire1.endTransmission();       //  0: Success  1: Data too long  2: NACK on transmit of address  3: NACK on transmit of data  4: Other error  5: Timeout
-    if (result == 0) {
-        return true;
-    } else {
+    byte result = Wire1.endTransmission();      //  0: Success  1: Data too long  2: NACK on transmit of address  3: NACK on transmit of data  4: Other error  5: Timeout
+    if (result != 0) {
         logErrorP("PCA9685 PWM not available via I2C %d", result);
         openknx.console.writeDiagenoseKo("ER I2C PWM %d", result);
         doResetI2c = true;
         return false;
     }
-    return false;
+    return true;
 }
 
 #ifdef FUNC1_BUTTON_PIN

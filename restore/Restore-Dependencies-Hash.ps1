@@ -3,7 +3,7 @@ Open ■
 ┬────┴  Restore-Dependencies
 ■ KNX   2024 OpenKNX - Erkan Çolak
 
-FILEPATH: restore/Restore-Dependencies-Branch.ps1
+FILEPATH: restore/Restore-Dependencies-Hash.ps1
 #>
 
 param(

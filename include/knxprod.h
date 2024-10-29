@@ -34,9 +34,9 @@
 #endif
 
 //--------------------Allgemein---------------------------
-#define MAIN_OpenKnxId 0xAF
+#define MAIN_OpenKnxId 0xA8
 #define MAIN_ApplicationNumber 0x01
-#define MAIN_ApplicationVersion 0x01
+#define MAIN_ApplicationVersion 0x02
 #define MAIN_OrderNumber "OpenKnxLEDDimmer"
 #define MAIN_ParameterSize 703
 #define MAIN_MaxKoNumber 676
@@ -94,6 +94,15 @@
 #define APP_Func1BtnLongClick_Mask	0x000F
 // Offset: 7, Size: 4 Bit, Text: Aktion - Func1 Button Langer Klick
 #define ParamAPP_Func1BtnLongClick ((uint)((knx.paramByte(APP_Func1BtnLongClick) >> APP_Func1BtnLongClick_Shift) & APP_Func1BtnLongClick_Mask))
+#define APP_AlarmUseVoltage		0x0007
+// Offset: 7, BitOffset: 4, Size: 1 Bit, Text: Spannungsbereich überwachen
+#define ParamAPP_AlarmUseVoltage knx.paramBit(APP_AlarmUseVoltage, 4)
+#define APP_AlarmUseOverTemp		0x0007
+// Offset: 7, BitOffset: 5, Size: 1 Bit, Text: Übertemperatur überwachen
+#define ParamAPP_AlarmUseOverTemp knx.paramBit(APP_AlarmUseOverTemp, 5)
+#define APP_AlarmUseOverCurrent		0x0007
+// Offset: 7, BitOffset: 6, Size: 1 Bit, Text: Überstrom überwachen
+#define ParamAPP_AlarmUseOverCurrent knx.paramBit(APP_AlarmUseOverCurrent, 6)
 #define APP_AlarmOverVoltage		0x0008
 // Offset: 8, Size: 16 Bit (2 Byte), Text: Grenzwert Überspannung
 #define ParamAPP_AlarmOverVoltage knx.paramFloat(APP_AlarmOverVoltage, Float_Enc_DPT9)
@@ -101,7 +110,7 @@
 // Offset: 10, Size: 16 Bit (2 Byte), Text: Grenzwert Unterpannung
 #define ParamAPP_AlarmUnderVoltage knx.paramFloat(APP_AlarmUnderVoltage, Float_Enc_DPT9)
 #define APP_AlarmOverTemp		0x000C
-// Offset: 12, Size: 16 Bit (2 Byte), Text: Übertemperaturabschaltung bei
+// Offset: 12, Size: 16 Bit (2 Byte), Text: Temperaturabschaltung bei
 #define ParamAPP_AlarmOverTemp knx.paramFloat(APP_AlarmOverTemp, Float_Enc_DPT9)
 #define APP_AlarmOverCurrent		0x000E
 // Offset: 14, Size: 16 Bit (2 Byte), Text: Grenzwert Überstrom

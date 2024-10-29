@@ -95,10 +95,11 @@ void DimChannel_EK::koHandleSwitch(GroupObject &ko)
 
 void DimChannel_EK::koHandleDimmAbs(GroupObject &ko) 
 {
-    uint8_t brightness = ko.value(DPT_Scaling);
+    uint8_t brightness = ko.value(DPT_Percent_U8);
+    //uint8_t brightness = ko.value(DPT_Scaling);
+    //_currentValueEK = round(brightness * 2.55);
+    _currentValueEK = brightness;
     logDebugP("Dim Absolut with value %i", brightness);
-
-    _currentValueEK = round(brightness * 2.55);
     sendDimValue();
 }
 
@@ -195,7 +196,8 @@ void DimChannel_EK::updateDimValue()
 
         (isNight ? _lastNightValue : _lastDayValue) = _currentValueEK;
 
-        sendKoStateOnChange(EK_KoStatusBrightness, (uint8_t)(_currentValueEK / 2.55), DPT_Scaling);
+        //sendKoStateOnChange(EK_KoStatusBrightness, (uint8_t)round(_currentValueEK / 2.55), DPT_Scaling);
+        sendKoStateOnChange(EK_KoStatusBrightness, _currentValueEK, DPT_Percent_U8);
     }
 }
 

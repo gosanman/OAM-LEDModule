@@ -399,9 +399,12 @@ void DimChannel_RGB::updateDimValue()
         sendKoStateOnChange(RGB_KoStatusShadeH, _currentValueHSV[0], DPT_Angle);
         sendKoStateOnChange(RGB_KoStatusSaturationS, _currentValueHSV[1], DPT_Scaling);
         sendKoStateOnChange(RGB_KoStatusBrightnessV, _currentValueHSV[2], DPT_Scaling);
-        sendKoStateOnChange(RGB_KoStatusColorR, (uint8_t)(_currentValueRGB[0] / 2.55), DPT_Scaling);
-        sendKoStateOnChange(RGB_KoStatusColorG, (uint8_t)(_currentValueRGB[1] / 2.55), DPT_Scaling);
-        sendKoStateOnChange(RGB_KoStatusColorB, (uint8_t)(_currentValueRGB[2] / 2.55), DPT_Scaling);
+        //sendKoStateOnChange(RGB_KoStatusColorR, (uint8_t)round(_currentValueRGB[0] / 2.55), DPT_Scaling);
+        //sendKoStateOnChange(RGB_KoStatusColorG, (uint8_t)round(_currentValueRGB[1] / 2.55), DPT_Scaling);
+        //sendKoStateOnChange(RGB_KoStatusColorB, (uint8_t)round(_currentValueRGB[2] / 2.55), DPT_Scaling);
+        sendKoStateOnChange(RGB_KoStatusColorR, (uint8_t)_currentValueRGB[0], DPT_Percent_U8);
+        sendKoStateOnChange(RGB_KoStatusColorG, (uint8_t)_currentValueRGB[1], DPT_Percent_U8);
+        sendKoStateOnChange(RGB_KoStatusColorB, (uint8_t)_currentValueRGB[2], DPT_Percent_U8);
     }
 }
 
@@ -507,6 +510,7 @@ double DimChannel_RGB::threeway_min(double a, double b, double c) {
 }
 
 //----------------------Color Converter ------------------------------
+
 //----------------------Gamma Converter ------------------------------
 
 //gamma 2.8 lookup table used for color correction

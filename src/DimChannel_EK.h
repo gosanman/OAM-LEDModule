@@ -62,7 +62,6 @@ private:
 
     uint16_t calcKoNumber(int koNum);
     void sendKoStateOnChange(uint16_t koNr, const KNXValue &value, const Dpt &type);
-    //void getDimValue();
     void sendDimValue(); 
     void updateDimValue();
 
