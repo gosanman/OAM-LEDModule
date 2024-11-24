@@ -90,7 +90,7 @@ void MeasuringModule::loop() {
         return;
     
     // always run measurment for alarm features
-    if (delayCheck(_lastMeasurementGet, 500)) {
+    if (delayCheck(_lastMeasurementGet, 15000)) {
         getSingleMeasurement();
         checkAlarmDefinitions();
         _lastMeasurementGet = millis();

@@ -177,7 +177,8 @@ void DimChannel_RGB::koHandleSwitch(GroupObject &ko)
     bool value = ko.value(DPT_Switch);
     if (value) //on
     {
-        if (isNight) {
+        if (isNight) 
+        {
             if (m_usenightvalue) {
                 setCurrentValueRGB(m_nightvalue);
             } else {
@@ -339,11 +340,14 @@ uint16_t DimChannel_RGB::calcKoNumber(int koNum)
     return koNum + (RGB_KoBlockSize * _channelIndex) + RGB_KoOffset;
 }
 
-void DimChannel_RGB::sendKoStateOnChange(uint16_t koNr, const KNXValue &value, const Dpt &type)
+void DimChannel_RGB::sendKoStateOnChange(uint16_t koNr, const KNXValue &value, const Dpt &type, bool alwayssend)
 {
     GroupObject &ko = knx.getGroupObject(calcKoNumber(koNr));
-    if(ko.valueNoSendCompare(value, type))
+    if(ko.valueNoSendCompare(value, type)) {
         ko.objectWritten();
+    } else if (alwayssend == true) {
+        ko.objectWritten();
+    }
 }
 
 void DimChannel_RGB::setCurrentValueRGB(uint8_t *value)
@@ -372,15 +376,6 @@ void DimChannel_RGB::updateDimValue()
         uint8_t g = hwchannels[m_hwchannel_g]->getCurrentValue();
         uint8_t b = hwchannels[m_hwchannel_b]->getCurrentValue();
 
-        if (r != 0 || g != 0 || b != 0) {
-            sendKoStateOnChange(RGB_KoStatusOnOff, (bool)1, DPT_Switch);
-            _currentValueRGB[0] = r;
-            _currentValueRGB[1] = g;
-            _currentValueRGB[2] = b;
-        } else {
-            sendKoStateOnChange(RGB_KoStatusOnOff, (bool)0, DPT_Switch);
-        }
-
         if (isNight) {
             _lastNightValue[0] = _currentValueRGB[0];  
             _lastNightValue[1] = _currentValueRGB[1];
@@ -390,21 +385,31 @@ void DimChannel_RGB::updateDimValue()
             _lastDayValue[1] = _currentValueRGB[1];
             _lastDayValue[2] = _currentValueRGB[2];
         }
-
+        
         uint32_t rgb = (_currentValueRGB[0] << 16) | (_currentValueRGB[1] << 8) | _currentValueRGB[2];
         uint32_t hsv = ((uint8_t)round((double)_currentValueHSV[0] * 255.0 / 360.0) << 16) | (_currentValueHSV[1] << 8) | _currentValueHSV[2];
 
-        sendKoStateOnChange(RGB_KoStatusColorRGB, rgb, DPT_Colour_RGB);
-        sendKoStateOnChange(RGB_KoStatusColorHSV, hsv, DPT_Colour_RGB);
-        sendKoStateOnChange(RGB_KoStatusShadeH, _currentValueHSV[0], DPT_Angle);
-        sendKoStateOnChange(RGB_KoStatusSaturationS, _currentValueHSV[1], DPT_Scaling);
-        sendKoStateOnChange(RGB_KoStatusBrightnessV, _currentValueHSV[2], DPT_Scaling);
-        //sendKoStateOnChange(RGB_KoStatusColorR, (uint8_t)round(_currentValueRGB[0] / 2.55), DPT_Scaling);
-        //sendKoStateOnChange(RGB_KoStatusColorG, (uint8_t)round(_currentValueRGB[1] / 2.55), DPT_Scaling);
-        //sendKoStateOnChange(RGB_KoStatusColorB, (uint8_t)round(_currentValueRGB[2] / 2.55), DPT_Scaling);
-        sendKoStateOnChange(RGB_KoStatusColorR, (uint8_t)_currentValueRGB[0], DPT_Percent_U8);
-        sendKoStateOnChange(RGB_KoStatusColorG, (uint8_t)_currentValueRGB[1], DPT_Percent_U8);
-        sendKoStateOnChange(RGB_KoStatusColorB, (uint8_t)_currentValueRGB[2], DPT_Percent_U8);
+        if (r != 0 || g != 0 || b != 0) {
+            sendKoStateOnChange(RGB_KoStatusOnOff, (bool)1, DPT_Switch, false);
+            sendKoStateOnChange(RGB_KoStatusColorRGB, rgb, DPT_Colour_RGB, true);
+            sendKoStateOnChange(RGB_KoStatusColorHSV, hsv, DPT_Colour_RGB, true);
+            sendKoStateOnChange(RGB_KoStatusShadeH, _currentValueHSV[0], DPT_Angle, true);
+            sendKoStateOnChange(RGB_KoStatusSaturationS, _currentValueHSV[1], DPT_Scaling, true);
+            sendKoStateOnChange(RGB_KoStatusBrightnessV, _currentValueHSV[2], DPT_Scaling, true);
+            sendKoStateOnChange(RGB_KoStatusColorR, (uint8_t)_currentValueRGB[0], DPT_Percent_U8, true);
+            sendKoStateOnChange(RGB_KoStatusColorG, (uint8_t)_currentValueRGB[1], DPT_Percent_U8, true);
+            sendKoStateOnChange(RGB_KoStatusColorB, (uint8_t)_currentValueRGB[2], DPT_Percent_U8, true);
+        } else {
+            sendKoStateOnChange(RGB_KoStatusOnOff, (bool)0, DPT_Switch, false);
+            sendKoStateOnChange(RGB_KoStatusColorRGB, rgb, DPT_Colour_RGB, false);
+            sendKoStateOnChange(RGB_KoStatusColorHSV, hsv, DPT_Colour_RGB, false);
+            sendKoStateOnChange(RGB_KoStatusShadeH, _currentValueHSV[0], DPT_Angle, false);
+            sendKoStateOnChange(RGB_KoStatusSaturationS, _currentValueHSV[1], DPT_Scaling, false);
+            sendKoStateOnChange(RGB_KoStatusBrightnessV, _currentValueHSV[2], DPT_Scaling, false);
+            sendKoStateOnChange(RGB_KoStatusColorR, (uint8_t)_currentValueRGB[0], DPT_Percent_U8, false);
+            sendKoStateOnChange(RGB_KoStatusColorG, (uint8_t)_currentValueRGB[1], DPT_Percent_U8, false);
+            sendKoStateOnChange(RGB_KoStatusColorB, (uint8_t)_currentValueRGB[2], DPT_Percent_U8, false);
+        }
     }
 }
 

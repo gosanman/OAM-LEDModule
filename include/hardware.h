@@ -26,5 +26,3 @@
 #define I2C_PCA9685_DEVICE_ADDRESS 0x40 // Address of PCA9685 PWM chip
 #define I2C_INA226_DEVICE_ADDRESS 0x41 // Address of INA226 current and power sensor chip
 #define I2C_TMP100_DEVICE_ADDRESS 0x48 // Address of TMP100 temperature sensor chip
-
-//#define ENABLE_DEBUG_OUTPUT          // Debug output for PCA9685 PWM chip

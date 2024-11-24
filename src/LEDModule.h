@@ -59,6 +59,8 @@ private:
     #endif
     void handleFunctionPropertySwitch(uint8_t *data, uint8_t *resultData, uint8_t &resultLength);
 
+    byte readRegister(byte registerAddress);
+
     Adafruit_PWMServoDriver _pwm;
  
     DimChannel *channel[MAXCHANNELSHW];

@@ -167,11 +167,14 @@ uint16_t DimChannel_EK::calcKoNumber(int koNum)
     return koNum + (EK_KoBlockSize * _channelIndex) + EK_KoOffset;
 }
 
-void DimChannel_EK::sendKoStateOnChange(uint16_t koNr, const KNXValue &value, const Dpt &type)
+void DimChannel_EK::sendKoStateOnChange(uint16_t koNr, const KNXValue &value, const Dpt &type, bool alwayssend)
 {
     GroupObject &ko = knx.getGroupObject(calcKoNumber(koNr));
-    if(ko.valueNoSendCompare(value, type))
+    if(ko.valueNoSendCompare(value, type)) {
         ko.objectWritten();
+    } else if (alwayssend == true) {
+        ko.objectWritten();
+    }
 }
 
 void DimChannel_EK::sendDimValue()
@@ -187,17 +190,16 @@ void DimChannel_EK::updateDimValue()
         hwchannels[m_hwchannel]->resetUpdateFlag();
         uint8_t ek = hwchannels[m_hwchannel]->getCurrentValue();
 
-        if (ek != 0) { 
-            sendKoStateOnChange(EK_KoStatusOnOff, (bool)1, DPT_Switch);
-            _currentValueEK = ek;
-        } else {
-            sendKoStateOnChange(EK_KoStatusOnOff, (bool)0, DPT_Switch);
-        }
-
         (isNight ? _lastNightValue : _lastDayValue) = _currentValueEK;
 
-        //sendKoStateOnChange(EK_KoStatusBrightness, (uint8_t)round(_currentValueEK / 2.55), DPT_Scaling);
-        sendKoStateOnChange(EK_KoStatusBrightness, _currentValueEK, DPT_Percent_U8);
+        if (ek != 0) { 
+            sendKoStateOnChange(EK_KoStatusOnOff, (bool)1, DPT_Switch, false);
+            sendKoStateOnChange(EK_KoStatusBrightness, _currentValueEK, DPT_Percent_U8, true);
+
+        } else {
+            sendKoStateOnChange(EK_KoStatusOnOff, (bool)0, DPT_Switch, false);
+            sendKoStateOnChange(EK_KoStatusBrightness, _currentValueEK, DPT_Percent_U8, false);
+        }
     }
 }
 

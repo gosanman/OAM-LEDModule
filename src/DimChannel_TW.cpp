@@ -253,11 +253,14 @@ uint16_t DimChannel_TW::calcKoNumber(int koNum)
     return koNum + (TW_KoBlockSize * _channelIndex) + TW_KoOffset;
 }
 
-void DimChannel_TW::sendKoStateOnChange(uint16_t koNr, const KNXValue &value, const Dpt &type)
+void DimChannel_TW::sendKoStateOnChange(uint16_t koNr, const KNXValue &value, const Dpt &type, bool alwayssend)
 {
     GroupObject &ko = knx.getGroupObject(calcKoNumber(koNr));
-    if(ko.valueNoSendCompare(value, type))
+    if(ko.valueNoSendCompare(value, type)) {
         ko.objectWritten();
+    } else if (alwayssend == true) {
+        ko.objectWritten();
+    }
 }
 
 void DimChannel_TW::sendDimValue()
@@ -279,13 +282,6 @@ void DimChannel_TW::updateDimValue() {
         uint8_t ww = hwchannels[m_hwchannel_ww]->getCurrentValue();
         uint8_t cw = hwchannels[m_hwchannel_cw]->getCurrentValue();
 
-        if (ww != 0 || cw != 0) {
-            sendKoStateOnChange(TW_KoStatusOnOff, (bool)1, DPT_Switch);
-            //To-Do - Berechnung von Kelvin und Brightness aus WW sowie CM
-        } else {
-            sendKoStateOnChange(TW_KoStatusOnOff, (bool)0, DPT_Switch);
-        }
-
         if (isNight) {
             _lastNightValue[0] = _currentValueTW[0];  
             _lastNightValue[1] = _currentValueTW[1];
@@ -294,11 +290,18 @@ void DimChannel_TW::updateDimValue() {
             _lastDayValue[1] = _currentValueTW[1];
         }
 
-        //sendKoStateOnChange(TW_KoStatusBrightness, (uint8_t)round(_currentValueTW[0] / 2.55), DPT_Scaling);
-        sendKoStateOnChange(TW_KoStatusBrightness, _currentValueTW[0], DPT_Percent_U8);
-        sendKoStateOnChange(TW_KoStatusColorTemp, _currentValueTW[1], Dpt(7, 600));
-        //sendKoStateOnChange(TW_KoStatusKW, (uint8_t)round(cw / 2.55), DPT_Scaling);
-        sendKoStateOnChange(TW_KoStatusKW, cw, DPT_Percent_U8);
+        if (ww != 0 || cw != 0) {
+            sendKoStateOnChange(TW_KoStatusOnOff, (bool)1, DPT_Switch, false);
+            sendKoStateOnChange(TW_KoStatusBrightness, _currentValueTW[0], DPT_Percent_U8, true);
+            sendKoStateOnChange(TW_KoStatusColorTemp, _currentValueTW[1], Dpt(7, 600), true);
+            sendKoStateOnChange(TW_KoStatusKW, cw, DPT_Percent_U8, true);
+            //To-Do - Berechnung von Kelvin und Brightness aus WW sowie CM
+        } else {
+            sendKoStateOnChange(TW_KoStatusOnOff, (bool)0, DPT_Switch, false);
+            sendKoStateOnChange(TW_KoStatusBrightness, (uint8_t)0, DPT_Percent_U8, false);
+            sendKoStateOnChange(TW_KoStatusColorTemp, _currentValueTW[1], Dpt(7, 600), false);
+            sendKoStateOnChange(TW_KoStatusKW, cw, DPT_Percent_U8, false);
+        }
     }
 }
 

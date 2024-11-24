@@ -72,7 +72,7 @@ private:
     void koHandleScene(GroupObject &ko);
 
     uint16_t calcKoNumber(int koNum);
-    void sendKoStateOnChange(uint16_t koNr, const KNXValue &value, const Dpt &type);
+    void sendKoStateOnChange(uint16_t koNr, const KNXValue &value, const Dpt &type, bool alwayssend);
     void setCurrentValueRGB(uint8_t *value);
     void sendDimValue(); 
     void updateDimValue();

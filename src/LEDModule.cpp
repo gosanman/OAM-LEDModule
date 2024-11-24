@@ -393,16 +393,56 @@ bool LEDModule::processCommand(const std::string cmd, bool diagnoseKo)
         _pwm.setPin(std::stoi(cmd.substr(cmd.find(' ') + 1)), std::stoi(cmd.substr(cmd.find(' ') + 3)));
         openknx.logger.logWithPrefixAndValues("CH", "Set value channel %i to %i", std::stoi(cmd.substr(cmd.find(' ') + 1)), std::stoi(cmd.substr(cmd.find(' ') + 3)));
         return true;
+    } else if (cmd == "init_pca") {
+        initI2cConnection();
+        if (diagnoseKo) { openknx.console.writeDiagenoseKo("INIT PCA"); }
+        openknx.logger.logWithPrefixAndValues("LED", "Init PCA9685 i2c connection");
+        return true;
+    } else if (cmd == "state_pca") {
+        Wire1.beginTransmission(I2C_PCA9685_DEVICE_ADDRESS);
+        byte result = Wire1.endTransmission();      // 0: Success  1: Data too long  2: NACK on transmit of address  3: NACK on transmit of data  4: Other error  5: Timeout
+        byte mode1Value = readRegister(0x00);       // Register - 0x00: MODE1
+        byte mode2Value = readRegister(0x01);       // Register - 0x01: MODE2
+        if (diagnoseKo) { openknx.console.writeDiagenoseKo("STAT %i %.2X %.2X", result, mode1Value, mode2Value); }
+        openknx.logger.logWithPrefixAndValues("LED", "State PCA9685 i2c connection: %i and MODE1: 0x%.2X - MODE2: 0x%.2X", result, mode1Value, mode2Value);
+        return true;
+    } else if (cmd == "test_pwm") {
+        openknx.logger.logWithPrefixAndValues("LED", "Start PCA9685 LED test....");
+        // Phasenverschiebung berechnen und einstellen
+        for (uint8_t i = 0; i < LED_HW_CHANNEL_COUNT; i++) {
+            uint16_t phaseShift = (4096 / LED_HW_CHANNEL_COUNT) * i;
+            uint16_t on_time = phaseShift % 4096;
+            uint16_t off_time = 4095;
+            _pwm.setPWM(i, on_time, off_time);
+        }
+        openknx.logger.logWithPrefixAndValues("LED", "Finish PCA9685 LED test....");
+        return true;
     }
     return false;
 }
 
-void LEDModule::processBeforeRestart() 
+void LEDModule::processBeforeRestart()
 {
     Wire1.beginTransmission(I2C_PCA9685_DEVICE_ADDRESS);
     Wire1.write(0xFD);  // Adresse des ALL_LED_OFF_H Registers
     Wire1.write(0x10);  // Setze das Bit 4 im ALL_LED_OFF_H Register
     Wire1.endTransmission();
+}
+
+// Allgemeine Funktion zum Auslesen eines Registers
+byte LEDModule::readRegister(byte registerAddress) 
+{
+  Wire1.beginTransmission(I2C_PCA9685_DEVICE_ADDRESS); // Starte I2C-Übertragung
+  Wire1.write(registerAddress); // Registeradresse senden
+  Wire1.endTransmission(); // Beende die Übertragung
+  
+  Wire1.requestFrom(I2C_PCA9685_DEVICE_ADDRESS, (uint8_t)1); // Fordere ein Byte vom Register an
+  
+  if (Wire1.available()) { // Prüfen, ob Daten empfangen wurden
+    return Wire1.read(); // Registerinhalt zurückgeben
+  } else {
+    return 0xFF; // Fehlerwert zurückgeben, falls keine Daten empfangen wurden
+  }
 }
 
 void LEDModule::savePower() 
@@ -420,7 +460,7 @@ bool LEDModule::initI2cConnection()
     }
     // Set default values for led
     _pwm.setPWMFreq(pwmFreqSelect);             // 1600 is the maximum PWM frequency
-    _pwm.setOutputMode(true);                   // External N-type driver, set to output mode INVRT = 0 OUTDRV = 1
+    //_pwm.setOutputMode(true);                   // External N-type driver, set to output mode INVRT = 0 OUTDRV = 1, Totempole (Push-Pull) = true, open drain = false
     logInfoP("Init pwm I2C connection for PCA9685 sucessful");
     doResetI2c = false;
     return true;
