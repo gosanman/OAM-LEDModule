@@ -39,7 +39,7 @@
 #define MAIN_ApplicationVersion 0x02
 #define MAIN_OrderNumber "OpenKnxLEDDimmer"
 #define MAIN_ParameterSize 703
-#define MAIN_MaxKoNumber 676
+#define MAIN_MaxKoNumber 677
 
 
 #define APP_ControllerType		0x0000
@@ -158,12 +158,12 @@
 #define RGB_ParamBlockOffset 547
 #define RGB_ParamBlockSize 39
 #define BASE_Share_KoOffset 49
-#define BASE_Share_KoBlockSize 11
-#define EK_KoOffset 60
+#define BASE_Share_KoBlockSize 12
+#define EK_KoOffset 61
 #define EK_KoBlockSize 28
-#define TW_KoOffset 396
+#define TW_KoOffset 397
 #define TW_KoBlockSize 28
-#define RGB_KoOffset 564
+#define RGB_KoOffset 565
 #define RGB_KoBlockSize 28
 
 //-----Module: Common Share
@@ -211,6 +211,9 @@
 #define BASE_SummertimeKO_Mask	0x0003
 // UnionOffset: 4, ParaOffset: 0, BitOffset: 6, Size: 2 Bit, Text: Sommerzeit ermitteln durch
 #define ParamBASE_SummertimeKO ((uint)((knx.paramByte((BASE_Share_ParamBlockOffset + BASE_SummertimeKO))) & BASE_SummertimeKO_Mask))
+#define BASE_InternalTime		0x0004
+// UnionOffset: 4, ParaOffset: 0, BitOffset: 7, Size: 1 Bit, Text: InternalTime
+#define ParamBASE_InternalTime knx.paramBit((BASE_Share_ParamBlockOffset + BASE_InternalTime), 7)
 #define BASE_Latitude		0x0005
 // UnionOffset: 5, ParaOffset: 0, Size: 16 Bit (2 Byte), Text: Breitengrad
 #define ParamBASE_Latitude knx.paramFloat((BASE_Share_ParamBlockOffset + BASE_Latitude), Float_Enc_IEEE754Single)
@@ -254,6 +257,9 @@
 //!< Number: 10, Text: Speichern, Function: Eingang
 #define BASE_KoManualSave 10
 #define KoBASE_ManualSave knx.getGroupObject(BASE_KoManualSave + BASE_Share_KoOffset)
+//!< Number: 11, Text: Uhrzeit/Datum, Function: Ausgang
+#define BASE_KoDateTime 11
+#define KoBASE_DateTime knx.getGroupObject(BASE_KoDateTime + BASE_Share_KoOffset)
 
 //-----Module: EK
 #define EK_UseOnValue		0x0000
