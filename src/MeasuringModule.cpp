@@ -15,7 +15,7 @@ const std::string MeasuringModule::name() {
 }
 
 const std::string MeasuringModule::version() {
-    return "0.1dev";
+    return "0.2dev";
 }
 
 void MeasuringModule::setup() 
@@ -346,26 +346,16 @@ uint16_t MeasuringModule::flashSize()
 
 uint32_t MeasuringModule::getTimeWithPattern(uint16_t time, uint8_t base) 
 {
-    switch (base)
-    {
-        case TIMEBASE_TENTH_SECONDS:
-            return time * 100;
-            break;
-        case TIMEBASE_SECONDS:
-            return time * 1000;
-            break;
-        case TIMEBASE_MINUTES:
-            return time * 60000;
-            break;
-        case TIMEBASE_HOURS:
-            // for hour, we can only cover 1193 hours in milliseconds, we allow just 1000 here
-            if (time > 1000) 
-                time = 1000;
-            return time * 3600000;
-            break;
-        default:
-            return 0;
-            break;
+    if (base == TIMEBASE_HOURS && time > 1000) {
+        time = 1000; // Begrenzung auf maximal 1000 Stunden
+    }
+
+    switch (base) {
+        case TIMEBASE_TENTH_SECONDS: return time * 100;
+        case TIMEBASE_SECONDS:       return time * 1000;
+        case TIMEBASE_MINUTES:       return time * 60000;
+        case TIMEBASE_HOURS:         return time * 3600000;
+        default:                     return 0;
     }
 }
 

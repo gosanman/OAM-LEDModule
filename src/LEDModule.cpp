@@ -21,7 +21,7 @@ const std::string LEDModule::name() {
 }
 
 const std::string LEDModule::version() {
-    return "0.1dev";
+    return "0.2dev";
 }
 
 void LEDModule::setup() 
@@ -472,10 +472,12 @@ bool LEDModule::checkI2cConnection()
         return initI2cConnection();
     }
     Wire1.beginTransmission(I2C_PCA9685_DEVICE_ADDRESS);
-    byte result = Wire1.endTransmission();      //  0: Success  1: Data too long  2: NACK on transmit of address  3: NACK on transmit of data  4: Other error  5: Timeout
-    if (result != 0) {
-        logErrorP("PCA9685 PWM not available via I2C %d", result);
-        openknx.console.writeDiagenoseKo("ER I2C PWM %d", result);
+    byte result = Wire1.endTransmission();      // 0: Success  1: Data too long  2: NACK on transmit of address  3: NACK on transmit of data  4: Other error  5: Timeout
+    byte mode1Value = readRegister(0x00);       // Register - 0x00: MODE1 -> 0x20
+    byte mode2Value = readRegister(0x01);       // Register - 0x01: MODE2 -> 0x04
+    if (result != 0 || mode1Value != 0x20 || mode2Value != 0x04) {
+        logErrorP("PCA9685 PWM not available via I2C - State: %i and MODE1: 0x%.2X - MODE2: 0x%.2X", result, mode1Value, mode2Value);
+        openknx.console.writeDiagenoseKo("ER PWM %i %.2X %.2X", result, mode1Value, mode2Value);
         doResetI2c = true;
         return false;
     }

@@ -45,8 +45,6 @@ void HWChannel::task()
         _updateAvailable = true;
         _updateCounter = 0;
         _currentTask = DIM_IDLE;
-        // send channel information to ko
-
         break;
     // turn on immediately
     case DIM_ON:
@@ -152,7 +150,7 @@ void HWChannel::task()
             _currentTask = DIM_STOP;
         }
         break;
-    // set value
+    // set new value
     case DIM_SET:
         if (_valueCurrent < _valueNew)
         {
@@ -184,6 +182,15 @@ void HWChannel::task()
         }
         else
         {
+            _currentTask = DIM_STOP;
+        }
+        break;
+    // set value
+    case DIM_VALUE:
+        if (_valueCurrent != _valueSetNew)
+        {
+            _valueCurrent = _valueSetNew;
+            setChannelValue(_valueCurrent);
             _currentTask = DIM_STOP;
         }
         break;
@@ -228,6 +235,11 @@ void HWChannel::taskDimDown(){
 void HWChannel::taskNewValue(byte valueNew) {
     _valueNew = valueNew;
     _currentTask = DIM_SET;
+}
+
+void HWChannel::taskSetValue(byte valueNew) {
+    _valueSetNew = valueNew;
+    _currentTask = DIM_VALUE;
 }
 
 bool HWChannel::isBusy() {

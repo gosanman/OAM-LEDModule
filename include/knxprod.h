@@ -124,6 +124,9 @@
 //!< Number: 33, Text: Wirkleistung, Function: Messwert
 #define APP_KoPowerW 33
 #define KoAPP_PowerW knx.getGroupObject(APP_KoPowerW)
+//!< Number: 34, Text: Wirkleistung (Wh), Function: Zähler
+#define APP_KoActivePowerWh 34
+#define KoAPP_ActivePowerWh knx.getGroupObject(APP_KoActivePowerWh)
 //!< Number: 35, Text: Gerätetemperatur, Function: Messwert
 #define APP_KoTempC 35
 #define KoAPP_TempC knx.getGroupObject(APP_KoTempC)
@@ -142,9 +145,6 @@
 //!< Number: 48, Text: Überstrom, Function: Alarm
 #define APP_KoAlarmOverCurrent 48
 #define KoAPP_AlarmOverCurrent knx.getGroupObject(APP_KoAlarmOverCurrent)
-//!< Number: 34, Text: Wirkleistung (Wh), Function: Zähler
-#define APP_KoActivePowerWh 34
-#define KoAPP_ActivePowerWh knx.getGroupObject(APP_KoActivePowerWh)
 
 //---------------------Modules----------------------------
 
@@ -615,10 +615,10 @@
 #define TW_KoDimRelativBrightness 10
 #define KoTW_DimRelativBrightnessIndex(X) knx.getGroupObject(TW_KoOffset + TW_KoBlockSize * X + TW_KoDimRelativBrightness)
 #define KoTW_DimRelativBrightness knx.getGroupObject(TW_KoOffset + TW_KoBlockSize * channelIndex() + TW_KoDimRelativBrightness)
-//!< Number: 11, Text: TW{{argChan}}: {{0:---}}, Function: Dimmen Relativ Anteil (KW)
-#define TW_KoDimRelativKW 11
-#define KoTW_DimRelativKWIndex(X) knx.getGroupObject(TW_KoOffset + TW_KoBlockSize * X + TW_KoDimRelativKW)
-#define KoTW_DimRelativKW knx.getGroupObject(TW_KoOffset + TW_KoBlockSize * channelIndex() + TW_KoDimRelativKW)
+//!< Number: 11, Text: TW{{argChan}}: {{0:---}}, Function: Dimmen Relativ Farbtemperatur (Kelvin)
+#define TW_KoDimRelativColorTemp 11
+#define KoTW_DimRelativColorTempIndex(X) knx.getGroupObject(TW_KoOffset + TW_KoBlockSize * X + TW_KoDimRelativColorTemp)
+#define KoTW_DimRelativColorTemp knx.getGroupObject(TW_KoOffset + TW_KoBlockSize * channelIndex() + TW_KoDimRelativColorTemp)
 //!< Number: 16, Text: TW{{argChan}}: {{0:---}}, Function: Status An/Aus
 #define TW_KoStatusOnOff 16
 #define KoTW_StatusOnOffIndex(X) knx.getGroupObject(TW_KoOffset + TW_KoBlockSize * X + TW_KoStatusOnOff)
@@ -631,10 +631,6 @@
 #define TW_KoStatusColorTemp 18
 #define KoTW_StatusColorTempIndex(X) knx.getGroupObject(TW_KoOffset + TW_KoBlockSize * X + TW_KoStatusColorTemp)
 #define KoTW_StatusColorTemp knx.getGroupObject(TW_KoOffset + TW_KoBlockSize * channelIndex() + TW_KoStatusColorTemp)
-//!< Number: 19, Text: TW{{argChan}}: {{0:---}}, Function: Status Anteil (KW)
-#define TW_KoStatusKW 19
-#define KoTW_StatusKWIndex(X) knx.getGroupObject(TW_KoOffset + TW_KoBlockSize * X + TW_KoStatusKW)
-#define KoTW_StatusKW knx.getGroupObject(TW_KoOffset + TW_KoBlockSize * channelIndex() + TW_KoStatusKW)
 //!< Number: 27, Text: TW{{argChan}}: {{0:---}}, Function: Szene
 #define TW_KoSceneNumber 27
 #define KoTW_SceneNumberIndex(X) knx.getGroupObject(TW_KoOffset + TW_KoBlockSize * X + TW_KoSceneNumber)

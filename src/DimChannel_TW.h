@@ -12,6 +12,14 @@
 #define TIMEBASE_HOURS          2
 #define TIMEBASE_TENTH_SECONDS  3
 
+// dim actions
+#define DIM_IDLE    0
+#define DIM_STOP    1
+#define DIM_B_UP    4
+#define DIM_B_DOWN  5
+#define DIM_K_UP    6
+#define DIM_K_DOWN  7
+
 // scene actions
 #define SC_TW_None              0
 #define SC_TW_OnValueDayNight   1
@@ -60,22 +68,36 @@ private:
     uint32_t _currentUpdateRun = 0;
     uint32_t _lastUpdatekRun = 0;
 
+    uint8_t percent = 0;
+    uint8_t percentWW = 0;
+    uint8_t percentCW = 0;
+
     bool isNight = false;
 
     void koHandleSwitch(GroupObject &ko);
     void koHandleDimmAbsBrightness(GroupObject &ko);
     void koHandleDimmAbsColorTemp(GroupObject &ko);
     void koHandleDimmRelBrightness(GroupObject &ko);
-    void koHandleDimmRelKw(GroupObject &ko);
+    void koHandleDimmRelColorTemp(GroupObject &ko);
     void koHandleScene(GroupObject &ko);
 
     uint16_t calcKoNumber(int koNum);
     void sendKoStateOnChange(uint16_t koNr, const KNXValue &value, const Dpt &type, bool onchange);
-    void sendDimValue(); 
+    void sendDimValue();
+    void setDimValue(); 
     void updateDimValue();
 
     uint16_t prozToDim(uint8_t value, uint8_t curve);
     uint32_t getTimeWithPattern(uint16_t time, uint8_t base);
+
+    void dimmerTask();
+    bool _busy = false;
+    uint8_t _valueMinBrightness = 0;
+    uint8_t _valueMaxBrightness = 255;
+    uint8_t _currentTask = DIM_IDLE;
+    uint32_t _currentMillis = 0;
+    uint32_t _lastTaskExecution;
+    uint32_t _delayRelative;
 
     HWChannel *hwchannels[MAXCHANNELSHW];
 };

@@ -15,6 +15,7 @@
 #define DIM_UP      6
 #define DIM_DOWN    7
 #define DIM_SET     8
+#define DIM_VALUE   9
 
 class LEDModule;
 class HWChannel
@@ -34,6 +35,7 @@ public:
     void taskDimUp();
     void taskDimDown();
     void taskNewValue(byte valueNew);
+    void taskSetValue(byte valueNew);
 
     //information
     bool isBusy();
@@ -49,6 +51,7 @@ private:
     uint8_t _valueMin;
     uint8_t _valueMax;
     uint8_t _valueNew;
+    uint8_t _valueSetNew;
     uint8_t _valueCurrent;
     uint8_t _currentTask;
 
