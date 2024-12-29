@@ -39824,9 +39824,9 @@
     "DefaultLanguage": "de-DE",
     "DefaultLanguageIndex": 0,
     "Name": "LED-DK-XX-24V",
-    "ReplacesVersions": "",
+    "ReplacesVersions": "2",
     "Script": "",
-    "NameText": "V 0.2 LED-DK-XX-24V",
+    "NameText": "V 0.3 LED-DK-XX-24V",
     "Text": [
       {
         "$type": "Kaenx.Creator.Models.Translation, Kaenx.Creator.Share",
@@ -39839,7 +39839,7 @@
         "Preview": "OpenKNX-LED-Dimmer"
       }
     ],
-    "Number": 2,
+    "Number": 3,
     "AddressTableMaxCount": 65535,
     "AddressTableOffset": 0,
     "AddressMemoryId": -1,

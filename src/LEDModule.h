@@ -7,10 +7,6 @@
 
 #include "LEDHelper.h"
 
-#ifndef OPENKNX_DUALCORE
-    #pragma warn "LEDModule needs OPENKNX_DUALCORE"
-#endif
-
 class DimChannel_EK;
 class DimChannel_TW;
 class DimChannel_RGB;
@@ -22,9 +18,7 @@ class LEDModule : public OpenKNX::Module
 public:
     LEDModule();
     void setup() override;
-    void setup1();
     void loop() override;
-    void loop1();
     const std::string name() override;
     const std::string version() override;
     void processInputKo(GroupObject &ko) override;

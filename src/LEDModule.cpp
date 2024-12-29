@@ -21,7 +21,7 @@ const std::string LEDModule::name() {
 }
 
 const std::string LEDModule::version() {
-    return "0.2dev";
+    return "0.3dev";
 }
 
 void LEDModule::setup() 
@@ -289,24 +289,19 @@ void LEDModule::setup()
     #endif
 }
 
-void LEDModule::setup1() 
-{
-    // Nothing to do on Core 1
-}
-
 void LEDModule::loop() 
 {
-    //check if I2C connection possible, if not reset and init the pwm
+    // do nothing when not parameterized
+    if (!knx.configured())
+        return;
+    // run task of all channels
+        for (int i = 0; i < usedChannels; i++)
+        channel[i]->task();
+    // check if I2C connection possible, if not reset and init the pwm
     if (delayCheck(_timerCheckI2cConnection, 30000)) {
         checkI2cConnection();
         _timerCheckI2cConnection = millis();
     }
-}
-
-void LEDModule::loop1() 
-{
-    for (int i = 0; i < usedChannels; i++)
-        channel[i]->task();
 }
 
 // Core function to set value, change if you use other hardware
@@ -455,13 +450,15 @@ bool LEDModule::initI2cConnection()
     // Call dependend begin for led
     if (!_pwm.begin()) {
         logErrorP("ERROR: initialization for PCA9685 failed...");
+        openknx.console.writeDiagenoseKo("ER PWM INIT");
         doResetI2c = true;
         return false;
     }
     // Set default values for led
     _pwm.setPWMFreq(pwmFreqSelect);             // 1600 is the maximum PWM frequency
-    //_pwm.setOutputMode(true);                   // External N-type driver, set to output mode INVRT = 0 OUTDRV = 1, Totempole (Push-Pull) = true, open drain = false
+    _pwm.setOutputMode(true);                   // External N-type driver, set to output mode INVRT = 0 OUTDRV = 1, Totempole (Push-Pull) = true, open drain = false
     logInfoP("Init pwm I2C connection for PCA9685 sucessful");
+    openknx.console.writeDiagenoseKo("OK PWM INIT");
     doResetI2c = false;
     return true;
 }
@@ -474,8 +471,8 @@ bool LEDModule::checkI2cConnection()
     Wire1.beginTransmission(I2C_PCA9685_DEVICE_ADDRESS);
     byte result = Wire1.endTransmission();      // 0: Success  1: Data too long  2: NACK on transmit of address  3: NACK on transmit of data  4: Other error  5: Timeout
     byte mode1Value = readRegister(0x00);       // Register - 0x00: MODE1 -> 0x20
-    byte mode2Value = readRegister(0x01);       // Register - 0x01: MODE2 -> 0x04
-    if (result != 0 || mode1Value != 0x20 || mode2Value != 0x04) {
+    byte mode2Value = readRegister(0x01);       // Register - 0x01: MODE2 -> 0x04 -> Totempole (Push-Pull)
+    if (result != 0 || mode1Value != 0x20 || (mode2Value & 0x04) != 0x04) {
         logErrorP("PCA9685 PWM not available via I2C - State: %i and MODE1: 0x%.2X - MODE2: 0x%.2X", result, mode1Value, mode2Value);
         openknx.console.writeDiagenoseKo("ER PWM %i %.2X %.2X", result, mode1Value, mode2Value);
         doResetI2c = true;

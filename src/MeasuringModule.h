@@ -6,10 +6,6 @@
 #include <OpenKNX.h>
 #include "hardware.h"
 
-#ifndef OPENKNX_DUALCORE
-    #pragma warn "MeasuringModule needs OPENKNX_DUALCORE"
-#endif
-
 #define TIMEBASE_SECONDS        0
 #define TIMEBASE_MINUTES        1
 #define TIMEBASE_HOURS          2
@@ -20,9 +16,7 @@ class MeasuringModule : public OpenKNX::Module
 public:
     MeasuringModule();
     void setup() override;
-    void setup1();
     void loop() override;
-    void loop1();
     const std::string name() override;
     const std::string version() override;
     

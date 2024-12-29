@@ -36,7 +36,7 @@
 //--------------------Allgemein---------------------------
 #define MAIN_OpenKnxId 0xA8
 #define MAIN_ApplicationNumber 0x01
-#define MAIN_ApplicationVersion 0x02
+#define MAIN_ApplicationVersion 0x03
 #define MAIN_OrderNumber "OpenKnxLEDDimmer"
 #define MAIN_ParameterSize 703
 #define MAIN_MaxKoNumber 676

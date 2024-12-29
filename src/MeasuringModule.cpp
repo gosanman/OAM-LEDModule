@@ -15,7 +15,7 @@ const std::string MeasuringModule::name() {
 }
 
 const std::string MeasuringModule::version() {
-    return "0.2dev";
+    return "0.3dev";
 }
 
 void MeasuringModule::setup() 
@@ -80,10 +80,6 @@ void MeasuringModule::setup()
     }                 
 }
 
-void MeasuringModule::setup1() {
-    // Nothing to do on Core 1
-}
-
 void MeasuringModule::loop() {
     // do nothing when not parameterized
     if (!knx.configured())
@@ -115,10 +111,6 @@ void MeasuringModule::loop() {
         checkI2cConnectionIna();
         _timerCheckI2cConnection = millis();
     }
-}
-
-void MeasuringModule::loop1() {
-    // Nothing to do on Core 1
 }
 
 void MeasuringModule::getSingleMeasurement()
@@ -259,7 +251,7 @@ bool MeasuringModule::initI2cConnectionIna()
         return false;
     }
     // Set default values for sensor
-    _ina226.setAverage(AVERAGE_1);                              // Anzahl Einzelmessungen für die Shunt- und Busspannungskonversion
+    _ina226.setAverage(AVERAGE_64);                             // Anzahl Einzelmessungen für die Shunt- und Busspannungskonversion
     _ina226.setConversionTime(CONV_TIME_1100);                  // Einstellung der A/D-Wandlungszeit für die Shunt- und Busspannung
     _ina226.setMeasureMode(CONTINUOUS);                         // Messmodus
     _ina226.setResistorRange(shuntValue / 1000, maxcurrent);    // Resistor 0.01 Ohm, Max current 8.0 A, 0,005 Ohm, Max current 16.0 A
