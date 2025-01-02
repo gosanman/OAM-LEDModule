@@ -193,6 +193,7 @@ void MeasuringModule::showHelp()
     openknx.console.printHelpLine("current", "Display the current current in ampere");
     openknx.console.printHelpLine("power", "Display the current power in watt");
     openknx.console.printHelpLine("energy", "Display the total energy in watt hour");
+    openknx.console.printHelpLine("all", "Display all values");
 }
 
 bool MeasuringModule::processCommand(const std::string cmd, bool diagnoseKo) 
@@ -217,11 +218,35 @@ bool MeasuringModule::processCommand(const std::string cmd, bool diagnoseKo)
         if (diagnoseKo) { openknx.console.writeDiagenoseKo("E %.2fWh", totalEnergy_Wh); }
         openknx.logger.logWithPrefixAndValues("Energy", "%.4f Wh", totalEnergy_Wh);
         return true;
-    }else if (cmd == "ccenergy") {
+    } else if (cmd == "all") {
+        openknx.logger.logWithPrefixAndValues("Temperatur", "%.2f °C", temperatur_C);
+        openknx.logger.logWithPrefixAndValues("Voltage", "%.1f V", busVoltage_V);
+        openknx.logger.logWithPrefixAndValues("Current", "%.2f A", current_A);
+        openknx.logger.logWithPrefixAndValues("Power", "%.2f W", power_W);
+        openknx.logger.logWithPrefixAndValues("Energy", "%.4f Wh", totalEnergy_Wh);
+        return true;
+    } else if (cmd == "ccenergy") {
         totalEnergy_Wh = 0.00;
-        openknx.flash.save();
+        openknx.flash.save(true); // force save
         if (diagnoseKo) { openknx.console.writeDiagenoseKo("E cleared"); }
         openknx.logger.logWithPrefixAndValues("Energy", "Clear counter finish");        
+        return true;
+    } else if (cmd.rfind("set ", 0) == 0) {
+        const std::string valueStr = cmd.substr(cmd.find(' ') + 1);
+        char* end;
+        float value = std::strtof(valueStr.c_str(), &end);
+        // Überprüfen, ob die Konvertierung erfolgreich war
+        if (end != valueStr.c_str() && *end == '\0' && !std::isspace(*valueStr.c_str())) {
+            totalEnergy_Wh = value;
+            openknx.flash.save(true); // force save
+            if (diagnoseKo) { openknx.console.writeDiagenoseKo("E set ok"); }
+            if (diagnoseKo) { openknx.console.writeDiagenoseKo("E %.2fWh", totalEnergy_Wh); }
+            openknx.logger.logWithPrefixAndValues("Energy", "Set %.4f Wh as new counter", totalEnergy_Wh);
+        } else {
+            if (diagnoseKo) { openknx.console.writeDiagenoseKo("E set fail"); }
+            openknx.logger.logWithPrefixAndValues("Energy", "Invalid argument for set command");
+            return false;
+        }
         return true;
     }
     return false;

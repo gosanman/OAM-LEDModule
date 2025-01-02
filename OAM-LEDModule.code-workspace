@@ -78,7 +78,19 @@
 			"typeinfo": "cpp",
 			"valarray": "cpp",
 			"variant": "cpp",
-			"*.inc": "cpp"
+			"*.inc": "cpp",
+			"bitset": "cpp",
+			"charconv": "cpp",
+			"condition_variable": "cpp",
+			"regex": "cpp",
+			"format": "cpp",
+			"future": "cpp",
+			"iomanip": "cpp",
+			"mutex": "cpp",
+			"numbers": "cpp",
+			"semaphore": "cpp",
+			"span": "cpp",
+			"text_encoding": "cpp"
 		}
 	}
 }
