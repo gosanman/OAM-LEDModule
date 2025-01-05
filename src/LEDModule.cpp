@@ -289,7 +289,17 @@ void LEDModule::setup()
     #endif
 }
 
-void LEDModule::loop() 
+void LEDModule::setup1() {
+
+}
+
+void LEDModule::loop() {
+    // do nothing when not parameterized
+    if (!knx.configured())
+        return;
+}
+
+void LEDModule::loop1() 
 {
     // do nothing when not parameterized
     if (!knx.configured())

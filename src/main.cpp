@@ -19,6 +19,15 @@ void setup() {
     openknx.setup();
 }
 
+void setup1() {
+    openknx.setup1();
+}
+
 void loop() {
     openknx.loop();
+}
+
+void loop1() {
+    openknxLEDModule.loop1();
+    openknxMeasuringModule.loop1();
 }

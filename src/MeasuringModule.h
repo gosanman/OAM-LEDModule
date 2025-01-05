@@ -16,7 +16,9 @@ class MeasuringModule : public OpenKNX::Module
 public:
     MeasuringModule();
     void setup() override;
+    void setup1();
     void loop() override;
+    void loop1();
     const std::string name() override;
     const std::string version() override;
     

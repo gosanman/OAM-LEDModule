@@ -80,7 +80,18 @@ void MeasuringModule::setup()
     }                 
 }
 
-void MeasuringModule::loop() {
+void MeasuringModule::setup1() {
+
+}
+
+void MeasuringModule::loop() 
+{
+    // do nothing when not parameterized
+    if (!knx.configured())
+        return;
+}
+
+void MeasuringModule::loop1() {
     // do nothing when not parameterized
     if (!knx.configured())
         return;
