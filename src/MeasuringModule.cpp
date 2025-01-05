@@ -15,7 +15,7 @@ const std::string MeasuringModule::name() {
 }
 
 const std::string MeasuringModule::version() {
-    return "0.3dev";
+    return "0.3.0";
 }
 
 void MeasuringModule::setup() 

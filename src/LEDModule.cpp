@@ -21,7 +21,7 @@ const std::string LEDModule::name() {
 }
 
 const std::string LEDModule::version() {
-    return "0.3dev";
+    return "0.3.0";
 }
 
 void LEDModule::setup() 
