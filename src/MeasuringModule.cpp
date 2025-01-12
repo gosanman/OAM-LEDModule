@@ -96,8 +96,8 @@ void MeasuringModule::loop1() {
     if (!knx.configured())
         return;
     
-    // always run measurment for alarm features
-    if (delayCheck(_lastMeasurementGet, 15000)) {
+    // always run measurment for alarm features every 5 seconds
+    if (delayCheck(_lastMeasurementGet, 5000)) {
         getSingleMeasurement();
         checkAlarmDefinitions();
         _lastMeasurementGet = millis();
@@ -262,6 +262,23 @@ bool MeasuringModule::processCommand(const std::string cmd, bool diagnoseKo)
     }
     return false;
 }
+
+float MeasuringModule::getMeasurementValue(const std::string &parameter)
+{
+    if (parameter == "temp") {
+        return temperatur_C;
+    } else if (parameter == "voltage") {
+        return busVoltage_V;
+    } else if (parameter == "current") {
+        return current_A;
+    } else if (parameter == "power") {
+        return power_W;
+    } else if (parameter == "energy") {
+        return totalEnergy_Wh;
+    }
+    return 0.0;
+}
+
 
 bool MeasuringModule::initI2cConnectionTemp() 
 {

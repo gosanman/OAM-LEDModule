@@ -32,11 +32,11 @@ void LEDModule::setup()
     
     switch (deviceSelect)
     {
-    case 0: // BOARD_KNXLED_DK_06_V10 - LED-DK-06x24V
+    case 0: // BOARD_KNXLED_DK_06_V10 or V12 - LED-DK-06x24V
         operatinModeSelect = ParamAPP_OperatingMode;
         logInfoP("Device: LED-DK-06x24V - 6-Kanal OpenKNX LED Dimmer");
         break;
-    case 1: // BOARD_KNXLED_DK_12_V10 - LED-DK-12x24V
+    case 1: // BOARD_KNXLED_DK_12_V10 or V12 - LED-DK-12x24V
         operatinModeSelect = ParamAPP_OperatingMode - 10;
         logInfoP("Device: LED-DK-12x24V - 12-Kanal OpenKNX LED Dimmer");
         break;
@@ -69,9 +69,9 @@ void LEDModule::setup()
     {
     case 0:
     {
-        #if defined(BOARD_KNXLED_DK_06_V10)
+        #if defined(BOARD_KNXLED_DK_06_V10) || defined(BOARD_KNXLED_DK_06_V12)
             usedChannels = 6;   // 6x EK
-        #elif defined(BOARD_KNXLED_DK_12_V10)
+        #elif defined(BOARD_KNXLED_DK_12_V10) || defined(BOARD_KNXLED_DK_12_V12)
             usedChannels = 12;  // 12x EK
         #endif
 
@@ -85,9 +85,9 @@ void LEDModule::setup()
     break;
     case 1:
     {
-        #if defined(BOARD_KNXLED_DK_06_V10)
+        #if defined(BOARD_KNXLED_DK_06_V10) || defined(BOARD_KNXLED_DK_06_V12)
             usedChannels = 3;   // 3x TW
-        #elif defined(BOARD_KNXLED_DK_12_V10)
+        #elif defined(BOARD_KNXLED_DK_12_V10) || defined(BOARD_KNXLED_DK_12_V12)
             usedChannels = 6;   // 6x TW
         #endif
 
@@ -102,7 +102,7 @@ void LEDModule::setup()
     case 2:
     {
         // 2xTW + 2xEK 
-        #ifdef BOARD_KNXLED_DK_06_V10
+        #if defined(BOARD_KNXLED_DK_06_V10) || defined(BOARD_KNXLED_DK_06_V12)
             // 2x TW
             channelTW[0] = channel[0] = new DimChannel_TW(0);
             uint8_t hwchannel0[] = {0, 1};
@@ -121,7 +121,7 @@ void LEDModule::setup()
             usedChannels = 4;
         #endif
         // 4x TW + 4x EK
-        #ifdef BOARD_KNXLED_DK_12_V10
+        #if defined(BOARD_KNXLED_DK_12_V10) || defined(BOARD_KNXLED_DK_12_V12)
             // 4x TW
             channelTW[0] = channel[0] = new DimChannel_TW(0);
             uint8_t hwchannel0[] = {0, 1};
@@ -155,9 +155,9 @@ void LEDModule::setup()
     break;
     case 3:
     {
-        #if defined(BOARD_KNXLED_DK_06_V10)
+        #if defined(BOARD_KNXLED_DK_06_V10) || defined(BOARD_KNXLED_DK_06_V12)
             usedChannels = 2;   // 2x RGB
-        #elif defined(BOARD_KNXLED_DK_12_V10)
+        #elif defined(BOARD_KNXLED_DK_12_V10) || defined(BOARD_KNXLED_DK_12_V12)
             usedChannels = 4;   // 4x RGB
         #endif
 
@@ -172,7 +172,7 @@ void LEDModule::setup()
     case 4:
     {
         // 1x RGB + 1x TW + 1x EK
-        #ifdef BOARD_KNXLED_DK_06_V10
+        #if defined(BOARD_KNXLED_DK_06_V10) || defined(BOARD_KNXLED_DK_06_V12)
             // 1x EK
             channelEK[0] = channel[0] = new DimChannel_EK(0);
             uint8_t hwchannel0[] = {5};
@@ -189,7 +189,7 @@ void LEDModule::setup()
             usedChannels = 3; 
         #endif  
         // 2x RGB + 2x TW + 2x EK
-        #ifdef BOARD_KNXLED_DK_12_V10
+        #if defined(BOARD_KNXLED_DK_12_V10) || defined(BOARD_KNXLED_DK_12_V12)
             // 2x RGB
             channelRGB[0] = channel[0] = new DimChannel_RGB(0);
             uint8_t hwchannel0[] = {0, 1, 2};
@@ -219,7 +219,7 @@ void LEDModule::setup()
     case 5:
     {
         // 1x RGB + 3x EK
-        #ifdef BOARD_KNXLED_DK_06_V10
+        #if defined(BOARD_KNXLED_DK_06_V10) || defined(BOARD_KNXLED_DK_06_V12)
             //3x EK
             channelEK[0] = channel[0] = new DimChannel_EK(0);
             uint8_t hwchannel0[] = {3};
@@ -238,7 +238,7 @@ void LEDModule::setup()
             usedChannels = 4;
         #endif
         // 1x RGB + 4x TW + 1x EK
-        #ifdef BOARD_KNXLED_DK_12_V10
+        #if defined(BOARD_KNXLED_DK_12_V10) || defined(BOARD_KNXLED_DK_12_V12)
             // 1x RGB            
             channelRGB[0] = channel[0] = new DimChannel_RGB(0);
             uint8_t hwchannel0[] = {0, 1, 2};
@@ -386,6 +386,7 @@ void LEDModule::showHelp()
     logInfo("chon <ch>", "Switch Channel 0-%i on", LED_HW_CHANNEL_COUNT - 1);
     logInfo("choff <ch>", "Switch Channel 0-%i off", LED_HW_CHANNEL_COUNT - 1);
     logInfo("chval <ch> <value>", "Switch Channel 0-%i to value 0-4095", LED_HW_CHANNEL_COUNT - 1);
+    logInfo("i2c", "Scan I2C devices on Wire1");
 }
 
 bool LEDModule::processCommand(const std::string cmd, bool diagnoseKo) 
@@ -421,6 +422,28 @@ bool LEDModule::processCommand(const std::string cmd, bool diagnoseKo)
             _pwm.setPWM(i, on_time, off_time);
         }
         openknx.logger.logWithPrefixAndValues("LED", "Finish PCA9685 LED test....");
+        return true;
+    } else if (cmd == "i2c") {
+        byte error, address;
+        int nDevices;
+        logInfoP("Scanning...");
+        nDevices = 0;
+        for(address = 1; address < 127; address++ ) 
+        {
+            Wire1.beginTransmission(address);
+            error = Wire1.endTransmission();
+            if (error == 0) {
+                logInfoP("I2C device found at address 0x%.2X", address);
+                nDevices++;
+            }
+            else if (error==4) {
+                logInfoP("Unknown error at address 0x%.2X", address);
+            }    
+        }
+        if (nDevices == 0)
+            logInfoP("No I2C devices found");
+        else
+            logInfoP("done");
         return true;
     }
     return false;

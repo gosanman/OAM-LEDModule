@@ -30,6 +30,8 @@ public:
     void showHelp() override;
     bool processCommand(const std::string cmd, bool diagnoseKo);
 
+    float getMeasurementValue(const std::string &parameter);
+
     static MeasuringModule *instance();
     static MeasuringModule *_instance;
 

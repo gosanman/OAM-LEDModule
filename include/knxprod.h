@@ -17,22 +17,6 @@
 #define PT_FuncClickAction_off 2
 #define PT_FuncClickAction_toggle 3
 
-// max number of channel to use in DimmerControl
-#ifdef BOARD_KNXLED_DK_06_V10
-    #define MAXCHANNELSHW    6
-    #define MAXCHANNELSEK    6
-    #define MAXCHANNELSTW    3
-    #define MAXCHANNELSRGB   2
-    #define MAXCHANNELSCENE  5
-#endif
-#ifdef BOARD_KNXLED_DK_12_V10
-    #define MAXCHANNELSHW    12
-    #define MAXCHANNELSEK    12
-    #define MAXCHANNELSTW    6
-    #define MAXCHANNELSRGB   4
-    #define MAXCHANNELSCENE  5
-#endif
-
 //--------------------Allgemein---------------------------
 #define MAIN_OpenKnxId 0xA8
 #define MAIN_ApplicationNumber 0x01
