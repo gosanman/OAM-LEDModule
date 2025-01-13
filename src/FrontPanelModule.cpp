@@ -29,11 +29,6 @@ void FrontPanelModule::setup()
     pinMode(IO2_PIN, INPUT_PULLUP); // Button left
     pinMode(IO3_PIN, INPUT_PULLUP); // Button right
     pinMode(IO4_PIN, INPUT_PULLUP); // Button select
-
-    // Show OpenKNX Logo an welcome message
-    currentscreen = 99;
-    _lastButtonPressed = millis();
-    _runScreenUpdate = true;
 }
 
 void FrontPanelModule::setup1() {
@@ -56,6 +51,11 @@ void FrontPanelModule::loop1() {
     if(!digitalRead(IO2_PIN)) handleButtonPress(BUTTON_LEFT);      // Button left pressed   - 🞀
     if(!digitalRead(IO3_PIN)) handleButtonPress(BUTTON_RIGHT);     // Button right pressed  - 🞂
     if(!digitalRead(IO4_PIN)) handleButtonPress(BUTTON_SELECT);    // Button select pressed - 🞉
+
+    // Show OpenKNX Logo an welcome message once at startup
+    if (startupscreen == true) {
+        startUpScreen();
+    }
 
     if (delayCheck(_lastScreenUpdate, 250) && _runScreenUpdate) {
         updateCurrentScreen();
@@ -210,14 +210,27 @@ void FrontPanelModule::updateCurrentScreen()
         _display.print(openknxMeasuringModule.getMeasurementValue("energy"), 2);
         _display.print(" Wh");
         _display.display();
-    } else if (currentscreen == 99) { // Screen Welcome
+    } 
+}
+
+void FrontPanelModule::startUpScreen()
+{
+    if (startUpFrame < FRAME_COUNT && delayCheck(_lastStartUpScreen, FRAME_DELAY)) {
         _display.clearDisplay();
-        _display.drawBitmap(0, 0, bitmap_openknx, 32, 32, 1);
+        _display.drawBitmap(0, 0, animation_openknx[startUpFrame], 32, 32, 1);
         _display.setTextSize(2);
         _display.setTextColor(SSD1306_WHITE);
         _display.setCursor(38,9);
-        _display.print("OpenKnx");
-        _display.display(); 
+        _display.print("OpenKNX");
+        _display.display();
+        _lastStartUpScreen = millis();
+        startUpFrame++;
+    }
+    // Deactivate startup screen after last frame
+    if (startUpFrame == FRAME_COUNT - 1) {
+        startupscreen = false;
+        _lastButtonPressed = millis();
+        _runScreenUpdate = true;
     }
 }
 
