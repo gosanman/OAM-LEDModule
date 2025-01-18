@@ -485,6 +485,7 @@ bool LEDModule::initI2cConnection()
         logErrorP("ERROR: initialization for PCA9685 failed...");
         openknx.console.writeDiagenoseKo("ER PWM INIT");
         doResetI2c = true;
+        pcaI2cConnection = false;
         return false;
     }
     // Set default values for led
@@ -493,6 +494,7 @@ bool LEDModule::initI2cConnection()
     logInfoP("Init pwm I2C connection for PCA9685 sucessful");
     openknx.console.writeDiagenoseKo("OK PWM INIT");
     doResetI2c = false;
+    pcaI2cConnection = true;
     return true;
 }
 
@@ -512,6 +514,11 @@ bool LEDModule::checkI2cConnection()
         return false;
     }
     return true;
+}
+
+bool LEDModule::getPcaI2cConnectionState() 
+{
+    return pcaI2cConnection;
 }
 
 #ifdef FUNC1_BUTTON_PIN

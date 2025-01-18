@@ -32,6 +32,9 @@ public:
 
     float getMeasurementValue(const std::string &parameter);
 
+    bool getTempI2cConnectionState();
+    bool getInaI2cConnectionState();
+
     static MeasuringModule *instance();
     static MeasuringModule *_instance;
 
@@ -57,6 +60,10 @@ private:
     bool overVoltageTriggered = false;
     bool underVoltageTriggered = false;
     bool overCurrentTriggered = false;
+
+    // Status flags for I2C connection
+    bool tempI2cConnection = false;
+    bool inaI2cConnection = false;
 
     float elapsedTime_s = 0;
     unsigned long currentTime = 0;

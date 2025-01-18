@@ -30,6 +30,8 @@ public:
     void processBeforeRestart();
     void savePower();
     
+    bool getPcaI2cConnectionState();
+
     static LEDModule *instance();
     static LEDModule *_instance;
     
@@ -45,6 +47,9 @@ private:
     int8_t usedChannels = 0;
     uint32_t _timerCheckI2cConnection = 0;
     bool doResetI2c = false;
+
+    // Status flags for I2C connection
+    bool pcaI2cConnection = false;
 
     void koHandleDayNight(GroupObject & ko);
     bool initI2cConnection();

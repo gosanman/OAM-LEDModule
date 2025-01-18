@@ -1,5 +1,6 @@
 #include "FrontPanelModule.h"
 #include "MeasuringModule.h"
+#include "LEDModule.h"
 
 FrontPanelModule *FrontPanelModule::_instance = nullptr;
 
@@ -76,9 +77,9 @@ bool FrontPanelModule::processCommand(const std::string cmd, bool diagnoseKo)
 {
     if (cmd == "test char") {
         _display.clearDisplay();
-        _display.setTextSize(1);                // Normal 1:1 pixel scale
-        _display.setTextColor(SSD1306_WHITE);   // Draw white text
-        _display.setCursor(0, 0);               // Start at top-left corner
+        _display.setTextSize(1);                
+        _display.setTextColor(SSD1306_WHITE);   
+        _display.setCursor(0, 0);               
         _display.cp437(true);                   // Use full 256 char 'Code Page 437' font
         for(int16_t i=0; i<256; i++) {
             if(i == '\n') _display.write(' ');
@@ -107,7 +108,7 @@ void FrontPanelModule::handleButtonPress(uint8_t button)
 {
     if ((millis() - _lastDebounceTime[button]) > _debounceDelay) {
         if (button == BUTTON_RIGHT) {
-            if (currentscreen < 7) {
+            if (currentscreen < 8) {
                 currentscreen++;
             }
         } else if (button == BUTTON_LEFT) {
@@ -145,25 +146,40 @@ void FrontPanelModule::updateCurrentScreen()
         _display.print("PA: ");
         _display.print(openknx.info.humanIndividualAddress().c_str());
         _display.display();
-    } else if (currentscreen == 2) { // Screen measuring values
+    } else if (currentscreen == 2) { // Screen status
+        _display.clearDisplay();
+        _display.drawBitmap(0, 0, bitmap_list_status, 32, 32, 1);
+        _display.setTextSize(1);
+        _display.setTextColor(SSD1306_WHITE);
+        _display.setCursor(38,0);
+        _display.print("Temp: ");
+        _display.print(openknxMeasuringModule.getTempI2cConnectionState() ? "OK.." : "Error");
+        _display.setCursor(38,10);
+        _display.print("Power: ");
+        _display.print(openknxMeasuringModule.getInaI2cConnectionState() ? "OK.." : "Error");
+        _display.setCursor(38,20);
+        _display.print("Dimmer: ");
+        _display.print(openknxLEDModule.getPcaI2cConnectionState() ? "OK.." : "Error");
+        _display.display();
+    } else if (currentscreen == 3) { // Screen measuring values
         _display.clearDisplay();
         _display.drawBitmap(0, 0, bitmap_information_box_outline, 32, 32, 1);
         _display.setTextSize(1);
         _display.setTextColor(SSD1306_WHITE);
-        _display.setCursor(38,2);
+        _display.setCursor(38,0);
         _display.print("V: ");
         _display.print(openknxMeasuringModule.getMeasurementValue("voltage"), 2);
         _display.print(" V");
-        _display.setCursor(38,12);
+        _display.setCursor(38,10);
         _display.print("A: ");
         _display.print(openknxMeasuringModule.getMeasurementValue("current"), 2);
         _display.print(" A");
-        _display.setCursor(38,22);
+        _display.setCursor(38,20);
         _display.print("P: ");
         _display.print(openknxMeasuringModule.getMeasurementValue("power"), 2);
         _display.print(" W");
         _display.display();
-    } else if (currentscreen == 3) { // Screen temperature values
+    } else if (currentscreen == 4) { // Screen temperature values
         _display.clearDisplay();
         _display.drawBitmap(0, 0, bitmap_thermometer_lines, 32, 32, 1);
         _display.setTextSize(2);
@@ -174,7 +190,7 @@ void FrontPanelModule::updateCurrentScreen()
         _display.print((char)247);
         _display.print("C");
         _display.display();
-    } else if (currentscreen == 4) { // Screen voltage values
+    } else if (currentscreen == 5) { // Screen voltage values
         _display.clearDisplay();
         _display.drawBitmap(0, 0, bitmap_lightning_bolt_outline, 32, 32, 1);
         _display.setTextSize(2);
@@ -183,7 +199,7 @@ void FrontPanelModule::updateCurrentScreen()
         _display.print(openknxMeasuringModule.getMeasurementValue("voltage"), 1);
         _display.print(" V");
         _display.display();
-    } else if (currentscreen == 5) { // Screen current values
+    } else if (currentscreen == 6) { // Screen current values
         _display.clearDisplay();
         _display.drawBitmap(0, 0, bitmap_current_dc, 32, 32, 1);
         _display.setTextSize(2);
@@ -192,7 +208,7 @@ void FrontPanelModule::updateCurrentScreen()
         _display.print(openknxMeasuringModule.getMeasurementValue("current"), 2);
         _display.print(" A");
         _display.display();
-    } else if (currentscreen == 6) { // Screen power values
+    } else if (currentscreen == 7) { // Screen power values
         _display.clearDisplay();
         _display.drawBitmap(0, 0, bitmap_gauge, 32, 32, 1);
         _display.setTextSize(2);
@@ -201,7 +217,7 @@ void FrontPanelModule::updateCurrentScreen()
         _display.print(openknxMeasuringModule.getMeasurementValue("power"), 2);
         _display.print(" W");
         _display.display();      
-    } else if (currentscreen == 7) { // Screen energy values
+    } else if (currentscreen == 8) { // Screen energy values
         _display.clearDisplay();
         _display.drawBitmap(0, 0, bitmap_meter_electric_outline, 32, 32, 1);
         _display.setTextSize(2);
@@ -227,7 +243,7 @@ void FrontPanelModule::startUpScreen()
         startUpFrame++;
     }
     // Deactivate startup screen after last frame
-    if (startUpFrame == FRAME_COUNT - 1) {
+    if (startUpFrame == FRAME_COUNT) {
         startupscreen = false;
         _lastButtonPressed = millis();
         _runScreenUpdate = true;
