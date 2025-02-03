@@ -1,9 +1,7 @@
 #ifndef DIMCHANNEL_EK_H
 #define DIMCHANNEL_EK_H
 
-//#include <OpenKNX.h>
 #include "DimChannel.h"
-
 #include "LEDModule.h"
 #include "HwChannel.h"
 
@@ -18,7 +16,7 @@
 #define SC_EK_SetBrightness     2
 #define SC_EK_Off               9
 
-//class LEDModule;
+// class LEDModule;
 class DimChannel_EK : public DimChannel
 {
 public:
@@ -26,12 +24,14 @@ public:
     ~DimChannel_EK();
     const std::string name() override;
 
-    //dimmchannel
-    void setup(uint8_t* hwchannel) override;
+    // dimmchannel
+    void setup(uint8_t *hwchannel) override;
     void processInputKo(GroupObject &ko) override;
     void task() override;
 
     void setDayNight(bool value) override;
+    std::vector<uint8_t> getHWPorts() override;
+    uint8_t getChannelIndex() override;
 
 private:
     uint8_t m_hwchannel;
@@ -47,8 +47,8 @@ private:
     uint8_t _index;
 
     uint8_t _currentValueEK = 0;
-	uint8_t _lastDayValue = 255;
-	uint8_t _lastNightValue = 25;
+    uint8_t _lastDayValue = 255;
+    uint8_t _lastNightValue = 25;
 
     uint32_t _currentUpdateRun = 0;
     uint32_t _lastUpdatekRun = 0;
@@ -62,12 +62,12 @@ private:
 
     uint16_t calcKoNumber(int koNum);
     void sendKoStateOnChange(uint16_t koNr, const KNXValue &value, const Dpt &type, bool alwayssend);
-    void sendDimValue(); 
+    void sendDimValue();
     void updateDimValue();
 
     uint32_t getTimeWithPattern(uint16_t time, uint8_t base);
 
-    HWChannel *hwchannels[MAXCHANNELSHW]; 
+    HWChannel *hwchannels[MAXCHANNELSHW];
 };
 
 #endif

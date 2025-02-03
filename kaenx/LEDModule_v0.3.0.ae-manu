@@ -3286,7 +3286,7 @@
         "OtherValue": true,
         "ExportInHeader": false,
         "UIHint": "Right",
-        "BaggageUId": 18,
+        "BaggageUId": 1,
         "Min": "0",
         "Max": "255",
         "Increment": "1",
