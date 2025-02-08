@@ -12,10 +12,10 @@
 #define PT_DimCurve_C 2
 #define PT_DimCurve_D 3
 #define PT_DimCurve_E 4
-#define PT_FuncClickAction_none 0
-#define PT_FuncClickAction_on 1
-#define PT_FuncClickAction_off 2
-#define PT_FuncClickAction_toggle 3
+#define PT_FuncClickAction_none     0
+#define PT_FuncClickAction_on       1
+#define PT_FuncClickAction_off      2
+#define PT_FuncClickAction_toggle   3
 
 //--------------------Allgemein---------------------------
 #define MAIN_OpenKnxId 0xA8

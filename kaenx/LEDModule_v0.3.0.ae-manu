@@ -2,7 +2,7 @@
   "$type": "Kaenx.Creator.Models.MainModel, Kaenx.Creator.Share",
   "ProjectName": "LEDModule",
   "Guid": "b1e8f98d-e691-4aaf-966a-3b3187fea67f",
-  "FileName": "LED-DK-XX-24V_v1",
+  "FileName": "LED-DK-XX-24V_v03",
   "Info": {
     "$type": "Kaenx.Creator.Models.Info, Kaenx.Creator.Share",
     "Name": "OpenKNX: LED Dimmer",
@@ -38864,16 +38864,7 @@
                         "Items": []
                       }
                     ]
-                  }
-                ]
-              },
-              {
-                "$type": "Kaenx.Creator.Models.Dynamic.DynChooseChannel, Kaenx.Creator.Share",
-                "IsExpanded": false,
-                "Name": "",
-                "IsGlobal": false,
-                "ParameterRef": 1,
-                "Items": [
+                  },
                   {
                     "$type": "Kaenx.Creator.Models.Dynamic.DynWhenChannel, Kaenx.Creator.Share",
                     "IsExpanded": false,
@@ -38913,16 +38904,7 @@
                         "Items": []
                       }
                     ]
-                  }
-                ]
-              },
-              {
-                "$type": "Kaenx.Creator.Models.Dynamic.DynChooseChannel, Kaenx.Creator.Share",
-                "IsExpanded": false,
-                "Name": "",
-                "IsGlobal": false,
-                "ParameterRef": 1,
-                "Items": [
+                  },
                   {
                     "$type": "Kaenx.Creator.Models.Dynamic.DynWhenChannel, Kaenx.Creator.Share",
                     "IsExpanded": false,
@@ -38962,16 +38944,7 @@
                         "Items": []
                       }
                     ]
-                  }
-                ]
-              },
-              {
-                "$type": "Kaenx.Creator.Models.Dynamic.DynChooseChannel, Kaenx.Creator.Share",
-                "IsExpanded": false,
-                "Name": "",
-                "IsGlobal": false,
-                "ParameterRef": 1,
-                "Items": [
+                  },
                   {
                     "$type": "Kaenx.Creator.Models.Dynamic.DynWhenChannel, Kaenx.Creator.Share",
                     "IsExpanded": false,
@@ -39011,16 +38984,7 @@
                         "Items": []
                       }
                     ]
-                  }
-                ]
-              },
-              {
-                "$type": "Kaenx.Creator.Models.Dynamic.DynChooseChannel, Kaenx.Creator.Share",
-                "IsExpanded": false,
-                "Name": "",
-                "IsGlobal": false,
-                "ParameterRef": 1,
-                "Items": [
+                  },
                   {
                     "$type": "Kaenx.Creator.Models.Dynamic.DynWhenChannel, Kaenx.Creator.Share",
                     "IsExpanded": false,
@@ -39060,16 +39024,7 @@
                         "Items": []
                       }
                     ]
-                  }
-                ]
-              },
-              {
-                "$type": "Kaenx.Creator.Models.Dynamic.DynChooseChannel, Kaenx.Creator.Share",
-                "IsExpanded": false,
-                "Name": "",
-                "IsGlobal": false,
-                "ParameterRef": 1,
-                "Items": [
+                  },
                   {
                     "$type": "Kaenx.Creator.Models.Dynamic.DynWhenChannel, Kaenx.Creator.Share",
                     "IsExpanded": false,
@@ -39109,16 +39064,7 @@
                         "Items": []
                       }
                     ]
-                  }
-                ]
-              },
-              {
-                "$type": "Kaenx.Creator.Models.Dynamic.DynChooseChannel, Kaenx.Creator.Share",
-                "IsExpanded": false,
-                "Name": "",
-                "IsGlobal": false,
-                "ParameterRef": 1,
-                "Items": [
+                  },
                   {
                     "$type": "Kaenx.Creator.Models.Dynamic.DynWhenChannel, Kaenx.Creator.Share",
                     "IsExpanded": false,
@@ -39158,16 +39104,7 @@
                         "Items": []
                       }
                     ]
-                  }
-                ]
-              },
-              {
-                "$type": "Kaenx.Creator.Models.Dynamic.DynChooseChannel, Kaenx.Creator.Share",
-                "IsExpanded": false,
-                "Name": "",
-                "IsGlobal": false,
-                "ParameterRef": 1,
-                "Items": [
+                  },
                   {
                     "$type": "Kaenx.Creator.Models.Dynamic.DynWhenChannel, Kaenx.Creator.Share",
                     "IsExpanded": false,
@@ -39207,16 +39144,7 @@
                         "Items": []
                       }
                     ]
-                  }
-                ]
-              },
-              {
-                "$type": "Kaenx.Creator.Models.Dynamic.DynChooseChannel, Kaenx.Creator.Share",
-                "IsExpanded": false,
-                "Name": "",
-                "IsGlobal": false,
-                "ParameterRef": 1,
-                "Items": [
+                  },
                   {
                     "$type": "Kaenx.Creator.Models.Dynamic.DynWhenChannel, Kaenx.Creator.Share",
                     "IsExpanded": false,
@@ -39256,16 +39184,7 @@
                         "Items": []
                       }
                     ]
-                  }
-                ]
-              },
-              {
-                "$type": "Kaenx.Creator.Models.Dynamic.DynChooseChannel, Kaenx.Creator.Share",
-                "IsExpanded": false,
-                "Name": "",
-                "IsGlobal": false,
-                "ParameterRef": 1,
-                "Items": [
+                  },
                   {
                     "$type": "Kaenx.Creator.Models.Dynamic.DynWhenChannel, Kaenx.Creator.Share",
                     "IsExpanded": false,
@@ -39305,16 +39224,7 @@
                         "Items": []
                       }
                     ]
-                  }
-                ]
-              },
-              {
-                "$type": "Kaenx.Creator.Models.Dynamic.DynChooseChannel, Kaenx.Creator.Share",
-                "IsExpanded": false,
-                "Name": "",
-                "IsGlobal": false,
-                "ParameterRef": 1,
-                "Items": [
+                  },
                   {
                     "$type": "Kaenx.Creator.Models.Dynamic.DynWhenChannel, Kaenx.Creator.Share",
                     "IsExpanded": false,
@@ -39354,16 +39264,7 @@
                         "Items": []
                       }
                     ]
-                  }
-                ]
-              },
-              {
-                "$type": "Kaenx.Creator.Models.Dynamic.DynChooseChannel, Kaenx.Creator.Share",
-                "IsExpanded": false,
-                "Name": "",
-                "IsGlobal": false,
-                "ParameterRef": 1,
-                "Items": [
+                  },
                   {
                     "$type": "Kaenx.Creator.Models.Dynamic.DynWhenChannel, Kaenx.Creator.Share",
                     "IsExpanded": false,
@@ -39403,16 +39304,7 @@
                         "Items": []
                       }
                     ]
-                  }
-                ]
-              },
-              {
-                "$type": "Kaenx.Creator.Models.Dynamic.DynChooseChannel, Kaenx.Creator.Share",
-                "IsExpanded": false,
-                "Name": "",
-                "IsGlobal": false,
-                "ParameterRef": 1,
-                "Items": [
+                  },
                   {
                     "$type": "Kaenx.Creator.Models.Dynamic.DynWhenChannel, Kaenx.Creator.Share",
                     "IsExpanded": false,
@@ -39452,16 +39344,7 @@
                         "Items": []
                       }
                     ]
-                  }
-                ]
-              },
-              {
-                "$type": "Kaenx.Creator.Models.Dynamic.DynChooseChannel, Kaenx.Creator.Share",
-                "IsExpanded": false,
-                "Name": "",
-                "IsGlobal": false,
-                "ParameterRef": 1,
-                "Items": [
+                  },
                   {
                     "$type": "Kaenx.Creator.Models.Dynamic.DynWhenChannel, Kaenx.Creator.Share",
                     "IsExpanded": false,
@@ -39501,16 +39384,7 @@
                         "Items": []
                       }
                     ]
-                  }
-                ]
-              },
-              {
-                "$type": "Kaenx.Creator.Models.Dynamic.DynChooseChannel, Kaenx.Creator.Share",
-                "IsExpanded": false,
-                "Name": "",
-                "IsGlobal": false,
-                "ParameterRef": 1,
-                "Items": [
+                  },
                   {
                     "$type": "Kaenx.Creator.Models.Dynamic.DynWhenChannel, Kaenx.Creator.Share",
                     "IsExpanded": false,
@@ -39550,16 +39424,7 @@
                         "Items": []
                       }
                     ]
-                  }
-                ]
-              },
-              {
-                "$type": "Kaenx.Creator.Models.Dynamic.DynChooseChannel, Kaenx.Creator.Share",
-                "IsExpanded": false,
-                "Name": "",
-                "IsGlobal": false,
-                "ParameterRef": 1,
-                "Items": [
+                  },
                   {
                     "$type": "Kaenx.Creator.Models.Dynamic.DynWhenChannel, Kaenx.Creator.Share",
                     "IsExpanded": false,
@@ -39599,16 +39464,7 @@
                         "Items": []
                       }
                     ]
-                  }
-                ]
-              },
-              {
-                "$type": "Kaenx.Creator.Models.Dynamic.DynChooseChannel, Kaenx.Creator.Share",
-                "IsExpanded": false,
-                "Name": "",
-                "IsGlobal": false,
-                "ParameterRef": 1,
-                "Items": [
+                  },
                   {
                     "$type": "Kaenx.Creator.Models.Dynamic.DynWhenChannel, Kaenx.Creator.Share",
                     "IsExpanded": false,
@@ -39648,16 +39504,7 @@
                         "Items": []
                       }
                     ]
-                  }
-                ]
-              },
-              {
-                "$type": "Kaenx.Creator.Models.Dynamic.DynChooseChannel, Kaenx.Creator.Share",
-                "IsExpanded": false,
-                "Name": "",
-                "IsGlobal": false,
-                "ParameterRef": 1,
-                "Items": [
+                  },
                   {
                     "$type": "Kaenx.Creator.Models.Dynamic.DynWhenChannel, Kaenx.Creator.Share",
                     "IsExpanded": false,
@@ -39697,16 +39544,7 @@
                         "Items": []
                       }
                     ]
-                  }
-                ]
-              },
-              {
-                "$type": "Kaenx.Creator.Models.Dynamic.DynChooseChannel, Kaenx.Creator.Share",
-                "IsExpanded": false,
-                "Name": "",
-                "IsGlobal": false,
-                "ParameterRef": 1,
-                "Items": [
+                  },
                   {
                     "$type": "Kaenx.Creator.Models.Dynamic.DynWhenChannel, Kaenx.Creator.Share",
                     "IsExpanded": false,
@@ -39746,16 +39584,7 @@
                         "Items": []
                       }
                     ]
-                  }
-                ]
-              },
-              {
-                "$type": "Kaenx.Creator.Models.Dynamic.DynChooseChannel, Kaenx.Creator.Share",
-                "IsExpanded": false,
-                "Name": "",
-                "IsGlobal": false,
-                "ParameterRef": 1,
-                "Items": [
+                  },
                   {
                     "$type": "Kaenx.Creator.Models.Dynamic.DynWhenChannel, Kaenx.Creator.Share",
                     "IsExpanded": false,
@@ -39795,16 +39624,7 @@
                         "Items": []
                       }
                     ]
-                  }
-                ]
-              },
-              {
-                "$type": "Kaenx.Creator.Models.Dynamic.DynChooseChannel, Kaenx.Creator.Share",
-                "IsExpanded": false,
-                "Name": "",
-                "IsGlobal": false,
-                "ParameterRef": 1,
-                "Items": [
+                  },
                   {
                     "$type": "Kaenx.Creator.Models.Dynamic.DynWhenChannel, Kaenx.Creator.Share",
                     "IsExpanded": false,
@@ -39844,16 +39664,7 @@
                         "Items": []
                       }
                     ]
-                  }
-                ]
-              },
-              {
-                "$type": "Kaenx.Creator.Models.Dynamic.DynChooseChannel, Kaenx.Creator.Share",
-                "IsExpanded": false,
-                "Name": "",
-                "IsGlobal": false,
-                "ParameterRef": 1,
-                "Items": [
+                  },
                   {
                     "$type": "Kaenx.Creator.Models.Dynamic.DynWhenChannel, Kaenx.Creator.Share",
                     "IsExpanded": false,
@@ -39937,6 +39748,7 @@
     "IsMemSizeAuto": true,
     "IsHelpActive": true,
     "IsBusInterfaceActive": false,
+    "IsSecureActive": false,
     "HasBusInterfaceRouter": false,
     "BusInterfaceCounter": 4,
     "Procedure": "<LoadProcedures>\r\n  <LoadProcedure MergeId=\"2\">\r\n    <LdCtrlRelSegment LsmIdx=\"4\" Size=\"703\" Mode=\"0\" Fill=\"0\" />\r\n  </LoadProcedure>\r\n  <LoadProcedure MergeId=\"4\">\r\n    <LdCtrlWriteRelMem ObjIdx=\"4\" Offset=\"0\" Size=\"703\" Verify=\"true\" />\r\n  </LoadProcedure>\r\n</LoadProcedures>",
@@ -39995,13 +39807,6 @@
           ]
         }
       ]
-    }
-  ],
-  "Languages": [
-    {
-      "$type": "Kaenx.Creator.Models.Language, Kaenx.Creator.Share",
-      "CultureCode": "de-DE",
-      "Text": "Deutsch"
     }
   ],
   "Baggages": [
