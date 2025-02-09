@@ -263,8 +263,6 @@ private:
 	uint8_t startUpFrame = 0;
 	uint32_t _lastStartUpScreen = 0;
 
-	const char HWPortsMapping[12] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'};
-
 	bool initI2cConnectionLcd();
 	void updateCurrentScreen();
 	void startUpScreen();

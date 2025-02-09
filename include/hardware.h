@@ -69,6 +69,8 @@
     #define MAXCHANNELSCENE  5
 #endif
 
+const char HWPortsMapping[12] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'};   // Mapping of HW ports to letters
+
 #define KNX_UART_RX_PIN 1       // Use GPIO01 as KNX RX PIN
 #define KNX_UART_TX_PIN 0       // Use GPIO00 as KNX TX PIN
 #define SAVE_INTERRUPT_PIN 5    // Use GPIO05 as KNX SAVE PIN
