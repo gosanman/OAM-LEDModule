@@ -268,7 +268,6 @@ private:
 	bool initI2cConnectionLcd();
 	void updateCurrentScreen();
 	void startUpScreen();
-	void showConnectionPlan();
 	void showConnectionScreen(uint8_t index);
 
 	void handleButtonPress(uint8_t button);

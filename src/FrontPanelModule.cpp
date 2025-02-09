@@ -32,6 +32,12 @@ void FrontPanelModule::setup()
     pinMode(IO2_PIN, INPUT_PULLUP); // Button left
     pinMode(IO3_PIN, INPUT_PULLUP); // Button right
     pinMode(IO4_PIN, INPUT_PULLUP); // Button select
+
+    // save default values from PA
+    _menuTimeout = (ParamAPP_DisplayTimeOut * 1000);
+
+    // Debug
+    logDebugP("Display Timeout: %i", _menuTimeout);
 }
 
 void FrontPanelModule::setup1()
@@ -80,7 +86,6 @@ void FrontPanelModule::showHelp()
     openknx.logger.color(0);
     openknx.console.printHelpLine("test char", "Test draw all characters");
     openknx.console.printHelpLine("test pixel", "Test draw pixel");
-    openknx.console.printHelpLine("show con", "Show connection plan on console");
 }
 
 bool FrontPanelModule::processCommand(const std::string cmd, bool diagnoseKo)
@@ -117,11 +122,6 @@ bool FrontPanelModule::processCommand(const std::string cmd, bool diagnoseKo)
         _display.display();
         _lastButtonPressed = millis();
         _runScreenUpdate = true;
-        return true;
-    }
-    else if (cmd == "show con")
-    {
-        showConnectionPlan();
         return true;
     }
     return false;
@@ -321,34 +321,6 @@ void FrontPanelModule::startUpScreen()
         startupscreen = false;
         _lastButtonPressed = millis();
         _runScreenUpdate = true;
-    }
-}
-
-void FrontPanelModule::showConnectionPlan()
-{
-    for (uint8_t i = 0; i < openknxLEDModule.getUsedChannels(); ++i)
-    {
-        logDebugP("Channel %d", i);
-        logDebugP("Name: %s%d", openknxLEDModule.getChannelName(i).c_str(), openknxLEDModule.getChannelIndex(i) + 1);
-        logDebugP("HWPorts: %d", openknxLEDModule.getChannelHWPort(i).size());
-        std::vector<uint8_t> ports = openknxLEDModule.getChannelHWPort(i);
-        uint8_t numberOfPorts = ports.size();
-        if (numberOfPorts == 1)
-        {
-            logDebugP("EK%d -> %c", openknxLEDModule.getChannelIndex(i) + 1, HWPortsMapping[ports[0]]);
-        }
-        else if (numberOfPorts == 2)
-        {
-            logDebugP("WW%d -> %c", openknxLEDModule.getChannelIndex(i) + 1, HWPortsMapping[ports[0]]);
-            logDebugP("KW%d -> %c", openknxLEDModule.getChannelIndex(i) + 1, HWPortsMapping[ports[1]]);
-        }
-        else if (numberOfPorts == 3)
-        {
-            logDebugP("R%d -> %c", openknxLEDModule.getChannelIndex(i) + 1, HWPortsMapping[ports[0]]);
-            logDebugP("G%d -> %c", openknxLEDModule.getChannelIndex(i) + 1, HWPortsMapping[ports[1]]);
-            logDebugP("B%d -> %c", openknxLEDModule.getChannelIndex(i) + 1, HWPortsMapping[ports[2]]);
-        }
-        logDebugP("--------------------");
     }
 }
 

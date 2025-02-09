@@ -66,6 +66,8 @@ private:
 
     byte readRegister(byte registerAddress);
 
+    const char HWPortsMapping[12] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'};
+
     Adafruit_PWMServoDriver _pwm;
 
     DimChannel *channel[MAXCHANNELSHW];

@@ -394,7 +394,8 @@ void LEDModule::showHelp()
     logInfo("chon <ch>", "Switch Channel 0-%i on", LED_HW_CHANNEL_COUNT - 1);
     logInfo("choff <ch>", "Switch Channel 0-%i off", LED_HW_CHANNEL_COUNT - 1);
     logInfo("chval <ch> <value>", "Switch Channel 0-%i to value 0-4095", LED_HW_CHANNEL_COUNT - 1);
-    logInfo("i2c", "Scan I2C devices on Wire1");
+    openknx.console.printHelpLine("show con", "Show connection plan on console");
+    openknx.console.printHelpLine("i2c", "Scan I2C devices on Wire1");
 }
 
 bool LEDModule::processCommand(const std::string cmd, bool diagnoseKo)
@@ -446,6 +447,34 @@ bool LEDModule::processCommand(const std::string cmd, bool diagnoseKo)
             _pwm.setPWM(i, on_time, off_time);
         }
         openknx.logger.logWithPrefixAndValues("LED", "Finish PCA9685 LED test....");
+        return true;
+    }
+    else if (cmd == "show con")
+    {
+        for (uint8_t i = 0; i < getUsedChannels(); ++i)
+        {
+            openknx.logger.logWithPrefixAndValues("LED", "Channel %d", i);
+            openknx.logger.logWithPrefixAndValues("LED", "Name: %s%d", getChannelName(i).c_str(), getChannelIndex(i) + 1);
+            openknx.logger.logWithPrefixAndValues("LED", "HWPorts: %d", getChannelHWPort(i).size());
+            std::vector<uint8_t> ports = getChannelHWPort(i);
+            uint8_t numberOfPorts = ports.size();
+            if (numberOfPorts == 1)
+            {
+                openknx.logger.logWithPrefixAndValues("LED", "EK%d -> %c", getChannelIndex(i) + 1, HWPortsMapping[ports[0]]);
+            }
+            else if (numberOfPorts == 2)
+            {
+                openknx.logger.logWithPrefixAndValues("LED", "WW%d -> %c", getChannelIndex(i) + 1, HWPortsMapping[ports[0]]);
+                openknx.logger.logWithPrefixAndValues("LED", "KW%d -> %c", getChannelIndex(i) + 1, HWPortsMapping[ports[1]]);
+            }
+            else if (numberOfPorts == 3)
+            {
+                openknx.logger.logWithPrefixAndValues("LED", "R%d -> %c", getChannelIndex(i) + 1, HWPortsMapping[ports[0]]);
+                openknx.logger.logWithPrefixAndValues("LED", "G%d -> %c", getChannelIndex(i) + 1, HWPortsMapping[ports[1]]);
+                openknx.logger.logWithPrefixAndValues("LED", "B%d -> %c", getChannelIndex(i) + 1, HWPortsMapping[ports[2]]);
+            }
+            openknx.logger.logWithPrefixAndValues("LED", "--------------------");
+        }
         return true;
     }
     else if (cmd == "i2c")
