@@ -24,6 +24,13 @@ const std::string FrontPanelModule::version()
 
 void FrontPanelModule::setup()
 {
+    // do nothing when no front panel is present
+    if (!ParamAPP_FrontPanelPresent)
+        return;
+    
+    // save default values from PA
+    _menuTimeout = (ParamAPP_DisplayTimeOut * 1000);
+
     // Init I2C connection and Lib SSD1306
     _display = Adafruit_SSD1306(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire1, OLED_RESET);
     initI2cConnectionLcd();
@@ -32,9 +39,6 @@ void FrontPanelModule::setup()
     pinMode(IO2_PIN, INPUT_PULLUP); // Button left
     pinMode(IO3_PIN, INPUT_PULLUP); // Button right
     pinMode(IO4_PIN, INPUT_PULLUP); // Button select
-
-    // save default values from PA
-    _menuTimeout = (ParamAPP_DisplayTimeOut * 1000);
 
     // Debug
     logDebugP("Display Timeout: %i", _menuTimeout);
@@ -46,15 +50,12 @@ void FrontPanelModule::setup1()
 
 void FrontPanelModule::loop()
 {
-    // do nothing when not parameterized
-    if (!knx.configured())
-        return;
 }
 
 void FrontPanelModule::loop1()
 {
-    // do nothing when not parameterized
-    if (!knx.configured())
+    // do nothing when not parameterized or no front panel is present
+    if (!knx.configured() || !ParamAPP_FrontPanelPresent)
         return;
 
     if (!digitalRead(IO1_PIN))
@@ -81,6 +82,10 @@ void FrontPanelModule::loop1()
 
 void FrontPanelModule::showHelp()
 {
+    // do nothing when no front panel is present
+    if (!ParamAPP_FrontPanelPresent)
+        return;
+        
     openknx.logger.color(CONSOLE_HEADLINE_COLOR);
     openknx.logger.log("======================== FrontPanel Module ===================================");
     openknx.logger.color(0);

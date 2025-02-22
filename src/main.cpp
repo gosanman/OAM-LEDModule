@@ -16,9 +16,7 @@ void setup() {
 
     openknx.addModule(1, openknxLEDModule);
     openknx.addModule(2, openknxMeasuringModule);
-#if defined(BOARD_KNXLED_DK_06_V12) || defined(BOARD_KNXLED_DK_12_V12)
     openknx.addModule(8, openknxFrontPanelModule);
-#endif
     openknx.addModule(9, openknxFileTransferModule);
     openknx.setup();
 }
@@ -34,7 +32,5 @@ void loop() {
 void loop1() {
     openknxLEDModule.loop1();
     openknxMeasuringModule.loop1();
-#if defined(BOARD_KNXLED_DK_06_V12) || defined(BOARD_KNXLED_DK_12_V12)
     openknxFrontPanelModule.loop1();
-#endif
 }

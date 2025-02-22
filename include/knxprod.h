@@ -6,17 +6,15 @@
             (time & 0xC000) == 0x4000 ? (time & 0x3FFF) * 60000 : \
             (time & 0xC000) == 0x8000 ? ((time & 0x3FFF) > 1000 ? 3600000 : \
                                             (time & 0x3FFF) * 3600000 ) : 0 )
-
 #define PT_DimCurve_A 0
 #define PT_DimCurve_B 1
 #define PT_DimCurve_C 2
 #define PT_DimCurve_D 3
 #define PT_DimCurve_E 4
-#define PT_FuncClickAction_none     0
-#define PT_FuncClickAction_on       1
-#define PT_FuncClickAction_off      2
-#define PT_FuncClickAction_toggle   3
-
+#define PT_FuncClickAction_none 0
+#define PT_FuncClickAction_on 1
+#define PT_FuncClickAction_off 2
+#define PT_FuncClickAction_toggle 3
 //--------------------Allgemein---------------------------
 #define MAIN_OpenKnxId 0xA8
 #define MAIN_ApplicationNumber 0x01
@@ -102,8 +100,11 @@
 #define APP_DisplayTimeOut		0x0010
 #define APP_DisplayTimeOut_Shift	6
 #define APP_DisplayTimeOut_Mask	0x03FF
-// Offset: 16, Size: 10 Bit, Text: Display ausschalten nach
+// Offset: 16, Size: 10 Bit, Text: Anzeige ausschalten nach
 #define ParamAPP_DisplayTimeOut ((uint32_t)((knx.paramWord(APP_DisplayTimeOut) >> APP_DisplayTimeOut_Shift) & APP_DisplayTimeOut_Mask))
+#define APP_FrontPanelPresent		0x0007
+// Offset: 7, BitOffset: 7, Size: 1 Bit, Text: Bedienfeld verbaut
+#define ParamAPP_FrontPanelPresent knx.paramBit(APP_FrontPanelPresent, 7)
 //!< Number: 31, Text: Spannung, Function: Messwert
 #define APP_KoVoltageV 31
 #define KoAPP_VoltageV knx.getGroupObject(APP_KoVoltageV)
@@ -861,3 +862,4 @@
 #define RGB_KoSceneNumber 27
 #define KoRGB_SceneNumberIndex(X) knx.getGroupObject(RGB_KoOffset + RGB_KoBlockSize * X + RGB_KoSceneNumber)
 #define KoRGB_SceneNumber knx.getGroupObject(RGB_KoOffset + RGB_KoBlockSize * channelIndex() + RGB_KoSceneNumber)
+
