@@ -11,3 +11,4 @@ $projectDir = Get-Location
 $files = Get-ChildItem -Path $projectDir/kaenx/*.ae-manu
 $filePath = Join-Path -Path $projectDir -ChildPath "kaenx" | Join-Path -ChildPath $files[0].Name
 ~/bin/Kaenx.Creator.Console publish $filePath
+cp $projectDir/kaenx/knxprod.h $projectDir/include
