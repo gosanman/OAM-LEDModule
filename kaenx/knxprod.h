@@ -102,9 +102,6 @@
 #define APP_DisplayTimeOut_Mask	0x03FF
 // Offset: 16, Size: 10 Bit, Text: Anzeige ausschalten nach
 #define ParamAPP_DisplayTimeOut ((uint32_t)((knx.paramWord(APP_DisplayTimeOut) >> APP_DisplayTimeOut_Shift) & APP_DisplayTimeOut_Mask))
-#define APP_FrontPanelPresent		0x0007
-// Offset: 7, BitOffset: 7, Size: 1 Bit, Text: Bedienfeld verbaut
-#define ParamAPP_FrontPanelPresent knx.paramBit(APP_FrontPanelPresent, 7)
 //!< Number: 31, Text: Spannung, Function: Messwert
 #define APP_KoVoltageV 31
 #define KoAPP_VoltageV knx.getGroupObject(APP_KoVoltageV)

@@ -53,12 +53,31 @@
     #define LED_HW_CHANNEL_COUNT 12
 #endif
 
+// max number of channel to use in DimmerControl
+#if defined(BOARD_KNXLED_DK_06_V10) || defined(BOARD_KNXLED_DK_06_V12)
+    #define MAXCHANNELSHW    6
+    #define MAXCHANNELSEK    6
+    #define MAXCHANNELSTW    3
+    #define MAXCHANNELSRGB   2
+    #define MAXCHANNELSCENE  5
+#endif
+#if defined(BOARD_KNXLED_DK_12_V10) || defined(BOARD_KNXLED_DK_12_V12)
+    #define MAXCHANNELSHW    12
+    #define MAXCHANNELSEK    12
+    #define MAXCHANNELSTW    6
+    #define MAXCHANNELSRGB   4
+    #define MAXCHANNELSCENE  5
+#endif
+
+const char HWPortsMapping[12] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'};   // Mapping of HW ports to letters
+
 #define KNX_UART_RX_PIN 1       // Use GPIO01 as KNX RX PIN
 #define KNX_UART_TX_PIN 0       // Use GPIO00 as KNX TX PIN
 #define SAVE_INTERRUPT_PIN 5    // Use GPIO05 as KNX SAVE PIN
 
 #define WIRE1_SDA 14                        // Use GP14 as I2C1 SDA
 #define WIRE1_SCL 15                        // Use GP15 as I2C1 SCL
-#define I2C_PCA9685_DEVICE_ADDRESS 0x40     // Address of PCA9685 PWM chip
-#define I2C_INA226_DEVICE_ADDRESS 0x41      // Address of INA226 current and power sensor chip
-#define I2C_TMP100_DEVICE_ADDRESS 0x48      // Address of TMP100 temperature sensor chip
+#define I2C_PCA9685_DEVICE_ADDRESS  0x40    // Address of PCA9685 PWM chip
+#define I2C_INA226_DEVICE_ADDRESS   0x41    // Address of INA226 current and power sensor chip
+#define I2C_TMP100_DEVICE_ADDRESS   0x48    // Address of TMP100 temperature sensor chip
+#define I2C_SSD1306_DEVICE_ADDRESS  0x3C    // Address of SSD1306 OLED display chip

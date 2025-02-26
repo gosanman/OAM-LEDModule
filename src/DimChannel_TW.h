@@ -1,7 +1,7 @@
 #ifndef DIMCHANNEL_TW_H
 #define DIMCHANNEL_TW_H
 
-//#include <OpenKNX.h>
+// #include <OpenKNX.h>
 #include "DimChannel.h"
 
 #include "LEDModule.h"
@@ -36,12 +36,14 @@ public:
     ~DimChannel_TW();
     const std::string name() override;
 
-    //dimmchannel
-    void setup(uint8_t* hwchannel) override;
+    // dimmchannel
+    void setup(uint8_t *hwchannel) override;
     void processInputKo(GroupObject &ko) override;
     void task() override;
 
     void setDayNight(bool isNight);
+    std::vector<uint8_t> getHWPorts() override;
+    uint8_t getChannelIndex() override;
 
 private:
     uint8_t m_hwchannel_ww;
@@ -61,9 +63,9 @@ private:
 
     uint8_t _index;
 
-    uint16_t _currentValueTW[2] = {255, 4000};    // 0 = Brightness, 1 = Kelvin
-    uint16_t _lastDayValue[2] = {255, 4000};      // 0 = Brightness, 1 = Kelvin
-    uint16_t _lastNightValue[2] = {100, 4000};    // 0 = Brightness, 1 = Kelvin
+    uint16_t _currentValueTW[2] = {255, 4000}; // 0 = Brightness, 1 = Kelvin
+    uint16_t _lastDayValue[2] = {255, 4000};   // 0 = Brightness, 1 = Kelvin
+    uint16_t _lastNightValue[2] = {100, 4000}; // 0 = Brightness, 1 = Kelvin
 
     uint32_t _currentUpdateRun = 0;
     uint32_t _lastUpdatekRun = 0;
@@ -84,7 +86,7 @@ private:
     uint16_t calcKoNumber(int koNum);
     void sendKoStateOnChange(uint16_t koNr, const KNXValue &value, const Dpt &type, bool onchange);
     void sendDimValue();
-    void setDimValue(); 
+    void setDimValue();
     void updateDimValue();
 
     uint16_t prozToDim(uint8_t value, uint8_t curve);
