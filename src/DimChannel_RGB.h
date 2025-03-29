@@ -6,6 +6,8 @@
 #include "LEDModule.h"
 #include "HwChannel.h"
 
+#include "LEDEffects.h"
+
 #define TIMEBASE_SECONDS        0
 #define TIMEBASE_MINUTES        1
 #define TIMEBASE_HOURS          2
@@ -34,6 +36,8 @@ public:
     std::vector<uint8_t> getHWPorts() override;
     uint8_t getChannelIndex() override;
 
+    LEDEffect ledEffect; 
+
 private:
     uint8_t m_hwchannel_r;
     uint8_t m_hwchannel_g;
@@ -57,6 +61,8 @@ private:
 
     uint32_t _currentUpdateRun = 0;
     uint32_t _lastUpdatekRun = 0;
+
+    uint32_t lastEffectChange = 0;
 
     bool isNight = false;
 

@@ -1,6 +1,6 @@
 #include "DimChannel_RGB.h"
 
-DimChannel_RGB::DimChannel_RGB(uint8_t index) : DimChannel(index)
+DimChannel_RGB::DimChannel_RGB(uint8_t index) : DimChannel(index), ledEffect(1)
 {
     _index = index;
 }
@@ -351,6 +351,25 @@ void DimChannel_RGB::task()
     {
         updateDimValue();
         _lastUpdatekRun = millis();
+    }
+    // run led effects
+    ledEffect.update();
+    uint32_t color = ledEffect.getColor();
+    uint8_t rgbColor[3] = {
+        static_cast<uint8_t>((color >> 16) & 0xFF),
+        static_cast<uint8_t>((color >> 8) & 0xFF),
+        static_cast<uint8_t>(color & 0xFF)
+    };
+    setCurrentValueRGB(rgbColor);
+    sendDimValue();
+
+    // change effect every 5 seconds
+    if (millis() - lastEffectChange >= 5000) {
+        lastEffectChange = millis();
+        ledEffect.setEffect(ledEffect.getEffect() + 1); // increment effect
+        if (ledEffect.getEffect() > 9) { // wrap around after 9
+            ledEffect.setEffect(0);
+        }
     }
 }
 
