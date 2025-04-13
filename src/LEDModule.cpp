@@ -330,6 +330,7 @@ void LEDModule::setHwChannelValue(byte channel, byte value, int curve)
 void LEDModule::processInputKo(GroupObject &ko)
 {
     uint16_t koNum = ko.asap();
+    if (koNum < EK_KoOffset) return;    // ignore KO smaler than EK_KoOffset
     logDebugP("Received KO %i", koNum);
 
     // EK Dimmer Class
@@ -359,11 +360,6 @@ void LEDModule::processInputKo(GroupObject &ko)
 
     switch (koNum)
     {
-    // Diagnose
-    case BASE_Share_KoOffset + BASE_KoDiagnose:
-        openknx.console.processDiagnoseKo(ko);
-        break;
-
     // Tag/Nacht Objekt
     case APP_KoDayNight:
         koHandleDayNight(ko);
@@ -489,7 +485,24 @@ bool LEDModule::processCommand(const std::string cmd, bool diagnoseKo)
             error = Wire1.endTransmission();
             if (error == 0)
             {
-                logInfoP("I2C device found at address 0x%.2X", address);
+                switch (address)
+                {
+                    case I2C_SSD1306_DEVICE_ADDRESS:
+                        logInfoP("SD1306 OLED display found at address 0x%.2X", address);
+                        break;
+                    case I2C_PCA9685_DEVICE_ADDRESS:
+                        logInfoP("PCA9685 PWM chip found at address 0x%.2X", address);
+                        break;
+                    case I2C_INA226_DEVICE_ADDRESS:
+                        logInfoP("INA226 current and power sensor found at address 0x%.2X", address);
+                        break;
+                    case I2C_TMP100_DEVICE_ADDRESS:
+                        logInfoP("TMP100 temperature sensor found at address 0x%.2X", address);
+                        break;
+                    default:
+                        logInfoP("Unknown device found at address 0x%.2X", address);
+                        break;
+                }
                 nDevices++;
             }
             else if (error == 4)
