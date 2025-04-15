@@ -1,6 +1,7 @@
 #include <OpenKNX.h>
 #include "LEDModule.h"
 #include "MeasuringModule.h"
+#include "FrontPanelModule.h"
 #include <FileTransferModule.h>
 
 void setup() {
@@ -15,6 +16,7 @@ void setup() {
 
     openknx.addModule(1, openknxLEDModule);
     openknx.addModule(2, openknxMeasuringModule);
+    openknx.addModule(8, openknxFrontPanelModule);
     openknx.addModule(9, openknxFileTransferModule);
     openknx.setup();
 }
@@ -30,4 +32,5 @@ void loop() {
 void loop1() {
     openknxLEDModule.loop1();
     openknxMeasuringModule.loop1();
+    openknxFrontPanelModule.loop1();
 }

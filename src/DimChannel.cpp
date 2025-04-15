@@ -1,12 +1,13 @@
 #include "DimChannel.h"
 
-DimChannel::DimChannel(uint8_t index) {
+DimChannel::DimChannel(uint8_t index)
+{
   _channelIndex = index;
 }
 
 DimChannel::~DimChannel() {}
 
-void DimChannel::setup(uint8_t* hwchannel) {}
+void DimChannel::setup(uint8_t *hwchannel) {}
 
 void DimChannel::processInputKo(GroupObject &ko) {}
 

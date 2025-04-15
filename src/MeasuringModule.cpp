@@ -96,8 +96,8 @@ void MeasuringModule::loop1() {
     if (!knx.configured())
         return;
     
-    // always run measurment for alarm features
-    if (delayCheck(_lastMeasurementGet, 15000)) {
+    // always run measurment for alarm features every 5 seconds
+    if (delayCheck(_lastMeasurementGet, 5000)) {
         getSingleMeasurement();
         checkAlarmDefinitions();
         _lastMeasurementGet = millis();
@@ -263,18 +263,36 @@ bool MeasuringModule::processCommand(const std::string cmd, bool diagnoseKo)
     return false;
 }
 
+float MeasuringModule::getMeasurementValue(const std::string &parameter)
+{
+    if (parameter == "temp") {
+        return temperatur_C;
+    } else if (parameter == "voltage") {
+        return busVoltage_V;
+    } else if (parameter == "current") {
+        return current_A;
+    } else if (parameter == "power") {
+        return power_W;
+    } else if (parameter == "energy") {
+        return totalEnergy_Wh;
+    }
+    return 0.0;
+}
+
 bool MeasuringModule::initI2cConnectionTemp() 
 {
     // Call dependend init for temp100 sensor
     if (!_tmp100.init()) {
         logErrorP("ERROR: initialization for TMP100 failed...");
         doResetI2cTemp = true;
+        tempI2cConnection = false;
         return false;
     }
     // Set default values for sensor
     _tmp100.setResolution(RES025);
     logInfoP("Init messurment I2C connection for TEMP100 sucessful");
     doResetI2cTemp = false;
+    tempI2cConnection = true;
     return true;
 }
 
@@ -284,6 +302,7 @@ bool MeasuringModule::initI2cConnectionIna()
     if (!_ina226.init()) {
         logErrorP("ERROR: initialization for INA226 failed...");
         doResetI2cIna = true;
+        inaI2cConnection = false;
         return false;
     }
     // Set default values for sensor
@@ -308,6 +327,7 @@ bool MeasuringModule::initI2cConnectionIna()
     _ina226.setAlertType(CURRENT_OVER, 4000);    // Testweise abgesichert auf 4.0 A
     logInfoP("Init messurment I2C connection INA226 sucessful");
     doResetI2cIna = false;
+    inaI2cConnection = true;
     return true;
 }
 
@@ -341,6 +361,16 @@ bool MeasuringModule::checkI2cConnectionIna()
         return false;
     }
     return true;
+}
+
+bool MeasuringModule::getTempI2cConnectionState() 
+{
+    return tempI2cConnection;
+}
+
+bool MeasuringModule::getInaI2cConnectionState() 
+{
+    return inaI2cConnection;
 }
 
 void MeasuringModule::readFlash(const uint8_t *buffer, const uint16_t size)

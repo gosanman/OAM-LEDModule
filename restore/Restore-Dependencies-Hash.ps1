@@ -3,13 +3,13 @@ Open ■
 ┬────┴  Restore-Dependencies
 ■ KNX   2024 OpenKNX - Erkan Çolak
 
-FILEPATH: restore/Restore-Dependencies-Hash.ps1
+FILEPATH: restore/Restore-Dependencies-Branch.ps1
 #>
 
 param(
   # Set the Git checkout mode
   [ValidateSet("Branch", "Hash")]
-  [string]$GitCheckoutMode = "Hash", # Default is Hash
+  [string]$GitCheckoutMode = "Hash", # Default is Branch
 
   # Force the script to recreate symbolic links
   [switch]$ForceRecreateSymLinks = $true, # Default is $true
@@ -18,7 +18,7 @@ param(
   [string]$DependenciesFile = "dependencies.txt", # Default is "dependencies.txt"
 
   # Check for privileges (Windows only)
-  [switch]$CheckForDeveloperMode = $true,  # Default is $true
+  [switch]$CheckForDeveloperMode = $false,  # Default is $false
   [switch]$CheckForSymbolicLinkPermissions = $true, # Default is $true
   [switch]$CheckForAdminOnly = $false, # Default is $false
 
