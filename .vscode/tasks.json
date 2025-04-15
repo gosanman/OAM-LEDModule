@@ -153,6 +153,15 @@
             "group": "test",
             "dependsOn": ["Pull"]
         },
+        {
+            "label": "Build KNXprod",
+            "type": "shell",
+            "command": "scripts/Build-KNXprod.ps1",
+            "args": [
+            ],
+            "problemMatcher": [],
+            "group": "test"
+        },
         // Build a release package for distribution
         // --- BOARD_KNXLED_DK_06_V10 ---
         {
