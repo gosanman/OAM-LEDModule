@@ -620,6 +620,17 @@ std::vector<uint8_t> LEDModule::getChannelHWPort(uint8_t channelIndex)
     return {0, 0, 0};
 }
 
+void LEDModule::toggleChannelHWPort(uint8_t channel)
+{
+    if (channel < usedChannels)
+    {
+        uint16_t _state = _pwm.getPWM(channel);
+        logDebugP("  HW Port: %i - Value %i to %i", channel, _state, _state == 0 ? 4095 : 0);
+        // Set PWM to 4095 if current value is 0, otherwise set to 0
+        _pwm.setPin(channel, _state == 0 ? 4095 : 0);
+    }
+}
+
 uint8_t LEDModule::getChannelIndex(uint8_t channelIndex)
 {
     if (channelIndex < usedChannels)
