@@ -41,7 +41,7 @@ void FrontPanelModule::setup()
     pinMode(IO4_PIN, INPUT_PULLUP); // Button select
 
     // Debug
-    logDebugP("Display Timeout: %i", _menuTimeout);
+    logDebugP("Timeout: %i sec", _menuTimeout / 1000);
 }
 
 void FrontPanelModule::setup1()
@@ -380,7 +380,7 @@ void FrontPanelModule::startUpScreen()
 void FrontPanelModule::showConnectionScreen(uint8_t index)
 {
     _display.clearDisplay();
-    _display.drawBitmap(0, 0, bitmap_progress_wrench, 32, 32, 1);
+    _display.drawBitmap(0, 0, lightbulb_on_outline, 32, 32, 1);
     _display.setTextSize(1);
     _display.setTextColor(SSD1306_WHITE);
     _display.setCursor(38, 5);
