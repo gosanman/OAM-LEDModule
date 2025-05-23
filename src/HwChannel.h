@@ -6,16 +6,18 @@
 #include <OpenKNX.h>
 
 // Dimmer  
-#define DIM_IDLE    0
-#define DIM_STOP    1
-#define DIM_ON      2
-#define DIM_OFF     3
-#define DIM_SOFTON  4
-#define DIM_SOFTOFF 5
-#define DIM_UP      6
-#define DIM_DOWN    7
-#define DIM_SET     8
-#define DIM_VALUE   9
+enum DimTask {
+    DIM_IDLE,
+    DIM_STOP,
+    DIM_ON,
+    DIM_OFF,
+    DIM_SOFTON,
+    DIM_SOFTOFF,
+    DIM_UP,
+    DIM_DOWN,
+    DIM_SET,
+    DIM_VALUE
+};
 
 class LEDModule;
 class HWChannel
@@ -37,7 +39,7 @@ public:
     void taskNewValue(byte valueNew);
     void taskSetValue(byte valueNew);
 
-    //information
+    // Information
     bool isBusy();
     bool updateAvailable();
     byte getCurrentValue();
@@ -67,9 +69,20 @@ private:
     uint32_t _lastTaskExecution;
     uint32_t _delayAbsolute;
     uint32_t _delayRelative;
-    
-    void calculateUpdateInterval();
 
+    // Private Methoden für die Task-Logik
+    void handleDimStop();
+    void handleDimOn();
+    void handleDimOff();
+    void handleDimSoftOn();
+    void handleDimSoftOff();
+    void handleDimUp();
+    void handleDimDown();
+    void handleDimSet();
+    void handleDimValue();
+
+    void updateValue(int8_t step, uint32_t delay);
+    void calculateUpdateInterval();
 };
 
 #endif
