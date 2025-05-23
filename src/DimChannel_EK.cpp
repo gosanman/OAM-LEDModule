@@ -29,23 +29,9 @@ void DimChannel_EK::setup(uint8_t *hwchannel)
     hwchannels[m_hwchannel] = new HWChannel(m_hwchannel);
     hwchannels[m_hwchannel]->setup(m_hwchannel, m_curve, m_durationabsolut, m_durationrelativ);
 
-    logDebugP("------------------ DEBUG -------------------");
-    logDebugP("Channel Index: %i", _channelIndex);
-    logDebugP("KO Switch: %i", calcKoNumber(EK_KoSwitch));
-    logDebugP("KO Dim Absolute: %i", calcKoNumber(EK_KoDimAbsolute));
-    logDebugP("KO Dim Relativ: %i", calcKoNumber(EK_KoDimRelativ));
-    logDebugP("KO Status OnOff: %i", calcKoNumber(EK_KoStatusOnOff));
-    logDebugP("KO Status Brightness: %i", calcKoNumber(EK_KoStatusBrightness));
-    logDebugP("KO Scene: %i", calcKoNumber(EK_KoSceneNumber));
-    logDebugP("HW Port: %i", m_hwchannel);
-    logDebugP("PT UseDayValue: %i", m_usedayvalue);
-    logDebugP("PT DayBrightness: %i", m_dayvalue);
-    logDebugP("PT UseNightValue: %i", m_usenightvalue);
-    logDebugP("PT NightBrightness: %i", m_nightvalue);
-    logDebugP("PT DurationRelativ: %i", m_durationrelativ);
-    logDebugP("PT DurationAbsolut: %i", m_durationabsolut);
-    logDebugP("PT Curve: %i", m_curve);
-    logDebugP("--------------------------------------------");
+    logDebugP("CH: %i, | HW: %i, | Use Day: %i, B: %i, | Use Night: %i, B: %i, Dur Rel: %i, Abs: %i, Curve: %i, | HCL Act: %i, Ch: %i, St: %i",
+              _index, m_hwchannel, m_usedayvalue, m_dayvalue, m_usenightvalue, m_nightvalue, m_durationrelativ,
+              m_durationabsolut, m_curve, ParamEK_hclActive, ParamEK_hclChannel, ParamEK_hclStart);
 }
 
 void DimChannel_EK::processInputKo(GroupObject &ko)
@@ -167,6 +153,16 @@ std::vector<uint8_t> DimChannel_EK::getHWPorts()
 uint8_t DimChannel_EK::getChannelIndex()
 {
     return _index;
+}
+
+uint8_t DimChannel_EK::getChannelType()
+{
+    return ChannelType::EK;
+}
+
+void DimChannel_EK::setHcl(uint8_t channel, uint16_t kelvin, uint8_t brightness)
+{
+
 }
 
 void DimChannel_EK::task()

@@ -4,6 +4,7 @@
 #include <Adafruit_PWMServoDriver.h>
 #include <OpenKNX.h>
 #include "hardware.h"
+#include "HclChannel.h"
 
 #include "LEDHelper.h"
 
@@ -51,6 +52,7 @@ private:
     unsigned long currentTime = 0;
     int8_t usedChannels = 0;
     uint32_t _timerCheckI2cConnection = 0;
+    uint32_t _timerCheckHclChannel = 0;
     bool doResetI2c = false;
 
     // Status flags for I2C connection
@@ -73,6 +75,7 @@ private:
     DimChannel *channelEK[MAXCHANNELSHW];
     DimChannel *channelTW[MAXCHANNELSHW];
     DimChannel *channelRGB[MAXCHANNELSHW];
+    HclChannel *hclchannel[MAXCHANNELSHCL];
     HWChannel *hwchannels[MAXCHANNELSHW];
 };
 

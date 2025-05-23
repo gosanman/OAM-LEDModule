@@ -275,6 +275,13 @@ void LEDModule::setup()
         break;
     }
 
+    // Set the default value for the HCL channels
+    for (int i = 0; i < MAXCHANNELSHCL; i++)
+    {
+        hclchannel[i] = new HclChannel();
+        hclchannel[i]->setup(i);
+    }
+
 #ifdef FUNC1_BUTTON_PIN
     openknx.func1Button.onShortClick([=]
                                      { 
@@ -303,6 +310,13 @@ void LEDModule::loop()
     // do nothing when not parameterized
     if (!knx.configured())
         return;
+    // run loop of all HCL channels ervery minute
+    if (delayCheck(_timerCheckHclChannel, 60000))
+    {
+        for (int i = 0; i < MAXCHANNELSHCL; i++)
+        hclchannel[i]->loop();
+        _timerCheckHclChannel = millis();
+    }
 }
 
 void LEDModule::loop1()
@@ -330,7 +344,7 @@ void LEDModule::setHwChannelValue(byte channel, byte value, int curve)
 void LEDModule::processInputKo(GroupObject &ko)
 {
     uint16_t koNum = ko.asap();
-    if (koNum < EK_KoOffset) return;    // ignore KO smaler than EK_KoOffset
+    if (koNum < EK_KoOffset) return;        // ignore KO smaler than EK_KoOffset - no Common
     logDebugP("Received KO %i", koNum);
 
     // EK Dimmer Class
@@ -355,6 +369,24 @@ void LEDModule::processInputKo(GroupObject &ko)
         int channelIndexRGB = floor((koNum - RGB_KoOffset) / RGB_KoBlockSize);
         logDebugP("For Channel RGB %i", channelIndexRGB);
         channelRGB[channelIndexRGB]->processInputKo(ko);
+        return;
+    }
+    // HCL Dimmer Class
+    if (koNum >= HCL_KoOffset && koNum < HCL_KoOffset + HCL_KoBlockSize * MAXCHANNELSHCL)
+    {
+        int channelIndexHCL = floor((koNum - HCL_KoOffset) / HCL_KoBlockSize) + 1;
+        int channelko = (ko.asap() - HCL_KoOffset) % HCL_KoBlockSize;
+        logDebugP("Broadcast values from HCL%i", channelIndexHCL);
+        for (int i = 0; i < usedChannels; i++) 
+        {
+            if (channelko == HCL_KoStatusColorTemp) {
+                uint16_t colorTemp = ko.value(Dpt(7, 600));
+                channel[i]->setHcl(channelIndexHCL, colorTemp, 0);
+            } else if (channelko == HCL_KoStatusBrightness) {
+                uint8_t brightness = ko.value(DPT_Scaling);
+                channel[i]->setHcl(channelIndexHCL, 0, brightness);
+            }
+        }
         return;
     }
 

@@ -30,9 +30,11 @@ public:
     void processInputKo(GroupObject &ko) override;
     void task() override;
 
-    void setDayNight(bool isNight);
+    void setDayNight(bool isNight) override;
     std::vector<uint8_t> getHWPorts() override;
     uint8_t getChannelIndex() override;
+    uint8_t getChannelType() override;
+    void setHcl(uint8_t channel, uint16_t kelvin, uint8_t brightness) override;
 
 private:
     uint8_t m_hwchannel_r;

@@ -36,52 +36,17 @@ void DimChannel_RGB::setup(uint8_t *hwchannel)
     hwchannels[m_hwchannel_g]->setup(m_hwchannel_g, m_curve, m_durationabsolut, m_durationrelativ);
     hwchannels[m_hwchannel_b]->setup(m_hwchannel_b, m_curve, m_durationabsolut, m_durationrelativ);
 
-    logDebugP("------------------ DEBUG -------------------");
-    logDebugP("Channel Index: %i", channelIndex());
-    logDebugP("KO Switch: %i", calcKoNumber(RGB_KoSwitch));
-    logDebugP("KO Color RGB: %i", calcKoNumber(RGB_KoColorRGB));
-    logDebugP("KO Color HSV: %i", calcKoNumber(RGB_KoColorHSV));
-    logDebugP("KO Dim Absolut H: %i", calcKoNumber(RGB_KoDimAbsoluteShadeH));
-    logDebugP("KO Dim Absolut S: %i", calcKoNumber(RGB_KoDimAbsoluteSaturationS));
-    logDebugP("KO Dim Absolut V: %i", calcKoNumber(RGB_KoDimAbsoluteBrightnessV));
-    logDebugP("KO Dim Absolut R: %i", calcKoNumber(RGB_KoDimAbsoluteR));
-    logDebugP("KO Dim Absolut G: %i", calcKoNumber(RGB_KoDimAbsoluteG));
-    logDebugP("KO Dim Absolut B: %i", calcKoNumber(RGB_KoDimAbsoluteB));
-    logDebugP("KO Dim Relativ H: %i", calcKoNumber(RGB_KoDimRelativShadeH));
-    logDebugP("KO Dim Relativ S: %i", calcKoNumber(RGB_KoDimRelativSaturationS));
-    logDebugP("KO Dim Relativ V: %i", calcKoNumber(RGB_KoDimRelativBrightnessV));
-    logDebugP("KO Dim Relativ R: %i", calcKoNumber(RGB_KoDimRelativR));
-    logDebugP("KO Dim Relativ G: %i", calcKoNumber(RGB_KoDimRelativG));
-    logDebugP("KO Dim Relativ B: %i", calcKoNumber(RGB_KoDimRelativB));
-    logDebugP("KO Status OnOff: %i", calcKoNumber(RGB_KoStatusOnOff));
-    logDebugP("KO Status Color RGB: %i", calcKoNumber(RGB_KoStatusColorRGB));
-    logDebugP("KO Status Color HSV: %i", calcKoNumber(RGB_KoStatusColorHSV));
-    logDebugP("KO Status H: %i", calcKoNumber(RGB_KoStatusShadeH));
-    logDebugP("KO Status S: %i", calcKoNumber(RGB_KoStatusSaturationS));
-    logDebugP("KO Status V: %i", calcKoNumber(RGB_KoStatusBrightnessV));
-    logDebugP("KO Status R: %i", calcKoNumber(RGB_KoStatusColorR));
-    logDebugP("KO Status G: %i", calcKoNumber(RGB_KoStatusColorG));
-    logDebugP("KO Status B: %i", calcKoNumber(RGB_KoStatusColorB));
-    logDebugP("KO Scene: %i", calcKoNumber(RGB_KoSceneNumber));
-    logDebugP("HW Port R: %i", m_hwchannel_r);
-    logDebugP("HW Port G: %i", m_hwchannel_g);
-    logDebugP("HW Port B: %i", m_hwchannel_b);
-    logDebugP("PT UseDayValue: %i", m_usedayvalue);
-    logDebugP("PT DayColor: #%.2X%.2X%.2X", m_dayvalue[0], m_dayvalue[1], m_dayvalue[2]);
-    logDebugP("PT UseNightValue: %i", m_usenightvalue);
-    logDebugP("PT NightColor: #%.2X%.2X%.2X", m_nightvalue[0], m_nightvalue[1], m_nightvalue[2]);
-    logDebugP("PT DurationRelativ: %i", m_durationrelativ);
-    logDebugP("PT DurationAbsolut: %i", m_durationabsolut);
-    logDebugP("PT Curve: %i", m_curve);
-    logDebugP("PT Gamma Correction: %.1f", m_gammacorrection);
-
+    // set default values for gamma correction
     if (m_gammacorrection >= 1.0f && m_gammacorrection <= 3)
     {
         if (m_gammacorrection != 2.8f)
             calcGammaTable(m_gammacorrection);
     }
 
-    logDebugP("--------------------------------------------");
+    logDebugP("CH: %i, | HW R: %i, G: %i, B: %i, | Use Day: %i, C: #%.2X%.2X%.2X, Use Night: %i, C: #%.2X%.2X%.2X, | Dur Rel: %i, Abs: %i, Curve: %i, Gamma: %.1f, | HCL Act: %i, Ch: %i, St: %i",
+              _index, m_hwchannel_r, m_hwchannel_g, m_hwchannel_b, m_usedayvalue, m_dayvalue[0], m_dayvalue[1], m_dayvalue[2],
+              m_usenightvalue, m_nightvalue[0], m_nightvalue[1], m_nightvalue[2], m_durationrelativ, m_durationabsolut,
+              m_curve, m_gammacorrection, ParamRGB_hclActive, ParamRGB_hclChannel, ParamRGB_hclStart);
 }
 
 void DimChannel_RGB::processInputKo(GroupObject &ko)
@@ -338,6 +303,16 @@ std::vector<uint8_t> DimChannel_RGB::getHWPorts()
 uint8_t DimChannel_RGB::getChannelIndex()
 {
     return _index;
+}
+
+uint8_t DimChannel_RGB::getChannelType()
+{
+    return ChannelType::RGB; // 3 = RGB
+}
+
+void DimChannel_RGB::setHcl(uint8_t channel, uint16_t kelvin, uint8_t brightness)
+{
+
 }
 
 void DimChannel_RGB::task()
