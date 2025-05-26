@@ -25,10 +25,6 @@ void DimChannel_EK::setup(uint8_t *hwchannel)
     m_durationabsolut = getTimeWithPattern(ParamEK_OnOffTime, ParamEK_OnOffBase);
     m_curve = ParamEK_DimCurve; // 0=A, 1=B, 2=C, 3=D, 4=E
 
-    // setup hw channels
-    hwchannels[m_hwchannel] = new HWChannel(m_hwchannel);
-    hwchannels[m_hwchannel]->setup(m_hwchannel, m_curve, m_durationabsolut, m_durationrelativ);
-
     logDebugP("CH: %i, | HW: %i, | Use Day: %i, B: %i, | Use Night: %i, B: %i, Dur Rel: %i, Abs: %i, Curve: %i, | HCL Act: %i, Ch: %i, St: %i",
               _index, m_hwchannel, m_usedayvalue, m_dayvalue, m_usenightvalue, m_nightvalue, m_durationrelativ,
               m_durationabsolut, m_curve, ParamEK_hclActive, ParamEK_hclChannel, ParamEK_hclStart);
@@ -64,27 +60,25 @@ void DimChannel_EK::processInputKo(GroupObject &ko)
 void DimChannel_EK::koHandleSwitch(GroupObject &ko)
 {
     bool value = ko.value(DPT_Switch);
-    if (value) // on
-    {
-        _currentValueEK = isNight ? (m_usenightvalue ? m_nightvalue : _lastNightValue)
-                                  : (m_usedayvalue ? m_dayvalue : _lastDayValue);
-        logDebugP(isNight ? "Switch Night - with value %i" : "Switch Day - with value %i", _currentValueEK);
-        sendDimValue();
+    if (value)
+    { // on
+        switchOnHelper();
+        logDebugP(isNight ? "Switch On Night - with value %i" : "Switch On Day - with value %i", _currentValueEK);
+        _currentTask = DimTaskEK::EK_DIM_SOFT_ON;
     }
-    else // off
-    {
-        hwchannels[m_hwchannel]->taskSoftOff();
+    else
+    { // off
+        switchOffHelper();
+        logDebugP(isNight ? "Switch Off Night - with value %i" : "Switch Off Day - with value %i", _currentValueEK);
+        _currentTask = DimTaskEK::EK_DIM_SOFT_OFF;
     }
 }
 
 void DimChannel_EK::koHandleDimmAbs(GroupObject &ko)
 {
-    uint8_t brightness = ko.value(DPT_Percent_U8);
-    // uint8_t brightness = ko.value(DPT_Scaling);
-    //_currentValueEK = round(brightness * 2.55);
-    _currentValueEK = brightness;
-    logDebugP("Dim Absolut with value %i", brightness);
-    sendDimValue();
+    _newValueEK = ko.value(DPT_Percent_U8);
+    logDebugP("Dim Absolut - Brightness: %i", _newValueEK);
+    _currentTask = DimTaskEK::EK_DIM_B_SET;
 }
 
 void DimChannel_EK::koHandleDimmRel(GroupObject &ko)
@@ -93,17 +87,15 @@ void DimChannel_EK::koHandleDimmRel(GroupObject &ko)
     uint8_t step = ko.value(Dpt(3, 7, 1));
     logDebugP("Dim Relativ - Direction: %i, Step: %i", direction, step);
     // direction true = dim up, false = dim down, step = 0 then stop
-    if (step == 0)
-    {
-        hwchannels[m_hwchannel]->taskStop();
-    }
-    else if (direction == 1)
-    {
-        hwchannels[m_hwchannel]->taskDimUp();
-    }
-    else if (direction == 0)
-    {
-        hwchannels[m_hwchannel]->taskDimDown();
+    if (step == 0) {
+        logDebugP("Dim Relativ - Stop");
+        _currentTask = DimTaskEK::EK_DIM_STOP;
+    } else if (direction == 1) {
+        logDebugP("Dim Relativ - DimUp");
+        _currentTask = DimTaskEK::EK_DIM_B_UP;
+    } else if (direction == 0) {
+        logDebugP("Dim Relativ - DimDown");
+        _currentTask = DimTaskEK::EK_DIM_B_DOWN;
     }
 }
 
@@ -124,17 +116,37 @@ void DimChannel_EK::koHandleScene(GroupObject &ko)
                 // do nothing
                 break;
             case SC_EK_OnValueDayNight:
-                sendDimValue();
+                switchOnHelper();
+                _currentTask = DimTaskEK::EK_DIM_SOFT_ON;
                 break;
             case SC_EK_SetBrightness:
-                _currentValueEK = round(((uint)((knx.paramByte((EK_ParamBlockOffset + EK_ParamBlockSize * channelIndex() + EK_SceneBrightnessA + i))))) * 2.55);
-                sendDimValue();
+                _newValueEK = round(((uint)((knx.paramByte((EK_ParamBlockOffset + EK_ParamBlockSize * channelIndex() + EK_SceneBrightnessA + i))))) * 2.55);
+                _currentTask = DimTaskEK::EK_DIM_B_SET;
                 break;
             case SC_EK_Off:
-                hwchannels[m_hwchannel]->taskSoftOff();
+                switchOffHelper();
+                _currentTask = DimTaskEK::EK_DIM_SOFT_OFF;
                 break;
             }
         }
+    }
+}
+
+void DimChannel_EK::switchOnHelper()
+{
+    if (isNight) {
+        _newValueEK = m_usenightvalue ? m_nightvalue : _lastNightValue;
+    } else {
+        _newValueEK = m_usedayvalue ? m_dayvalue : _lastDayValue;
+    }
+}
+
+void DimChannel_EK::switchOffHelper()
+{
+    if (isNight) {
+        _lastNightValue = _currentValueEK;
+    } else {
+        _lastDayValue = _currentValueEK;
     }
 }
 
@@ -157,24 +169,20 @@ uint8_t DimChannel_EK::getChannelIndex()
 
 uint8_t DimChannel_EK::getChannelType()
 {
-    return ChannelType::EK;
+    return ChannelType::EK; // 1 = EK
 }
 
 void DimChannel_EK::setHcl(uint8_t channel, uint16_t kelvin, uint8_t brightness)
 {
-
+    if (ParamEK_hclActive != 1 || channel != ParamEK_hclChannel)
+        return;
+    if (brightness != 0) _currentValueEK = brightness;
+    // HCL is not supported for EK, so we ignore kelvin
 }
 
 void DimChannel_EK::task()
 {
-    hwchannels[m_hwchannel]->task();
-    // run ko update every 100ms
-    _currentUpdateRun = millis();
-    if (_currentUpdateRun - _lastUpdatekRun >= 100)
-    {
-        updateDimValue();
-        _lastUpdatekRun = millis();
-    }
+    dimmerTask();
 }
 
 uint16_t DimChannel_EK::calcKoNumber(int koNum)
@@ -185,54 +193,25 @@ uint16_t DimChannel_EK::calcKoNumber(int koNum)
 void DimChannel_EK::sendKoStateOnChange(uint16_t koNr, const KNXValue &value, const Dpt &type, bool alwayssend)
 {
     GroupObject &ko = knx.getGroupObject(calcKoNumber(koNr));
-    if (ko.valueNoSendCompare(value, type))
-    {
+    if (ko.valueNoSendCompare(value, type)) {
+        ko.objectWritten();
+    } else if (alwayssend == true) {
         ko.objectWritten();
     }
-    else if (alwayssend == true)
-    {
-        ko.objectWritten();
-    }
-}
-
-void DimChannel_EK::sendDimValue()
-{
-    hwchannels[m_hwchannel]->taskNewValue(_currentValueEK);
 }
 
 void DimChannel_EK::updateDimValue()
 {
-    if (hwchannels[m_hwchannel]->isBusy())
-    {
-        return;
-    }
-    if (hwchannels[m_hwchannel]->updateAvailable())
-    {
-        hwchannels[m_hwchannel]->resetUpdateFlag();
-        uint8_t ek = hwchannels[m_hwchannel]->getCurrentValue();
-
-        (isNight ? _lastNightValue : _lastDayValue) = _currentValueEK;
-
-        if (ek != 0)
-        {
-            sendKoStateOnChange(EK_KoStatusOnOff, (bool)1, DPT_Switch, false);
-            sendKoStateOnChange(EK_KoStatusBrightness, _currentValueEK, DPT_Percent_U8, true);
-        }
-        else
-        {
-            sendKoStateOnChange(EK_KoStatusOnOff, (bool)0, DPT_Switch, false);
-            sendKoStateOnChange(EK_KoStatusBrightness, _currentValueEK, DPT_Percent_U8, false);
-        }
-    }
+    logDebugP("Send DimValue to KO - OnOff: %i B: %i", _currentValueEK > 0, _currentValueEK);
+    sendKoStateOnChange(EK_KoStatusOnOff, _currentValueEK > 0, DPT_Switch, false);
+    sendKoStateOnChange(EK_KoStatusBrightness, _currentValueEK, DPT_Percent_U8, true);
 }
 
 uint32_t DimChannel_EK::getTimeWithPattern(uint16_t time, uint8_t base)
 {
-    if (base == TIMEBASE_HOURS && time > 1000)
-    {
+    if (base == TIMEBASE_HOURS && time > 1000) {
         time = 1000; // Begrenzung auf maximal 1000 Stunden
     }
-
     switch (base)
     {
     case TIMEBASE_TENTH_SECONDS:
@@ -246,4 +225,94 @@ uint32_t DimChannel_EK::getTimeWithPattern(uint16_t time, uint8_t base)
     default:
         return 0;
     }
+}
+
+//----------------------------- TW Dimmer Task ------------------------------
+
+void DimChannel_EK::dimmerTask()
+{
+    _currentMillis = millis();
+    switch (_currentTask)
+    {
+    case DimTaskEK::EK_DIM_STOP:
+        handleDimStop();
+        break;
+    case DimTaskEK::EK_DIM_SOFT_ON:
+        handleDimSoftOn();
+        break;
+    case DimTaskEK::EK_DIM_SOFT_OFF:
+        handleDimSoftOff();
+        break;
+    case DimTaskEK::EK_DIM_B_SET:
+        handleDimSetBrightness();
+        break;
+    case DimTaskEK::EK_DIM_B_UP:
+        handleDimBrightnessUp();
+        break;
+    case DimTaskEK::EK_DIM_B_DOWN:
+        handleDimBrightnessDown();
+        break;
+    case DimTaskEK::EK_DIM_IDLE:
+    default:
+        break;
+    }
+}
+
+void DimChannel_EK::sendDimValue()
+{
+    // logDebugP("Send DimValue to HW - EK: %i", _currentValueEK);
+    LEDModule::_instance->setHwChannelValue(m_hwchannel, _currentValueEK, m_curve);
+}
+
+void DimChannel_EK::handleDimGeneric(uint8_t &currentValue, uint8_t targetValue, uint8_t minValue, uint8_t maxValue, bool isAbsolute)
+{
+    if (currentValue == targetValue) {
+        _currentTask = DimTaskEK::EK_DIM_STOP;
+        return;
+    }
+    if (!_busy) {
+        uint32_t duration = isAbsolute ? m_durationabsolut : m_durationrelativ;
+        uint16_t delta = abs((int)targetValue - (int)currentValue);
+        _time = (word)(duration / delta);
+    }
+    if (_currentMillis - _lastTaskExecution >= _time) {
+        if (currentValue < targetValue && currentValue < maxValue) {
+            currentValue++;
+        } else if (currentValue > targetValue && currentValue > minValue) {
+            currentValue--;
+        } else {
+            _currentTask = DimTaskEK::EK_DIM_STOP;
+            return;
+        }
+        _busy = true;
+        sendDimValue();
+        _lastTaskExecution = millis();
+    }
+}
+
+void DimChannel_EK::handleDimStop()
+{
+    _busy = false;
+    _currentTask = DimTaskEK::EK_DIM_IDLE;
+    updateDimValue();
+}
+
+void DimChannel_EK::handleDimSoftOn() {
+    handleDimGeneric(_currentValueEK, _newValueEK, _valueMinBrightness, _valueMaxBrightness, true);
+}
+
+void DimChannel_EK::handleDimSoftOff() {
+    handleDimGeneric(_currentValueEK, _valueMinBrightness, _valueMinBrightness, _valueMaxBrightness, true);
+}
+
+void DimChannel_EK::handleDimSetBrightness() {
+    handleDimGeneric(_currentValueEK, _newValueEK, _valueMinBrightness, _valueMaxBrightness, true);
+}
+
+void DimChannel_EK::handleDimBrightnessUp() {
+    handleDimGeneric(_currentValueEK, _valueMaxBrightness, _valueMinBrightness, _valueMaxBrightness, false);
+}
+
+void DimChannel_EK::handleDimBrightnessDown() {
+    handleDimGeneric(_currentValueEK, _valueMinBrightness, _valueMinBrightness, _valueMaxBrightness, false);
 }

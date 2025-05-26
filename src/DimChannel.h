@@ -4,7 +4,6 @@
 #include <OpenKNX.h>
 
 #include "LEDModule.h"
-#include "HwChannel.h"
 
 class LEDModule;
 class DimChannel : public OpenKNX::Channel

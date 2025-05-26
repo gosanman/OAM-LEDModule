@@ -28,14 +28,6 @@ void DimChannel_RGB::setup(uint8_t *hwchannel)
     m_curve = ParamRGB_DimCurve; // 0=A, 1=B, 2=C, 3=D, 4=E
     m_gammacorrection = ParamRGB_GammaCorrection;
 
-    // setup hw channels
-    hwchannels[m_hwchannel_r] = new HWChannel(m_hwchannel_r);
-    hwchannels[m_hwchannel_g] = new HWChannel(m_hwchannel_g);
-    hwchannels[m_hwchannel_b] = new HWChannel(m_hwchannel_b);
-    hwchannels[m_hwchannel_r]->setup(m_hwchannel_r, m_curve, m_durationabsolut, m_durationrelativ);
-    hwchannels[m_hwchannel_g]->setup(m_hwchannel_g, m_curve, m_durationabsolut, m_durationrelativ);
-    hwchannels[m_hwchannel_b]->setup(m_hwchannel_b, m_curve, m_durationabsolut, m_durationrelativ);
-
     // set default values for gamma correction
     if (m_gammacorrection >= 1.0f && m_gammacorrection <= 3)
     {
@@ -107,15 +99,15 @@ void DimChannel_RGB::processInputKo(GroupObject &ko)
         break;
     // Dimmen Relative R
     case RGB_KoDimRelativR:
-        koHandleDimmRelRGB(ko, m_hwchannel_r, 0);
+        koHandleDimmRelRGB(ko, 0);
         break;
     // Dimmen Relative G
     case RGB_KoDimRelativG:
-        koHandleDimmRelRGB(ko, m_hwchannel_g, 1);
+        koHandleDimmRelRGB(ko, 1);
         break;
     // Dimmen Relative B
     case RGB_KoDimRelativB:
-        koHandleDimmRelRGB(ko, m_hwchannel_b, 2);
+        koHandleDimmRelRGB(ko, 2);
         break;
     // Szenensteuerung
     case RGB_KoSceneNumber:
@@ -127,92 +119,62 @@ void DimChannel_RGB::processInputKo(GroupObject &ko)
 void DimChannel_RGB::koHandleSwitch(GroupObject &ko)
 {
     bool value = ko.value(DPT_Switch);
-    if (value) // on
-    {
-        if (isNight)
-        {
-            if (m_usenightvalue)
-            {
-                setCurrentValueRGB(m_nightvalue);
-            }
-            else
-            {
-                setCurrentValueRGB(_lastNightValue);
-            }
-        }
-        else
-        {
-            if (m_usedayvalue)
-            {
-                setCurrentValueRGB(m_dayvalue);
-            }
-            else
-            {
-                setCurrentValueRGB(_lastDayValue);
-            }
-        }
-        logDebugP(isNight ? "Switch Night - with value %i Color: #%.2X%.2X%.2X" : "Switch Day - with value %i Color: #%.2X%.2X%.2X", value, _currentValueRGB[0], _currentValueRGB[1], _currentValueRGB[2]);
-        rgbToHSV(_currentValueRGB[0], _currentValueRGB[1], _currentValueRGB[2], _currentValueHSV[0], _currentValueHSV[1], _currentValueHSV[2]);
-        sendDimValue();
+    if (value)
+    { // on
+        switchOnHelper();
+        logDebugP(isNight ? "Switch On Night - with value %i Color: #%.2X%.2X%.2X" : "Switch On Day - with value %i Color: #%.2X%.2X%.2X", value, _newValueRGB[0], _newValueRGB[1], _newValueRGB[2]);
+        //rgbToHSV(_newValueRGB[0], _newValueRGB[1], _newValueRGB[2], _currentValueHSV[0], _currentValueHSV[1], _currentValueHSV[2]);
+        _currentTask = DimTaskRGB::RGB_DIM_SOFT_ON;
     }
     else
     { // off
-        hwchannels[m_hwchannel_r]->taskSoftOff();
-        hwchannels[m_hwchannel_g]->taskSoftOff();
-        hwchannels[m_hwchannel_b]->taskSoftOff();
+        switchOffHelper();
+        logDebugP(isNight ? "Switch Off Night - with value %i" : "Switch Off Day - with value %i", value);
+        _currentTask = DimTaskRGB::RGB_DIM_SOFT_OFF;
     }
 }
 
 void DimChannel_RGB::koHandleDimmAbsColorRGB(GroupObject &ko)
 {
     uint32_t rgb = ko.value(DPT_Colour_RGB);
-    logDebugP("Got RGB Color: %X", rgb);
-
-    _currentValueRGB[0] = (rgb >> 16) & 0xFF;
-    _currentValueRGB[1] = (rgb >> 8) & 0xFF;
-    _currentValueRGB[2] = rgb & 0xFF;
-
-    rgbToHSV(_currentValueRGB[0], _currentValueRGB[1], _currentValueRGB[2], _currentValueHSV[0], _currentValueHSV[1], _currentValueHSV[2]);
-    sendDimValue();
+    _newValueRGB[0] = (rgb >> 16) & 0xFF;
+    _newValueRGB[1] = (rgb >> 8) & 0xFF;
+    _newValueRGB[2] = rgb & 0xFF;
+    //rgbToHSV(_newValueRGB[0], _newValueRGB[1], _newValueRGB[2], _currentValueHSV[0], _currentValueHSV[1], _currentValueHSV[2]);
+    logDebugP("Dim Absolute RGB: %X", rgb);
+    _currentTask = DimTaskRGB::RGB_DIM_RGB_SET;
 }
 
 void DimChannel_RGB::koHandleDimmAbsColorHSV(GroupObject &ko)
 {
     uint32_t hsv = ko.value(DPT_Colour_RGB);
-    logDebugP("Got HSV Color: %X", hsv);
-
     _currentValueHSV[0] = (hsv >> 16) & 0xFF;
     _currentValueHSV[1] = (hsv >> 8) & 0xFF;
     _currentValueHSV[2] = hsv & 0xFF;
-
-    hsvToRGB(_currentValueHSV[0], _currentValueHSV[1], _currentValueHSV[2], _currentValueRGB[0], _currentValueRGB[1], _currentValueRGB[2]);
-    sendDimValue();
+    hsvToRGB(_currentValueHSV[0], _currentValueHSV[1], _currentValueHSV[2], _newValueRGB[0], _newValueRGB[1], _newValueRGB[2]);
+    logDebugP("Dim Absolute HSV: %X", hsv);
+    _currentTask = DimTaskRGB::RGB_DIM_RGB_SET;
 }
 
 void DimChannel_RGB::koHandleDimmAbsRGB(GroupObject &ko, uint8_t index)
 {
-    _currentValueRGB[index] = ko.value(DPT_Scaling);
-    _currentValueRGB[index] = round(_currentValueRGB[index] * 2.55);
-    logDebugP("Got RGB index: %i withe value: %i", index, _currentValueRGB[index]);
-
-    rgbToHSV(_currentValueRGB[0], _currentValueRGB[1], _currentValueRGB[2], _currentValueHSV[0], _currentValueHSV[1], _currentValueHSV[2]);
-    sendDimValue();
+    _newValueRGB[index] = ko.value(DPT_Scaling);
+    _newValueRGB[index] = round(_newValueRGB[index] * 2.55);
+    //rgbToHSV(_newValueRGB[0], _newValueRGB[1], _newValueRGB[2], _currentValueHSV[0], _currentValueHSV[1], _currentValueHSV[2]);    
+    logDebugP("Dim Absolute RGB index: %i withe value: %i", index, _newValueRGB[index]);
+    _currentTask = DimTaskRGB::RGB_DIM_RGB_SET;
 }
 
 void DimChannel_RGB::koHandleDimmAbsHSV(GroupObject &ko, uint8_t index)
 {
-    if (index == 0)
-    {
+    if (index == 0) { // H
         _currentValueHSV[index] = ko.value(DPT_Angle);
-    }
-    else
-    {
+    } else { // S or V
         _currentValueHSV[index] = ko.value(DPT_Scaling);
     }
-    logDebugP("Got HSV index: %i withe value: %i", index, _currentValueHSV[index]);
-
-    hsvToRGB(_currentValueHSV[0], _currentValueHSV[1], _currentValueHSV[2], _currentValueRGB[0], _currentValueRGB[1], _currentValueRGB[2]);
-    sendDimValue();
+    hsvToRGB(_currentValueHSV[0], _currentValueHSV[1], _currentValueHSV[2], _newValueRGB[0], _newValueRGB[1], _newValueRGB[2]);
+    logDebugP("Dim Absolute HSV index: %i withe value: %i", index, _currentValueHSV[index]);
+    _currentTask = DimTaskRGB::RGB_DIM_RGB_SET;
 }
 
 void DimChannel_RGB::koHandleDimmRelH(GroupObject &ko)
@@ -227,25 +189,23 @@ void DimChannel_RGB::koHandleDimmRelV(GroupObject &ko)
 {
 }
 
-void DimChannel_RGB::koHandleDimmRelRGB(GroupObject &ko, uint8_t hwchannel, uint8_t index)
+void DimChannel_RGB::koHandleDimmRelRGB(GroupObject &ko, uint8_t index)
 {
     uint8_t direction = ko.value(Dpt(3, 7, 0));
     uint8_t step = ko.value(Dpt(3, 7, 1));
-    logDebugP("Dim Relativ hwchannel: %i - Direction: %i, Step: %i", hwchannel, direction, step);
+    logDebugP("Dim Relativ ColorIndex: %i - Direction: %i, Step: %i", index, direction, step);
     // direction true = dim up, false = dim down, step = 0 then stop
-    if (step == 0)
-    {
-        hwchannels[hwchannel]->taskStop();
-        _currentValueRGB[index] = hwchannels[hwchannel]->getCurrentValue();
-        rgbToHSV(_currentValueRGB[0], _currentValueRGB[1], _currentValueRGB[2], _currentValueHSV[0], _currentValueHSV[1], _currentValueHSV[2]);
-    }
-    else if (direction == 1)
-    {
-        hwchannels[hwchannel]->taskDimUp();
-    }
-    else if (direction == 0)
-    {
-        hwchannels[hwchannel]->taskDimDown();
+    if (step == 0) {
+        logDebugP("Dim Relativ ColorIndex: %i - Stop", index);
+        _currentTask = DimTaskRGB::RGB_DIM_STOP;
+    } else if (direction == 1) {
+        logDebugP("Dim Relativ ColorIndex: %i - Up", index);
+        _newValueRGB[index] = _valueMax;
+        _currentTask = DimTaskRGB::RGB_DIM_RGB_REL;
+    } else if (direction == 0) {
+        logDebugP("Dim Relativ ColorIndex: %i - Down", index);
+        _newValueRGB[index] = _valueMin;
+        _currentTask = DimTaskRGB::RGB_DIM_RGB_REL;    
     }
 }
 
@@ -266,24 +226,61 @@ void DimChannel_RGB::koHandleScene(GroupObject &ko)
                 // do nothing
                 break;
             case SC_RGB_OnValueDayNight:
-                sendDimValue();
+                switchOnHelper();
+                _currentTask = DimTaskRGB::RGB_DIM_SOFT_ON;
                 break;
             case SC_RGB_SetColor:
                 uint8_t *colorvalue;
                 colorvalue = knx.paramData((RGB_ParamBlockOffset + RGB_ParamBlockSize * channelIndex() + RGB_SceneColorA + (i * 3)));
-                logDebugP("Scene Color: #%.2X%.2X%.2X", colorvalue[0], colorvalue[1], colorvalue[2]);
-                setCurrentValueRGB(colorvalue);
-                rgbToHSV(_currentValueRGB[0], _currentValueRGB[1], _currentValueRGB[2], _currentValueHSV[0], _currentValueHSV[1], _currentValueHSV[2]);
-                sendDimValue();
+                setNewValueRGB(colorvalue);
+                rgbToHSV(_newValueRGB[0], _newValueRGB[1], _newValueRGB[2], _currentValueHSV[0], _currentValueHSV[1], _currentValueHSV[2]);
+                _currentTask = DimTaskRGB::RGB_DIM_RGB_SET;
                 break;
             case SC_RGB_Off:
-                hwchannels[m_hwchannel_r]->taskSoftOff();
-                hwchannels[m_hwchannel_g]->taskSoftOff();
-                hwchannels[m_hwchannel_b]->taskSoftOff();
+                switchOffHelper();
+                _currentTask = DimTaskRGB::RGB_DIM_SOFT_OFF;
                 break;
             }
         }
     }
+}
+
+void DimChannel_RGB::setNewValueRGB(uint8_t *value)
+{
+    _newValueRGB[0] = value[0];
+    _newValueRGB[1] = value[1];
+    _newValueRGB[2] = value[2];
+}
+
+void DimChannel_RGB::switchOnHelper()
+{
+    if (isNight) {
+        if (m_usenightvalue) {
+            setNewValueRGB(m_nightvalue);
+        } else{
+            setNewValueRGB(_lastNightValue);
+        }
+    } else {
+        if (m_usedayvalue) {
+            setNewValueRGB(m_dayvalue);
+        } else{
+            setNewValueRGB(_lastDayValue);
+        }
+    }
+}
+
+void DimChannel_RGB::switchOffHelper()
+{
+    if (isNight) {
+        _lastNightValue[0] = _currentValueRGB[0];
+        _lastNightValue[1] = _currentValueRGB[1];   
+        _lastNightValue[2] = _currentValueRGB[2];
+    } else {
+        _lastDayValue[0] = _currentValueRGB[0];
+        _lastDayValue[1] = _currentValueRGB[1];
+        _lastDayValue[2] = _currentValueRGB[2];
+    }
+
 }
 
 void DimChannel_RGB::setDayNight(bool value)
@@ -312,21 +309,13 @@ uint8_t DimChannel_RGB::getChannelType()
 
 void DimChannel_RGB::setHcl(uint8_t channel, uint16_t kelvin, uint8_t brightness)
 {
-
+        if (ParamRGB_hclActive != 1 || channel != ParamRGB_hclChannel)
+        return;    
 }
 
 void DimChannel_RGB::task()
 {
-    hwchannels[m_hwchannel_r]->task();
-    hwchannels[m_hwchannel_g]->task();
-    hwchannels[m_hwchannel_b]->task();
-    // run update check every 100ms
-    _currentUpdateRun = millis();
-    if (_currentUpdateRun - _lastUpdatekRun >= 100)
-    {
-        updateDimValue();
-        _lastUpdatekRun = millis();
-    }
+    dimmerTask();
 }
 
 uint16_t DimChannel_RGB::calcKoNumber(int koNum)
@@ -337,86 +326,30 @@ uint16_t DimChannel_RGB::calcKoNumber(int koNum)
 void DimChannel_RGB::sendKoStateOnChange(uint16_t koNr, const KNXValue &value, const Dpt &type, bool alwayssend)
 {
     GroupObject &ko = knx.getGroupObject(calcKoNumber(koNr));
-    if (ko.valueNoSendCompare(value, type))
-    {
+    if (ko.valueNoSendCompare(value, type)) {
+        ko.objectWritten(); }
+    else if (alwayssend == true) {
         ko.objectWritten();
     }
-    else if (alwayssend == true)
-    {
-        ko.objectWritten();
-    }
-}
-
-void DimChannel_RGB::setCurrentValueRGB(uint8_t *value)
-{
-    _currentValueRGB[0] = value[0];
-    _currentValueRGB[1] = value[1];
-    _currentValueRGB[2] = value[2];
-}
-
-void DimChannel_RGB::sendDimValue()
-{
-    hwchannels[m_hwchannel_r]->taskNewValue(gammaT[_currentValueRGB[0]]);
-    hwchannels[m_hwchannel_g]->taskNewValue(gammaT[_currentValueRGB[1]]);
-    hwchannels[m_hwchannel_b]->taskNewValue(gammaT[_currentValueRGB[2]]);
 }
 
 void DimChannel_RGB::updateDimValue()
 {
-    if (hwchannels[m_hwchannel_r]->isBusy() || hwchannels[m_hwchannel_g]->isBusy() || hwchannels[m_hwchannel_b]->isBusy())
-    {
-        return;
-    }
-    if (hwchannels[m_hwchannel_r]->updateAvailable() || hwchannels[m_hwchannel_g]->updateAvailable() || hwchannels[m_hwchannel_b]->updateAvailable())
-    {
-        hwchannels[m_hwchannel_r]->resetUpdateFlag();
-        hwchannels[m_hwchannel_g]->resetUpdateFlag();
-        hwchannels[m_hwchannel_b]->resetUpdateFlag();
-        uint8_t r = hwchannels[m_hwchannel_r]->getCurrentValue();
-        uint8_t g = hwchannels[m_hwchannel_g]->getCurrentValue();
-        uint8_t b = hwchannels[m_hwchannel_b]->getCurrentValue();
-
-        if (isNight)
-        {
-            _lastNightValue[0] = _currentValueRGB[0];
-            _lastNightValue[1] = _currentValueRGB[1];
-            _lastNightValue[2] = _currentValueRGB[2];
-        }
-        else
-        {
-            _lastDayValue[0] = _currentValueRGB[0];
-            _lastDayValue[1] = _currentValueRGB[1];
-            _lastDayValue[2] = _currentValueRGB[2];
-        }
-
-        uint32_t rgb = (_currentValueRGB[0] << 16) | (_currentValueRGB[1] << 8) | _currentValueRGB[2];
-        uint32_t hsv = ((uint8_t)round((double)_currentValueHSV[0] * 255.0 / 360.0) << 16) | (_currentValueHSV[1] << 8) | _currentValueHSV[2];
-
-        if (r != 0 || g != 0 || b != 0)
-        {
-            sendKoStateOnChange(RGB_KoStatusOnOff, (bool)1, DPT_Switch, false);
-            sendKoStateOnChange(RGB_KoStatusColorRGB, rgb, DPT_Colour_RGB, true);
-            sendKoStateOnChange(RGB_KoStatusColorHSV, hsv, DPT_Colour_RGB, true);
-            sendKoStateOnChange(RGB_KoStatusShadeH, _currentValueHSV[0], DPT_Angle, true);
-            sendKoStateOnChange(RGB_KoStatusSaturationS, _currentValueHSV[1], DPT_Scaling, true);
-            sendKoStateOnChange(RGB_KoStatusBrightnessV, _currentValueHSV[2], DPT_Scaling, true);
-            sendKoStateOnChange(RGB_KoStatusColorR, (uint8_t)_currentValueRGB[0], DPT_Percent_U8, true);
-            sendKoStateOnChange(RGB_KoStatusColorG, (uint8_t)_currentValueRGB[1], DPT_Percent_U8, true);
-            sendKoStateOnChange(RGB_KoStatusColorB, (uint8_t)_currentValueRGB[2], DPT_Percent_U8, true);
-        }
-        else
-        {
-            sendKoStateOnChange(RGB_KoStatusOnOff, (bool)0, DPT_Switch, false);
-            sendKoStateOnChange(RGB_KoStatusColorRGB, rgb, DPT_Colour_RGB, false);
-            sendKoStateOnChange(RGB_KoStatusColorHSV, hsv, DPT_Colour_RGB, false);
-            sendKoStateOnChange(RGB_KoStatusShadeH, _currentValueHSV[0], DPT_Angle, false);
-            sendKoStateOnChange(RGB_KoStatusSaturationS, _currentValueHSV[1], DPT_Scaling, false);
-            sendKoStateOnChange(RGB_KoStatusBrightnessV, _currentValueHSV[2], DPT_Scaling, false);
-            sendKoStateOnChange(RGB_KoStatusColorR, (uint8_t)_currentValueRGB[0], DPT_Percent_U8, false);
-            sendKoStateOnChange(RGB_KoStatusColorG, (uint8_t)_currentValueRGB[1], DPT_Percent_U8, false);
-            sendKoStateOnChange(RGB_KoStatusColorB, (uint8_t)_currentValueRGB[2], DPT_Percent_U8, false);
-        }
-    }
+    rgbToHSV(_currentValueRGB[0], _currentValueRGB[1], _currentValueRGB[2], _currentValueHSV[0], _currentValueHSV[1], _currentValueHSV[2]);
+    uint32_t rgb = (_currentValueRGB[0] << 16) | (_currentValueRGB[1] << 8) | _currentValueRGB[2];
+    uint32_t hsv = ((uint8_t)round((double)_currentValueHSV[0] * 255.0 / 360.0) << 16) | (_currentValueHSV[1] << 8) | _currentValueHSV[2];
+    bool isOn = (_currentValueRGB[0] > 0 || _currentValueRGB[1] > 0 || _currentValueRGB[2] > 0);
+    logDebugP("Send DimValue to KO - RGB: #%.2X%.2X%.2X, HSV: %i, %i, %i", _currentValueRGB[0], _currentValueRGB[1], _currentValueRGB[2],
+              _currentValueHSV[0], _currentValueHSV[1], _currentValueHSV[2]);
+    sendKoStateOnChange(RGB_KoStatusOnOff, isOn, DPT_Switch, false);
+    sendKoStateOnChange(RGB_KoStatusColorRGB, rgb, DPT_Colour_RGB, false);
+    sendKoStateOnChange(RGB_KoStatusColorHSV, hsv, DPT_Colour_RGB, false);
+    sendKoStateOnChange(RGB_KoStatusShadeH, _currentValueHSV[0], DPT_Angle, false);
+    sendKoStateOnChange(RGB_KoStatusSaturationS, _currentValueHSV[1], DPT_Scaling, false);
+    sendKoStateOnChange(RGB_KoStatusBrightnessV, _currentValueHSV[2], DPT_Scaling, false);
+    sendKoStateOnChange(RGB_KoStatusColorR, (uint8_t)_currentValueRGB[0], DPT_Percent_U8, false);
+    sendKoStateOnChange(RGB_KoStatusColorG, (uint8_t)_currentValueRGB[1], DPT_Percent_U8, false);
+    sendKoStateOnChange(RGB_KoStatusColorB, (uint8_t)_currentValueRGB[2], DPT_Percent_U8, false);
 }
 
 uint32_t DimChannel_RGB::getTimeWithPattern(uint16_t time, uint8_t base)
@@ -573,3 +506,111 @@ void DimChannel_RGB::calcGammaTable(float gamma)
 }
 
 //----------------------Gamma Converter ------------------------------
+
+//----------------------------- TW Dimmer Task ------------------------------
+
+void DimChannel_RGB::dimmerTask()
+{
+    _currentMillis = millis();
+    switch (_currentTask)
+    {
+    case DimTaskRGB::RGB_DIM_STOP:
+        handleDimStop();
+        break;
+    case DimTaskRGB::RGB_DIM_SOFT_ON:
+        handleDimSoftOn();
+        break;
+    case DimTaskRGB::RGB_DIM_SOFT_OFF:
+        handleDimSoftOff();
+        break;
+    case DimTaskRGB::RGB_DIM_RGB_SET:
+        handleDimSetRGB();
+        break;
+    case DimTaskRGB::RGB_DIM_RGB_REL:
+        handleDimRelRGB();
+        break;        
+    case DimTaskRGB::RGB_DIM_IDLE:
+    default:
+        break;
+    }
+}
+
+void DimChannel_RGB::sendDimValue()
+{
+    // logDebugP("Send DimValue to HW - R: %i G: % B: %i", _currentValueRGB[0], _currentValueRGB[1], _currentValueRGB[2]);
+    LEDModule::_instance->setHwChannelValue(m_hwchannel_r, gammaT[_currentValueRGB[0]], m_curve);
+    LEDModule::_instance->setHwChannelValue(m_hwchannel_g, gammaT[_currentValueRGB[1]], m_curve);
+    LEDModule::_instance->setHwChannelValue(m_hwchannel_b, gammaT[_currentValueRGB[2]], m_curve);
+}
+
+void DimChannel_RGB::handleDimGeneric(uint8_t *currentValues, uint8_t *targetValues, uint8_t minValue, uint8_t maxValue, bool isAbsolute) 
+{
+    bool allTargetsReached = true;
+    bool channelBusy[3] = {false, false, false};
+
+    for (uint8_t i = 0; i < 3; i++) {
+        if(currentValues[i] != targetValues[i]) {
+            allTargetsReached = false;
+            channelBusy[i] = true;
+        }
+    }
+    if (allTargetsReached) {
+        _currentTask = DimTaskRGB::RGB_DIM_STOP;
+        return;
+    }
+    if (!_busy) {
+        uint32_t duration = isAbsolute ? m_durationabsolut : m_durationrelativ;
+        uint16_t maxDelta = 0;
+        for (uint8_t i = 0; i < 3; i++) {
+            if (channelBusy[i]) {
+                uint16_t delta = abs((int)targetValues[i] - (int)currentValues[i]);
+                maxDelta = max(maxDelta, delta);
+            }
+        }
+        _time = (word)(duration / maxDelta);
+        _busy = true;
+    }
+    if (_currentMillis - _lastTaskExecution >= _time) {
+        bool valueChanged = false;
+        for (uint8_t i = 0; i < 3; i++) {
+            if (channelBusy[i]) {
+                if (currentValues[i] < targetValues[i] && currentValues[i] < maxValue) {
+                    currentValues[i]++;
+                    valueChanged = true;
+                } else if (currentValues[i] > targetValues[i] && currentValues[i] > minValue) {
+                    currentValues[i]--;
+                    valueChanged = true;
+                }
+            }
+        }
+        if (valueChanged) {
+            sendDimValue();
+            _lastTaskExecution = millis();
+        } else {
+            _currentTask = DimTaskRGB::RGB_DIM_STOP;
+        }
+    }
+}
+
+void DimChannel_RGB::handleDimStop()
+{
+    _busy = false;
+    _currentTask = DimTaskRGB::RGB_DIM_IDLE;
+    updateDimValue();
+}
+
+void DimChannel_RGB::handleDimSoftOn() {
+    handleDimGeneric(_currentValueRGB, _newValueRGB, _valueMin, _valueMax, true);
+}
+
+void DimChannel_RGB::handleDimSoftOff() {
+    handleDimGeneric(_currentValueRGB, _valueOff, _valueMin, _valueMax, true);
+}
+
+void DimChannel_RGB::handleDimSetRGB() {
+    handleDimGeneric(_currentValueRGB, _newValueRGB, _valueMin, _valueMax, true);
+}
+
+void DimChannel_RGB::handleDimRelRGB() {
+    handleDimGeneric(_currentValueRGB, _newValueRGB, _valueMin, _valueMax, false);
+}

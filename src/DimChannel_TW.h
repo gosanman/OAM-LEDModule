@@ -1,11 +1,8 @@
 #ifndef DIMCHANNEL_TW_H
 #define DIMCHANNEL_TW_H
 
-// #include <OpenKNX.h>
 #include "DimChannel.h"
-
 #include "LEDModule.h"
-#include "HwChannel.h"
 
 #define TIMEBASE_SECONDS        0
 #define TIMEBASE_MINUTES        1
@@ -16,6 +13,10 @@
 enum DimTaskTW {
     TW_DIM_IDLE,
     TW_DIM_STOP,
+    TW_DIM_SOFT_ON,
+    TW_DIM_SOFT_OFF,
+    TW_DIM_B_SET,
+    TW_DIM_K_SET,
     TW_DIM_B_UP,
     TW_DIM_B_DOWN,
     TW_DIM_K_UP,
@@ -67,16 +68,10 @@ private:
 
     uint8_t _index;
 
-    uint16_t _currentValueTW[2] = {255, 4000}; // 0 = Brightness, 1 = Kelvin
+    uint16_t _newValueTW[2] = {255, 4000};     // 0 = Brightness, 1 = Kelvin
+    uint16_t _currentValueTW[2] = {0, 4000};   // 0 = Brightness, 1 = Kelvin
     uint16_t _lastDayValue[2] = {255, 4000};   // 0 = Brightness, 1 = Kelvin
     uint16_t _lastNightValue[2] = {100, 4000}; // 0 = Brightness, 1 = Kelvin
-
-    uint32_t _currentUpdateRun = 0;
-    uint32_t _lastUpdatekRun = 0;
-
-    uint8_t percent = 0;
-    uint8_t percentWW = 0;
-    uint8_t percentCW = 0;
 
     bool isNight = false;
 
@@ -87,36 +82,36 @@ private:
     void koHandleDimmRelColorTemp(GroupObject &ko);
     void koHandleScene(GroupObject &ko);
 
+    void switchOnHelper();
+    void switchOffHelper();
+
     uint16_t calcKoNumber(int koNum);
     void sendKoStateOnChange(uint16_t koNr, const KNXValue &value, const Dpt &type, bool onchange);
     void sendDimValue();
-    void setDimValue();
     void updateDimValue();
 
-    uint16_t prozToDim(uint8_t value, uint8_t curve);
     uint32_t getTimeWithPattern(uint16_t time, uint8_t base);
 
     // dimmer task
     void dimmerTask();
-    bool _updateAvailable;
+    void handleDimGeneric(uint16_t& currentValue, uint16_t targetValue, uint16_t minValue, uint16_t maxValue, bool isAbsolute);
     bool _busy = false;
     uint8_t _valueMinBrightness = 0;
     uint8_t _valueMaxBrightness = 255;
-    uint8_t _currentTask = DIM_IDLE;
-    uint8_t _updateCounter;
-    uint8_t _updateInterval;
+    uint8_t _currentTask = DimTaskTW::TW_DIM_IDLE;
     uint32_t _currentMillis = 0;
     uint32_t _lastTaskExecution;
-    uint32_t _delayAbsolute;
-    uint32_t _delayRelative;
+    uint32_t _time;
 
     void handleDimStop();
+    void handleDimSoftOn();
+    void handleDimSoftOff();
+    void handleDimSetBrightness();
+    void handleDimSetColorTemp();
     void handleDimBrightnessUp();
     void handleDimBrightnessDown();
     void handleDimColorTempUp();
     void handleDimColorTempDown();
-
-    HWChannel *hwchannels[MAXCHANNELSHW];
 };
 
 #endif

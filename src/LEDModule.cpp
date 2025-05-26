@@ -4,7 +4,6 @@
 #include "DimChannel_TW.h"
 #include "DimChannel_RGB.h"
 #include "DimChannel.h"
-#include "HwChannel.h"
 
 LEDModule *LEDModule::_instance = nullptr;
 

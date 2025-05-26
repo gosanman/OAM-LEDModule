@@ -2,14 +2,22 @@
 #define DIMCHANNEL_RGB_H
 
 #include "DimChannel.h"
-
 #include "LEDModule.h"
-#include "HwChannel.h"
 
 #define TIMEBASE_SECONDS        0
 #define TIMEBASE_MINUTES        1
 #define TIMEBASE_HOURS          2
 #define TIMEBASE_TENTH_SECONDS  3
+
+// dim actions
+enum DimTaskRGB {
+    RGB_DIM_IDLE,
+    RGB_DIM_STOP,
+    RGB_DIM_SOFT_ON,
+    RGB_DIM_SOFT_OFF,
+    RGB_DIM_RGB_SET,
+    RGB_DIM_RGB_REL,
+};
 
 // scene actions
 #define SC_RGB_None             0
@@ -52,13 +60,12 @@ private:
 
     uint8_t _index;
 
+    uint8_t _newValueRGB[3];                      // 0 = Red, 1 = Green, 2 = Blue
     uint8_t _currentValueRGB[3];                  // 0 = Red, 1 = Green, 2 = Blue
     uint16_t _currentValueHSV[3];                 // 0 = h, 1 = s, 2 = v
     uint8_t _lastDayValue[3] = {125, 125, 125};   // 0 = Red, 1 = Green, 2 = Blue
     uint8_t _lastNightValue[3] = {125, 125, 125}; // 0 = Red, 1 = Green, 2 = Blue
-
-    uint32_t _currentUpdateRun = 0;
-    uint32_t _lastUpdatekRun = 0;
+    uint8_t _valueOff[3] = {0, 0, 0};             // 0 = Red, 1 = Green, 2 = Blue
 
     bool isNight = false;
 
@@ -67,16 +74,18 @@ private:
     void koHandleDimmAbsColorHSV(GroupObject &ko);
     void koHandleDimmAbsRGB(GroupObject &ko, uint8_t index);
     void koHandleDimmAbsHSV(GroupObject &ko, uint8_t index);
-
     void koHandleDimmRelH(GroupObject &ko);
     void koHandleDimmRelS(GroupObject &ko);
     void koHandleDimmRelV(GroupObject &ko);
-    void koHandleDimmRelRGB(GroupObject &ko, uint8_t hwchannel, uint8_t index);
+    void koHandleDimmRelRGB(GroupObject &ko, uint8_t index);
     void koHandleScene(GroupObject &ko);
+
+    void switchOnHelper();
+    void switchOffHelper();
 
     uint16_t calcKoNumber(int koNum);
     void sendKoStateOnChange(uint16_t koNr, const KNXValue &value, const Dpt &type, bool alwayssend);
-    void setCurrentValueRGB(uint8_t *value);
+    void setNewValueRGB(uint8_t *value);
     void sendDimValue();
     void updateDimValue();
 
@@ -90,7 +99,22 @@ private:
     static uint8_t gammaT[];
     void calcGammaTable(float gamma);
 
-    HWChannel *hwchannels[MAXCHANNELSHW];
+    // dimmer task
+    void dimmerTask();
+    void handleDimGeneric(uint8_t *currentValues, uint8_t *targetValues, uint8_t minValue, uint8_t maxValue, bool isAbsolute);
+    bool _busy = false;
+    uint8_t _valueMin = 0;
+    uint8_t _valueMax = 255;
+    uint8_t _currentTask = DimTaskRGB::RGB_DIM_IDLE;
+    uint32_t _currentMillis = 0;
+    uint32_t _lastTaskExecution;
+    uint32_t _time;
+
+    void handleDimStop();
+    void handleDimSoftOn();
+    void handleDimSoftOff();
+    void handleDimSetRGB();
+    void handleDimRelRGB();
 };
 
 #endif
