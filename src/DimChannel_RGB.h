@@ -91,14 +91,6 @@ private:
 
     uint32_t getTimeWithPattern(uint16_t time, uint8_t base);
 
-    static void hsvToRGB(uint8_t in_h, uint8_t in_s, uint8_t in_v, uint8_t &out_r, uint8_t &out_g, uint8_t &out_b);
-    static void rgbToHSV(uint8_t in_r, uint8_t in_g, uint8_t in_b, uint16_t &out_h, uint16_t &out_s, uint16_t &out_v);
-    static double threeway_max(double a, double b, double c);
-    static double threeway_min(double a, double b, double c);
-
-    static uint8_t gammaT[];
-    void calcGammaTable(float gamma);
-
     // dimmer task
     void dimmerTask();
     void handleDimGeneric(uint8_t *currentValues, uint8_t *targetValues, uint8_t minValue, uint8_t maxValue, bool isAbsolute);
@@ -109,6 +101,9 @@ private:
     uint32_t _currentMillis = 0;
     uint32_t _lastTaskExecution;
     uint32_t _time;
+    float _dimIncrement[3] = {0};
+    float _dimAcc[3] = {0};
+    bool  _dimmingInit = false;
 
     void handleDimStop();
     void handleDimSoftOn();

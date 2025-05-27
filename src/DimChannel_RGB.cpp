@@ -32,7 +32,8 @@ void DimChannel_RGB::setup(uint8_t *hwchannel)
     if (m_gammacorrection >= 1.0f && m_gammacorrection <= 3)
     {
         if (m_gammacorrection != 2.8f)
-            calcGammaTable(m_gammacorrection);
+            LEDHelper::calcGammaTable(m_gammacorrection);
+            logDebugP("Finish recalculate gamma correction table with value: %.1f", m_gammacorrection);
     }
 
     logDebugP("CH: %i, | HW R: %i, G: %i, B: %i, | Use Day: %i, C: #%.2X%.2X%.2X, Use Night: %i, C: #%.2X%.2X%.2X, | Dur Rel: %i, Abs: %i, Curve: %i, Gamma: %.1f, | HCL Act: %i, Ch: %i, St: %i",
@@ -151,7 +152,7 @@ void DimChannel_RGB::koHandleDimmAbsColorHSV(GroupObject &ko)
     _currentValueHSV[0] = (hsv >> 16) & 0xFF;
     _currentValueHSV[1] = (hsv >> 8) & 0xFF;
     _currentValueHSV[2] = hsv & 0xFF;
-    hsvToRGB(_currentValueHSV[0], _currentValueHSV[1], _currentValueHSV[2], _newValueRGB[0], _newValueRGB[1], _newValueRGB[2]);
+    LEDHelper::hsvToRGB(_currentValueHSV[0], _currentValueHSV[1], _currentValueHSV[2], _newValueRGB[0], _newValueRGB[1], _newValueRGB[2]);
     logDebugP("Dim Absolute HSV: %X", hsv);
     _currentTask = DimTaskRGB::RGB_DIM_RGB_SET;
 }
@@ -172,7 +173,7 @@ void DimChannel_RGB::koHandleDimmAbsHSV(GroupObject &ko, uint8_t index)
     } else { // S or V
         _currentValueHSV[index] = ko.value(DPT_Scaling);
     }
-    hsvToRGB(_currentValueHSV[0], _currentValueHSV[1], _currentValueHSV[2], _newValueRGB[0], _newValueRGB[1], _newValueRGB[2]);
+    LEDHelper::hsvToRGB(_currentValueHSV[0], _currentValueHSV[1], _currentValueHSV[2], _newValueRGB[0], _newValueRGB[1], _newValueRGB[2]);
     logDebugP("Dim Absolute HSV index: %i withe value: %i", index, _currentValueHSV[index]);
     _currentTask = DimTaskRGB::RGB_DIM_RGB_SET;
 }
@@ -233,7 +234,7 @@ void DimChannel_RGB::koHandleScene(GroupObject &ko)
                 uint8_t *colorvalue;
                 colorvalue = knx.paramData((RGB_ParamBlockOffset + RGB_ParamBlockSize * channelIndex() + RGB_SceneColorA + (i * 3)));
                 setNewValueRGB(colorvalue);
-                rgbToHSV(_newValueRGB[0], _newValueRGB[1], _newValueRGB[2], _currentValueHSV[0], _currentValueHSV[1], _currentValueHSV[2]);
+                LEDHelper::rgbToHSV(_newValueRGB[0], _newValueRGB[1], _newValueRGB[2], _currentValueHSV[0], _currentValueHSV[1], _currentValueHSV[2]);
                 _currentTask = DimTaskRGB::RGB_DIM_RGB_SET;
                 break;
             case SC_RGB_Off:
@@ -335,7 +336,7 @@ void DimChannel_RGB::sendKoStateOnChange(uint16_t koNr, const KNXValue &value, c
 
 void DimChannel_RGB::updateDimValue()
 {
-    rgbToHSV(_currentValueRGB[0], _currentValueRGB[1], _currentValueRGB[2], _currentValueHSV[0], _currentValueHSV[1], _currentValueHSV[2]);
+    LEDHelper::rgbToHSV(_currentValueRGB[0], _currentValueRGB[1], _currentValueRGB[2], _currentValueHSV[0], _currentValueHSV[1], _currentValueHSV[2]);
     uint32_t rgb = (_currentValueRGB[0] << 16) | (_currentValueRGB[1] << 8) | _currentValueRGB[2];
     uint32_t hsv = ((uint8_t)round((double)_currentValueHSV[0] * 255.0 / 360.0) << 16) | (_currentValueHSV[1] << 8) | _currentValueHSV[2];
     bool isOn = (_currentValueRGB[0] > 0 || _currentValueRGB[1] > 0 || _currentValueRGB[2] > 0);
@@ -374,139 +375,6 @@ uint32_t DimChannel_RGB::getTimeWithPattern(uint16_t time, uint8_t base)
     }
 }
 
-//----------------------Color Converter ------------------------------
-// extended lib from https://github.com/ratkins/RGBConverter
-// WTFPL license
-
-void DimChannel_RGB::hsvToRGB(uint8_t in_h, uint8_t in_s, uint8_t in_v, uint8_t &out_r, uint8_t &out_g, uint8_t &out_b)
-{
-    float h = in_h / 255.0;
-    float s = in_s / 255.0;
-    float v = in_v / 255.0;
-
-    double rt = 0;
-    double gt = 0;
-    double bt = 0;
-
-    int i = int(h * 6);
-    double f = h * 6 - i;
-    double p = v * (1 - s);
-    double q = v * (1 - f * s);
-    double t = v * (1 - (1 - f) * s);
-
-    switch (i % 6)
-    {
-    case 0:
-        rt = v, gt = t, bt = p;
-        break;
-    case 1:
-        rt = q, gt = v, bt = p;
-        break;
-    case 2:
-        rt = p, gt = v, bt = t;
-        break;
-    case 3:
-        rt = p, gt = q, bt = v;
-        break;
-    case 4:
-        rt = t, gt = p, bt = v;
-        break;
-    case 5:
-        rt = v, gt = p, bt = q;
-        break;
-    }
-    out_r = rt * 255;
-    out_g = gt * 255;
-    out_b = bt * 255;
-}
-
-void DimChannel_RGB::rgbToHSV(uint8_t in_r, uint8_t in_g, uint8_t in_b, uint16_t &out_h, uint16_t &out_s, uint16_t &out_v)
-{
-    double rd = (double)in_r / 255;
-    double gd = (double)in_g / 255;
-    double bd = (double)in_b / 255;
-    double max = threeway_max(rd, gd, bd), min = threeway_min(rd, gd, bd);
-    double h = 0, s, v = max;
-
-    double d = max - min;
-    s = max == 0 ? 0 : d / max;
-
-    if (max != min)
-    {
-        if (max == rd)
-        {
-            h = (gd - bd) / d + (gd < bd ? 6 : 0);
-        }
-        else if (max == gd)
-        {
-            h = (bd - rd) / d + 2;
-        }
-        else if (max == bd)
-        {
-            h = (rd - gd) / d + 4;
-        }
-        h /= 6;
-    }
-    /*
-    h = h * 360;
-    if (h >= 0 && h <= 255) {
-        out_h = static_cast<uint8_t>(h);
-    } else if (h > 255 && h <= 360) {
-        double converted_h = ((h - 256.0) / 104.0) * 255.0;
-        converted_h = constrain(converted_h, 0.0, 255.0);
-        out_h = static_cast<uint8_t>(round(converted_h));
-    }
-    */
-    out_h = h * 360;
-    out_s = s * 100;
-    out_v = v * 100;
-}
-
-double DimChannel_RGB::threeway_max(double a, double b, double c)
-{
-    return max(a, max(b, c));
-}
-
-double DimChannel_RGB::threeway_min(double a, double b, double c)
-{
-    return min(a, min(b, c));
-}
-
-//----------------------Color Converter ------------------------------
-
-//----------------------Gamma Converter ------------------------------
-
-// gamma 2.8 lookup table used for color correction
-uint8_t DimChannel_RGB::gammaT[256] = {
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2,
-    2, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 5, 5, 5,
-    5, 6, 6, 6, 6, 7, 7, 7, 7, 8, 8, 8, 9, 9, 9, 10,
-    10, 10, 11, 11, 11, 12, 12, 13, 13, 13, 14, 14, 15, 15, 16, 16,
-    17, 17, 18, 18, 19, 19, 20, 20, 21, 21, 22, 22, 23, 24, 24, 25,
-    25, 26, 27, 27, 28, 29, 29, 30, 31, 32, 32, 33, 34, 35, 35, 36,
-    37, 38, 39, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 50,
-    51, 52, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 66, 67, 68,
-    69, 70, 72, 73, 74, 75, 77, 78, 79, 81, 82, 83, 85, 86, 87, 89,
-    90, 92, 93, 95, 96, 98, 99, 101, 102, 104, 105, 107, 109, 110, 112, 114,
-    115, 117, 119, 120, 122, 124, 126, 127, 129, 131, 133, 135, 137, 138, 140, 142,
-    144, 146, 148, 150, 152, 154, 156, 158, 160, 162, 164, 167, 169, 171, 173, 175,
-    177, 180, 182, 184, 186, 189, 191, 193, 196, 198, 200, 203, 205, 208, 210, 213,
-    215, 218, 220, 223, 225, 228, 231, 233, 236, 239, 241, 244, 247, 249, 252, 255};
-
-// re-calculates & fills gamma table
-void DimChannel_RGB::calcGammaTable(float gamma)
-{
-    for (size_t i = 0; i < 256; i++)
-    {
-        gammaT[i] = (int)(powf((float)i / 255.0f, gamma) * 255.0f + 0.5f);
-    }
-    logDebugP("Finish recalculate gamma correction table with value: %.1f", m_gammacorrection);
-}
-
-//----------------------Gamma Converter ------------------------------
-
 //----------------------------- TW Dimmer Task ------------------------------
 
 void DimChannel_RGB::dimmerTask()
@@ -543,42 +411,49 @@ void DimChannel_RGB::sendDimValue()
     LEDModule::_instance->setHwChannelValue(m_hwchannel_b, gammaT[_currentValueRGB[2]], m_curve);
 }
 
-void DimChannel_RGB::handleDimGeneric(uint8_t *currentValues, uint8_t *targetValues, uint8_t minValue, uint8_t maxValue, bool isAbsolute) 
+void DimChannel_RGB::handleDimGeneric(uint8_t *currentValues, uint8_t *targetValues, uint8_t minValue, uint8_t maxValue, bool isAbsolute)
 {
-    bool allTargetsReached = true;
-    bool channelBusy[3] = {false, false, false};
+    if (!_dimmingInit) {
+        uint16_t maxDelta = 0;
+        // Schrittdifferenzen bestimmen
+        for (uint8_t i = 0; i < 3; i++) {
+            uint16_t delta = abs((int)targetValues[i] - (int)currentValues[i]);
+            if (delta > maxDelta) maxDelta = delta;
+        }
+        // Schrittgrößen berechnen
+        for (uint8_t i = 0; i < 3; i++) {
+            uint16_t delta = abs((int)targetValues[i] - (int)currentValues[i]);
+            _dimIncrement[i] = (maxDelta == 0) ? 0.0f : ((float)delta / (float)maxDelta);
+            _dimAcc[i] = 0.0f;
+        }
+        uint32_t duration = isAbsolute ? m_durationabsolut : m_durationrelativ;
+        _time = (word)(maxDelta ? (duration / maxDelta) : duration);
+        _dimmingInit = true;
+        _busy = true;
+    }
 
+    bool allTargetsReached = true;
     for (uint8_t i = 0; i < 3; i++) {
         if(currentValues[i] != targetValues[i]) {
             allTargetsReached = false;
-            channelBusy[i] = true;
+            break;
         }
-    }
-    if (allTargetsReached) {
+    } if (allTargetsReached) {
         _currentTask = DimTaskRGB::RGB_DIM_STOP;
+        _dimmingInit = false;
+        _busy = false;
         return;
     }
-    if (!_busy) {
-        uint32_t duration = isAbsolute ? m_durationabsolut : m_durationrelativ;
-        uint16_t maxDelta = 0;
-        for (uint8_t i = 0; i < 3; i++) {
-            if (channelBusy[i]) {
-                uint16_t delta = abs((int)targetValues[i] - (int)currentValues[i]);
-                maxDelta = max(maxDelta, delta);
-            }
-        }
-        _time = (word)(duration / maxDelta);
-        _busy = true;
-    }
+
     if (_currentMillis - _lastTaskExecution >= _time) {
         bool valueChanged = false;
         for (uint8_t i = 0; i < 3; i++) {
-            if (channelBusy[i]) {
-                if (currentValues[i] < targetValues[i] && currentValues[i] < maxValue) {
-                    currentValues[i]++;
-                    valueChanged = true;
-                } else if (currentValues[i] > targetValues[i] && currentValues[i] > minValue) {
-                    currentValues[i]--;
+            if (currentValues[i] != targetValues[i]) {
+                _dimAcc[i] += _dimIncrement[i];
+                if (_dimAcc[i] >= 1.0f) {
+                    int8_t step = (currentValues[i] < targetValues[i]) ? 1 : -1;
+                    currentValues[i] = std::max(std::min((int)currentValues[i] + step, (int)maxValue), (int)minValue);
+                    _dimAcc[i] -= 1.0f;
                     valueChanged = true;
                 }
             }
@@ -586,8 +461,6 @@ void DimChannel_RGB::handleDimGeneric(uint8_t *currentValues, uint8_t *targetVal
         if (valueChanged) {
             sendDimValue();
             _lastTaskExecution = millis();
-        } else {
-            _currentTask = DimTaskRGB::RGB_DIM_STOP;
         }
     }
 }
@@ -596,6 +469,7 @@ void DimChannel_RGB::handleDimStop()
 {
     _busy = false;
     _currentTask = DimTaskRGB::RGB_DIM_IDLE;
+    _dimmingInit = false;
     updateDimValue();
 }
 

@@ -1,27 +1,37 @@
 #pragma once
 
 #include <Arduino.h>
+#include "OpenKNX.h"
 
-/*
+class LEDHelper
+{
+public:
+    static void hsvToRGB(uint8_t in_h, uint8_t in_s, uint8_t in_v, uint8_t &out_r, uint8_t &out_g, uint8_t &out_b);
+    static void rgbToHSV(uint8_t in_r, uint8_t in_g, uint8_t in_b, uint16_t &out_h, uint16_t &out_s, uint16_t &out_v);
+    static void calcGammaTable(float gamma);
+private:
+    static double threeway_max(double a, double b, double c);
+    static double threeway_min(double a, double b, double c);
+};
 
-void setDimmingCurves();
-
-// calc RGBW curve
-uint8_t firstOnValue = 1;
-uint8_t maxR = 255; // to match the same brightness on different colors
-uint8_t maxG = 255; // reduce brightnes of some colors
-uint8_t maxB = 255; // also usefull to make not "to blueisch" white
-uint8_t maxW = 255; // recomended values: R:255,G:176,B:240,W:255
-uint8_t whiteType = 0; // if RGBW used, 0=warm, 1=neutral, 2=cold
-float gammaCorrection = 1.0;
-
-byte curveR[256];
-byte curveG[256];
-byte curveB[256];
-byte curveW[256];
-// calc RGB curve
-
-*/
+// gamma 2.8 lookup table used for color correction
+static uint8_t gammaT[256] = {
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2,
+    2, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 5, 5, 5,
+    5, 6, 6, 6, 6, 7, 7, 7, 7, 8, 8, 8, 9, 9, 9, 10,
+    10, 10, 11, 11, 11, 12, 12, 13, 13, 13, 14, 14, 15, 15, 16, 16,
+    17, 17, 18, 18, 19, 19, 20, 20, 21, 21, 22, 22, 23, 24, 24, 25,
+    25, 26, 27, 27, 28, 29, 29, 30, 31, 32, 32, 33, 34, 35, 35, 36,
+    37, 38, 39, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 50,
+    51, 52, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 66, 67, 68,
+    69, 70, 72, 73, 74, 75, 77, 78, 79, 81, 82, 83, 85, 86, 87, 89,
+    90, 92, 93, 95, 96, 98, 99, 101, 102, 104, 105, 107, 109, 110, 112, 114,
+    115, 117, 119, 120, 122, 124, 126, 127, 129, 131, 133, 135, 137, 138, 140, 142,
+    144, 146, 148, 150, 152, 154, 156, 158, 160, 162, 164, 167, 169, 171, 173, 175,
+    177, 180, 182, 184, 186, 189, 191, 193, 196, 198, 200, 203, 205, 208, 210, 213,
+    215, 218, 220, 223, 225, 228, 231, 233, 236, 239, 241, 244, 247, 249, 252, 255};
 
 // all dim curves with 12 bit resolution 0(A) = linear, 1(B) = gamma 2.8, 2(C) = gamma 3.8, 3(D) = CIE, 4(E) = DALI
 const uint16_t curves[256][5] PROGMEM = {
