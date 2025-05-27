@@ -21,8 +21,8 @@ void DimChannel_EK::setup(uint8_t *hwchannel)
     m_dayvalue = round(ParamEK_OnBrightness * 2.55);
     m_usenightvalue = ParamEK_UseNightValue;
     m_nightvalue = round(ParamEK_NightBrightness * 2.55);
-    m_durationrelativ = getTimeWithPattern(ParamEK_RelativDimTime, ParamEK_RelativDimBase);
-    m_durationabsolut = getTimeWithPattern(ParamEK_OnOffTime, ParamEK_OnOffBase);
+    m_durationrelativ = LEDHelper::getTimeWithPattern(ParamEK_RelativDimTime, ParamEK_RelativDimBase);
+    m_durationabsolut = LEDHelper::getTimeWithPattern(ParamEK_OnOffTime, ParamEK_OnOffBase);
     m_curve = ParamEK_DimCurve; // 0=A, 1=B, 2=C, 3=D, 4=E
 
     logDebugP("CH: %i, | HW: %i, | Use Day: %i, B: %i, | Use Night: %i, B: %i, Dur Rel: %i, Abs: %i, Curve: %i, | HCL Act: %i, Ch: %i, St: %i",
@@ -205,26 +205,6 @@ void DimChannel_EK::updateDimValue()
     logDebugP("Send DimValue to KO - OnOff: %i B: %i", _currentValueEK > 0, _currentValueEK);
     sendKoStateOnChange(EK_KoStatusOnOff, _currentValueEK > 0, DPT_Switch, false);
     sendKoStateOnChange(EK_KoStatusBrightness, _currentValueEK, DPT_Percent_U8, true);
-}
-
-uint32_t DimChannel_EK::getTimeWithPattern(uint16_t time, uint8_t base)
-{
-    if (base == TIMEBASE_HOURS && time > 1000) {
-        time = 1000; // Begrenzung auf maximal 1000 Stunden
-    }
-    switch (base)
-    {
-    case TIMEBASE_TENTH_SECONDS:
-        return time * 100;
-    case TIMEBASE_SECONDS:
-        return time * 1000;
-    case TIMEBASE_MINUTES:
-        return time * 60000;
-    case TIMEBASE_HOURS:
-        return time * 3600000;
-    default:
-        return 0;
-    }
 }
 
 //----------------------------- TW Dimmer Task ------------------------------

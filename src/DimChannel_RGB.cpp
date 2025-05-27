@@ -23,8 +23,8 @@ void DimChannel_RGB::setup(uint8_t *hwchannel)
     m_dayvalue = ParamRGB_OnColor;
     m_usenightvalue = ParamRGB_UseNightColor;
     m_nightvalue = ParamRGB_NightColor;
-    m_durationrelativ = getTimeWithPattern(ParamRGB_RelativDimTime, ParamRGB_RelativDimBase);
-    m_durationabsolut = getTimeWithPattern(ParamRGB_OnOffTime, ParamRGB_OnOffBase);
+    m_durationrelativ = LEDHelper::getTimeWithPattern(ParamRGB_RelativDimTime, ParamRGB_RelativDimBase);
+    m_durationabsolut = LEDHelper::getTimeWithPattern(ParamRGB_OnOffTime, ParamRGB_OnOffBase);
     m_curve = ParamRGB_DimCurve; // 0=A, 1=B, 2=C, 3=D, 4=E
     m_gammacorrection = ParamRGB_GammaCorrection;
 
@@ -351,28 +351,6 @@ void DimChannel_RGB::updateDimValue()
     sendKoStateOnChange(RGB_KoStatusColorR, (uint8_t)_currentValueRGB[0], DPT_Percent_U8, false);
     sendKoStateOnChange(RGB_KoStatusColorG, (uint8_t)_currentValueRGB[1], DPT_Percent_U8, false);
     sendKoStateOnChange(RGB_KoStatusColorB, (uint8_t)_currentValueRGB[2], DPT_Percent_U8, false);
-}
-
-uint32_t DimChannel_RGB::getTimeWithPattern(uint16_t time, uint8_t base)
-{
-    if (base == TIMEBASE_HOURS && time > 1000)
-    {
-        time = 1000; // Begrenzung auf maximal 1000 Stunden
-    }
-
-    switch (base)
-    {
-    case TIMEBASE_TENTH_SECONDS:
-        return time * 100;
-    case TIMEBASE_SECONDS:
-        return time * 1000;
-    case TIMEBASE_MINUTES:
-        return time * 60000;
-    case TIMEBASE_HOURS:
-        return time * 3600000;
-    default:
-        return 0;
-    }
 }
 
 //----------------------------- TW Dimmer Task ------------------------------

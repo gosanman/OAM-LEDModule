@@ -112,3 +112,29 @@ void LEDHelper::calcGammaTable(float gamma)
 }
 
 //----------------------Gamma Converter ------------------------------
+
+//----------------------Time Calculator ------------------------------
+
+uint32_t LEDHelper::getTimeWithPattern(uint16_t time, uint8_t base)
+{
+    if (base == TIMEBASE_HOURS && time > 1000)
+    {
+        time = 1000; // Begrenzung auf maximal 1000 Stunden
+    }
+
+    switch (base)
+    {
+    case TIMEBASE_TENTH_SECONDS:
+        return time * 100;
+    case TIMEBASE_SECONDS:
+        return time * 1000;
+    case TIMEBASE_MINUTES:
+        return time * 60000;
+    case TIMEBASE_HOURS:
+        return time * 3600000;
+    default:
+        return 0;
+    }
+}
+
+//----------------------Time Calculator ------------------------------

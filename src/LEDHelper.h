@@ -3,12 +3,18 @@
 #include <Arduino.h>
 #include "OpenKNX.h"
 
+#define TIMEBASE_SECONDS        0
+#define TIMEBASE_MINUTES        1
+#define TIMEBASE_HOURS          2
+#define TIMEBASE_TENTH_SECONDS  3
+
 class LEDHelper
 {
 public:
     static void hsvToRGB(uint8_t in_h, uint8_t in_s, uint8_t in_v, uint8_t &out_r, uint8_t &out_g, uint8_t &out_b);
     static void rgbToHSV(uint8_t in_r, uint8_t in_g, uint8_t in_b, uint16_t &out_h, uint16_t &out_s, uint16_t &out_v);
     static void calcGammaTable(float gamma);
+    static uint32_t getTimeWithPattern(uint16_t time, uint8_t base);
 private:
     static double threeway_max(double a, double b, double c);
     static double threeway_min(double a, double b, double c);
@@ -32,7 +38,7 @@ static uint8_t gammaT[256] = {
     144, 146, 148, 150, 152, 154, 156, 158, 160, 162, 164, 167, 169, 171, 173, 175,
     177, 180, 182, 184, 186, 189, 191, 193, 196, 198, 200, 203, 205, 208, 210, 213,
     215, 218, 220, 223, 225, 228, 231, 233, 236, 239, 241, 244, 247, 249, 252, 255};
-
+  
 // all dim curves with 12 bit resolution 0(A) = linear, 1(B) = gamma 2.8, 2(C) = gamma 3.8, 3(D) = CIE, 4(E) = DALI
 const uint16_t curves[256][5] PROGMEM = {
 {0, 0, 0, 0, 0},

@@ -4,11 +4,6 @@
 #include "DimChannel.h"
 #include "LEDModule.h"
 
-#define TIMEBASE_SECONDS        0
-#define TIMEBASE_MINUTES        1
-#define TIMEBASE_HOURS          2
-#define TIMEBASE_TENTH_SECONDS  3
-
 // dim actions
 enum DimTaskRGB {
     RGB_DIM_IDLE,
@@ -88,8 +83,6 @@ private:
     void setNewValueRGB(uint8_t *value);
     void sendDimValue();
     void updateDimValue();
-
-    uint32_t getTimeWithPattern(uint16_t time, uint8_t base);
 
     // dimmer task
     void dimmerTask();

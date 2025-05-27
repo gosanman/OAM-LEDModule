@@ -26,8 +26,8 @@ void DimChannel_TW::setup(uint8_t *hwchannel)
     m_usenightvalue = ParamTW_UseNightValue;
     m_nightbrightness = round(ParamTW_NightBrightness * 2.55);
     m_nightcolortemp = ParamTW_NightColorTemp;
-    m_durationrelativ = getTimeWithPattern(ParamTW_RelativDimTime, ParamTW_RelativDimBase);
-    m_durationabsolut = getTimeWithPattern(ParamTW_OnOffTime, ParamTW_OnOffBase);
+    m_durationrelativ = LEDHelper::getTimeWithPattern(ParamTW_RelativDimTime, ParamTW_RelativDimBase);
+    m_durationabsolut = LEDHelper::getTimeWithPattern(ParamTW_OnOffTime, ParamTW_OnOffBase);
     m_curve = ParamTW_DimCurve; // 0=A, 1=B, 2=C, 3=D, 4=E
 
     logDebugP("CH: %i, | HW WW: %i, CW: %i, | CT WW: %i, CW: %i, | Use Day: %i, B: %i, K: %i, | Use Night: %i, B: %i, K: %i, | Dur Rel: %i, Abs: %i, Curve: %i, | HCL Act: %i, Ch: %i, St: %i",
@@ -275,26 +275,6 @@ void DimChannel_TW::updateDimValue()
     sendKoStateOnChange(TW_KoStatusOnOff, _currentValueTW[0] > 0, DPT_Switch, false);
     sendKoStateOnChange(TW_KoStatusBrightness, _currentValueTW[0], DPT_Percent_U8, false);
     sendKoStateOnChange(TW_KoStatusColorTemp, _currentValueTW[1], Dpt(7, 600), false);
-}
-
-uint32_t DimChannel_TW::getTimeWithPattern(uint16_t time, uint8_t base)
-{
-    if (base == TIMEBASE_HOURS && time > 1000) {
-        time = 1000; // Begrenzung auf maximal 1000 Stunden
-    }
-    switch (base) 
-    {
-    case TIMEBASE_TENTH_SECONDS:
-        return time * 100;
-    case TIMEBASE_SECONDS:
-        return time * 1000;
-    case TIMEBASE_MINUTES:
-        return time * 60000;
-    case TIMEBASE_HOURS:
-        return time * 3600000;
-    default:
-        return 0;
-    }
 }
 
 //----------------------------- TW Dimmer Task ------------------------------
