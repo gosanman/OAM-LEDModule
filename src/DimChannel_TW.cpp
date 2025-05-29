@@ -245,8 +245,24 @@ void DimChannel_TW::setHcl(uint8_t channel, uint16_t kelvin, uint8_t brightness)
 {
     if (ParamTW_hclActive != 1 || channel != ParamTW_hclChannel)
         return;
-    if (brightness != 0) _currentValueTW[0] = brightness;
-    if (kelvin != 0) _currentValueTW[1] = kelvin;
+    if (ParamTW_hclStart == PT_hclStart_during && _isOn) { // HCL active when channel is on
+        logDebugP("HCL active - Channel: %i Kelvin: %i Brightness: %i", channel, kelvin, brightness);
+        if (ParamTW_hclCheckTemperature == 1 && ParamTW_hclCheckBrightness == 1) {
+            _currentValueTW[0] = brightness;
+            _newValueTW[1] = kelvin;
+            _currentTask = DimTaskTW::TW_DIM_K_SET;
+        } else if (ParamTW_hclCheckTemperature == 1 && ParamTW_hclCheckBrightness == 0) {
+            _newValueTW[1] = kelvin;
+            _currentTask = DimTaskTW::TW_DIM_K_SET;
+        } else if (ParamTW_hclCheckTemperature == 0 && ParamTW_hclCheckBrightness == 1) {
+            _newValueTW[0] = brightness;
+            _currentTask = DimTaskTW::TW_DIM_B_SET;
+        }
+    } else {
+        _currentHclValue[0] = brightness;
+        _currentHclValue[1] = kelvin;
+        logDebugP("HCL will only apply if channel on, save for later use");
+    }
 }
 
 void DimChannel_TW::task()
@@ -271,8 +287,9 @@ void DimChannel_TW::sendKoStateOnChange(uint16_t koNr, const KNXValue &value, co
 
 void DimChannel_TW::updateDimValue()
 {
-    logDebugP("Send DimValue to KO - OnOff: %i B: %i K: %i", _currentValueTW[0] > 0, _currentValueTW[0], _currentValueTW[1]);
-    sendKoStateOnChange(TW_KoStatusOnOff, _currentValueTW[0] > 0, DPT_Switch, false);
+    _isOn = _currentValueTW[0] > 0;
+    logDebugP("Send DimValue to KO - OnOff: %i B: %i K: %i", _isOn, _currentValueTW[0], _currentValueTW[1]);
+    sendKoStateOnChange(TW_KoStatusOnOff, _isOn, DPT_Switch, false);
     sendKoStateOnChange(TW_KoStatusBrightness, _currentValueTW[0], DPT_Percent_U8, false);
     sendKoStateOnChange(TW_KoStatusColorTemp, _currentValueTW[1], Dpt(7, 600), false);
 }

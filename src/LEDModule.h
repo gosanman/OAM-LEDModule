@@ -55,6 +55,10 @@ private:
     uint32_t _timerCheckHclChannel = 0;
     bool doResetI2c = false;
 
+    // hcl channels
+    uint8_t hclBrightness = 0;
+    uint16_t hclKelvin = 0;
+
     // Status flags for I2C connection
     bool pcaI2cConnection = false;
 

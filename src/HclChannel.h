@@ -7,7 +7,7 @@ class HclChannel
 {
 public:
     void setup(uint8_t index);
-    void loop();
+    void loop(uint16_t &out_k, uint8_t &out_b);
 
 private:
     const std::string logPrefix();

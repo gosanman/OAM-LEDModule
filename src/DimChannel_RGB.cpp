@@ -28,19 +28,19 @@ void DimChannel_RGB::setup(uint8_t *hwchannel)
     m_curve = ParamRGB_DimCurve; // 0=A, 1=B, 2=C, 3=D, 4=E
     m_gammacorrection = ParamRGB_GammaCorrection;
 
+    logDebugP("CH: %i, | HW R: %i, G: %i, B: %i, | Use Day: %i, C: #%.2X%.2X%.2X, Use Night: %i, C: #%.2X%.2X%.2X, | Dur Rel: %i, Abs: %i, Curve: %i, Gamma: %.1f, | HCL Act: %i, Ch: %i, St: %i",
+              _index, m_hwchannel_r, m_hwchannel_g, m_hwchannel_b, m_usedayvalue, m_dayvalue[0], m_dayvalue[1], m_dayvalue[2],
+              m_usenightvalue, m_nightvalue[0], m_nightvalue[1], m_nightvalue[2], m_durationrelativ, m_durationabsolut,
+              m_curve, m_gammacorrection, ParamRGB_hclActive, ParamRGB_hclChannel, ParamRGB_hclStart);
+
     // set default values for gamma correction
     if (m_gammacorrection >= 1.0f && m_gammacorrection <= 3)
     {
         if (m_gammacorrection != 2.8f)
             LEDHelper::calcGammaTable(m_gammacorrection);
             logDebugP("Finish recalculate gamma correction table with value: %.1f", m_gammacorrection);
+        }
     }
-
-    logDebugP("CH: %i, | HW R: %i, G: %i, B: %i, | Use Day: %i, C: #%.2X%.2X%.2X, Use Night: %i, C: #%.2X%.2X%.2X, | Dur Rel: %i, Abs: %i, Curve: %i, Gamma: %.1f, | HCL Act: %i, Ch: %i, St: %i",
-              _index, m_hwchannel_r, m_hwchannel_g, m_hwchannel_b, m_usedayvalue, m_dayvalue[0], m_dayvalue[1], m_dayvalue[2],
-              m_usenightvalue, m_nightvalue[0], m_nightvalue[1], m_nightvalue[2], m_durationrelativ, m_durationabsolut,
-              m_curve, m_gammacorrection, ParamRGB_hclActive, ParamRGB_hclChannel, ParamRGB_hclStart);
-}
 
 void DimChannel_RGB::processInputKo(GroupObject &ko)
 {
@@ -124,7 +124,6 @@ void DimChannel_RGB::koHandleSwitch(GroupObject &ko)
     { // on
         switchOnHelper();
         logDebugP(isNight ? "Switch On Night - with value %i Color: #%.2X%.2X%.2X" : "Switch On Day - with value %i Color: #%.2X%.2X%.2X", value, _newValueRGB[0], _newValueRGB[1], _newValueRGB[2]);
-        //rgbToHSV(_newValueRGB[0], _newValueRGB[1], _newValueRGB[2], _currentValueHSV[0], _currentValueHSV[1], _currentValueHSV[2]);
         _currentTask = DimTaskRGB::RGB_DIM_SOFT_ON;
     }
     else
@@ -141,7 +140,6 @@ void DimChannel_RGB::koHandleDimmAbsColorRGB(GroupObject &ko)
     _newValueRGB[0] = (rgb >> 16) & 0xFF;
     _newValueRGB[1] = (rgb >> 8) & 0xFF;
     _newValueRGB[2] = rgb & 0xFF;
-    //rgbToHSV(_newValueRGB[0], _newValueRGB[1], _newValueRGB[2], _currentValueHSV[0], _currentValueHSV[1], _currentValueHSV[2]);
     logDebugP("Dim Absolute RGB: %X", rgb);
     _currentTask = DimTaskRGB::RGB_DIM_RGB_SET;
 }
@@ -161,7 +159,6 @@ void DimChannel_RGB::koHandleDimmAbsRGB(GroupObject &ko, uint8_t index)
 {
     _newValueRGB[index] = ko.value(DPT_Scaling);
     _newValueRGB[index] = round(_newValueRGB[index] * 2.55);
-    //rgbToHSV(_newValueRGB[0], _newValueRGB[1], _newValueRGB[2], _currentValueHSV[0], _currentValueHSV[1], _currentValueHSV[2]);    
     logDebugP("Dim Absolute RGB index: %i withe value: %i", index, _newValueRGB[index]);
     _currentTask = DimTaskRGB::RGB_DIM_RGB_SET;
 }
@@ -180,14 +177,50 @@ void DimChannel_RGB::koHandleDimmAbsHSV(GroupObject &ko, uint8_t index)
 
 void DimChannel_RGB::koHandleDimmRelH(GroupObject &ko)
 {
+    uint8_t direction = ko.value(Dpt(3, 7, 0));
+    uint8_t step = ko.value(Dpt(3, 7, 1));
+    logDebugP("Dim Relativ H - Direction: %i, Step: %i", direction, step);
+    // direction true = dim up, false = dim down, step = 0 then stop
+    if (step == 0) {
+        logDebugP("Dim Relativ H - Stop");
+        _currentTask = DimTaskRGB::RGB_DIM_STOP;
+    } else if (direction == 1) {
+        logDebugP("Dim Relativ H - Up");
+    } else if (direction == 0) {
+        logDebugP("Dim Relativ H - Down");
+    }
 }
 
 void DimChannel_RGB::koHandleDimmRelS(GroupObject &ko)
 {
+    uint8_t direction = ko.value(Dpt(3, 7, 0));
+    uint8_t step = ko.value(Dpt(3, 7, 1));
+    logDebugP("Dim Relativ S - Direction: %i, Step: %i", direction, step);
+    // direction true = dim up, false = dim down, step = 0 then stop
+    if (step == 0) {
+        logDebugP("Dim Relativ S - Stop");
+        _currentTask = DimTaskRGB::RGB_DIM_STOP;
+    } else if (direction == 1) {
+        logDebugP("Dim Relativ S - Up");
+    } else if (direction == 0) {
+        logDebugP("Dim Relativ S - Down");
+    }
 }
 
 void DimChannel_RGB::koHandleDimmRelV(GroupObject &ko)
 {
+    uint8_t direction = ko.value(Dpt(3, 7, 0));
+    uint8_t step = ko.value(Dpt(3, 7, 1));
+    logDebugP("Dim Relativ V - Direction: %i, Step: %i", direction, step);
+    // direction true = dim up, false = dim down, step = 0 then stop
+    if (step == 0) {
+        logDebugP("Dim Relativ V - Stop");
+        _currentTask = DimTaskRGB::RGB_DIM_STOP;
+    } else if (direction == 1) {
+        logDebugP("Dim Relativ V - Up");
+    } else if (direction == 0) {
+        logDebugP("Dim Relativ V - Down");
+    }
 }
 
 void DimChannel_RGB::koHandleDimmRelRGB(GroupObject &ko, uint8_t index)
@@ -234,7 +267,6 @@ void DimChannel_RGB::koHandleScene(GroupObject &ko)
                 uint8_t *colorvalue;
                 colorvalue = knx.paramData((RGB_ParamBlockOffset + RGB_ParamBlockSize * channelIndex() + RGB_SceneColorA + (i * 3)));
                 setNewValueRGB(colorvalue);
-                LEDHelper::rgbToHSV(_newValueRGB[0], _newValueRGB[1], _newValueRGB[2], _currentValueHSV[0], _currentValueHSV[1], _currentValueHSV[2]);
                 _currentTask = DimTaskRGB::RGB_DIM_RGB_SET;
                 break;
             case SC_RGB_Off:
@@ -310,8 +342,25 @@ uint8_t DimChannel_RGB::getChannelType()
 
 void DimChannel_RGB::setHcl(uint8_t channel, uint16_t kelvin, uint8_t brightness)
 {
-        if (ParamRGB_hclActive != 1 || channel != ParamRGB_hclChannel)
-        return;    
+    if (ParamRGB_hclActive != 1 || channel != ParamRGB_hclChannel)
+        return;
+    if (ParamRGB_hclStart == PT_hclStart_during && _isOn) { // HCL active when channel is on
+        logDebugP("HCL active - Channel: %i Kelvin: %i Brightness: %i",channel, kelvin, brightness);
+        if (ParamRGB_hclCheckTemperature == 1 && ParamRGB_hclCheckBrightness == 1) {
+            LEDHelper::kelvinToRGB(kelvin, brightness, _newValueRGB[0], _newValueRGB[1], _newValueRGB[2]);
+            _currentTask = DimTaskRGB::RGB_DIM_RGB_SET;
+        } else if (ParamRGB_hclCheckTemperature == 1 && ParamRGB_hclCheckBrightness == 0) {
+            LEDHelper::kelvinToRGB(kelvin, 100, _newValueRGB[0], _newValueRGB[1], _newValueRGB[2]);
+            _currentTask = DimTaskRGB::RGB_DIM_RGB_SET;
+        } else if (ParamRGB_hclCheckTemperature == 0 && ParamRGB_hclCheckBrightness == 1) {
+            LEDHelper::adjustRGBBrightness(_currentValueRGB[0], _currentValueRGB[1], _currentValueRGB[2], brightness, _newValueRGB[0], _newValueRGB[1], _newValueRGB[2]);
+            _currentTask = DimTaskRGB::RGB_DIM_RGB_SET;
+        }
+    } else {
+        _currentHclValue[0] = brightness;
+        _currentHclValue[1] = kelvin;
+        logDebugP("HCL will only apply if channel on, save for later use");      
+    }
 }
 
 void DimChannel_RGB::task()
@@ -339,10 +388,10 @@ void DimChannel_RGB::updateDimValue()
     LEDHelper::rgbToHSV(_currentValueRGB[0], _currentValueRGB[1], _currentValueRGB[2], _currentValueHSV[0], _currentValueHSV[1], _currentValueHSV[2]);
     uint32_t rgb = (_currentValueRGB[0] << 16) | (_currentValueRGB[1] << 8) | _currentValueRGB[2];
     uint32_t hsv = ((uint8_t)round((double)_currentValueHSV[0] * 255.0 / 360.0) << 16) | (_currentValueHSV[1] << 8) | _currentValueHSV[2];
-    bool isOn = (_currentValueRGB[0] > 0 || _currentValueRGB[1] > 0 || _currentValueRGB[2] > 0);
-    logDebugP("Send DimValue to KO - RGB: #%.2X%.2X%.2X, HSV: %i, %i, %i", _currentValueRGB[0], _currentValueRGB[1], _currentValueRGB[2],
+    _isOn = (_currentValueRGB[0] > 0 || _currentValueRGB[1] > 0 || _currentValueRGB[2] > 0);
+    logDebugP("Send DimValue to KO - OnOff: %i RGB: #%.2X%.2X%.2X HSV: %i, %i, %i", _isOn, _currentValueRGB[0], _currentValueRGB[1], _currentValueRGB[2],
               _currentValueHSV[0], _currentValueHSV[1], _currentValueHSV[2]);
-    sendKoStateOnChange(RGB_KoStatusOnOff, isOn, DPT_Switch, false);
+    sendKoStateOnChange(RGB_KoStatusOnOff, _isOn, DPT_Switch, false);
     sendKoStateOnChange(RGB_KoStatusColorRGB, rgb, DPT_Colour_RGB, false);
     sendKoStateOnChange(RGB_KoStatusColorHSV, hsv, DPT_Colour_RGB, false);
     sendKoStateOnChange(RGB_KoStatusShadeH, _currentValueHSV[0], DPT_Angle, false);
@@ -374,7 +423,7 @@ void DimChannel_RGB::dimmerTask()
         break;
     case DimTaskRGB::RGB_DIM_RGB_REL:
         handleDimRelRGB();
-        break;        
+        break;   
     case DimTaskRGB::RGB_DIM_IDLE:
     default:
         break;
@@ -383,7 +432,6 @@ void DimChannel_RGB::dimmerTask()
 
 void DimChannel_RGB::sendDimValue()
 {
-    // logDebugP("Send DimValue to HW - R: %i G: % B: %i", _currentValueRGB[0], _currentValueRGB[1], _currentValueRGB[2]);
     LEDModule::_instance->setHwChannelValue(m_hwchannel_r, gammaT[_currentValueRGB[0]], m_curve);
     LEDModule::_instance->setHwChannelValue(m_hwchannel_g, gammaT[_currentValueRGB[1]], m_curve);
     LEDModule::_instance->setHwChannelValue(m_hwchannel_b, gammaT[_currentValueRGB[2]], m_curve);

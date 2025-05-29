@@ -65,6 +65,7 @@ private:
 
     uint16_t _newValueTW[2] = {255, 4000};     // 0 = Brightness, 1 = Kelvin
     uint16_t _currentValueTW[2] = {0, 4000};   // 0 = Brightness, 1 = Kelvin
+    uint16_t _currentHclValue[2] = {0, 0};     // 0 = Brightness, 1 = Kelvin
     uint16_t _lastDayValue[2] = {255, 4000};   // 0 = Brightness, 1 = Kelvin
     uint16_t _lastNightValue[2] = {100, 4000}; // 0 = Brightness, 1 = Kelvin
 
@@ -95,6 +96,7 @@ private:
     uint32_t _currentMillis = 0;
     uint32_t _lastTaskExecution;
     uint32_t _time;
+    bool _isOn = false;         // true = on, false = off
 
     void handleDimStop();
     void handleDimSoftOn();

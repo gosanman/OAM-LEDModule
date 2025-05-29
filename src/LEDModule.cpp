@@ -46,10 +46,8 @@ void LEDModule::setup()
     }
 
     // Debug
-    logDebugP("Selected Device: %i", deviceSelect);
-    logDebugP("Operating Mode: %i", operatinModeSelect);
-    logDebugP("PWM frequenz: %i", pwmFreqSelect);
-    logDebugP("DayNight: %i", ParamAPP_DayNight);
+    logDebugP("CONFIG - Controller Device: %i - Operating Mode: %i - PWM freq: %i Hz - DayNight: %i", 
+              deviceSelect, operatinModeSelect, pwmFreqSelect, ParamAPP_DayNight);
 
     // Init I2C connection and Lib
     _pwm = Adafruit_PWMServoDriver(I2C_PCA9685_DEVICE_ADDRESS, Wire1);
@@ -281,6 +279,8 @@ void LEDModule::setup()
         hclchannel[i]->setup(i);
     }
 
+// ▲ - Symbol for Program Button
+// ••• - Symbol for Func1 Button
 #ifdef FUNC1_BUTTON_PIN
     openknx.func1Button.onShortClick([=]
                                      { 
@@ -312,8 +312,15 @@ void LEDModule::loop()
     // run loop of all HCL channels ervery minute
     if (delayCheck(_timerCheckHclChannel, 60000))
     {
-        for (int i = 0; i < MAXCHANNELSHCL; i++)
-        hclchannel[i]->loop();
+        for (int ch = 0; ch < MAXCHANNELSHCL; ch++)
+        {
+            hclchannel[ch]->loop(hclKelvin, hclBrightness);
+            logDebugP("Broadcast values from HCL%i", ch+1);
+            for (int i = 0; i < usedChannels; i++) 
+            {
+                channel[i]->setHcl(ch, hclKelvin, hclBrightness);
+            }
+        }    
         _timerCheckHclChannel = millis();
     }
 }
@@ -368,24 +375,6 @@ void LEDModule::processInputKo(GroupObject &ko)
         int channelIndexRGB = floor((koNum - RGB_KoOffset) / RGB_KoBlockSize);
         logDebugP("For Channel RGB %i", channelIndexRGB);
         channelRGB[channelIndexRGB]->processInputKo(ko);
-        return;
-    }
-    // HCL Dimmer Class
-    if (koNum >= HCL_KoOffset && koNum < HCL_KoOffset + HCL_KoBlockSize * MAXCHANNELSHCL)
-    {
-        int channelIndexHCL = floor((koNum - HCL_KoOffset) / HCL_KoBlockSize) + 1;
-        int channelko = (ko.asap() - HCL_KoOffset) % HCL_KoBlockSize;
-        logDebugP("Broadcast values from HCL%i", channelIndexHCL);
-        for (int i = 0; i < usedChannels; i++) 
-        {
-            if (channelko == HCL_KoStatusColorTemp) {
-                uint16_t colorTemp = ko.value(Dpt(7, 600));
-                channel[i]->setHcl(channelIndexHCL, colorTemp, 0);
-            } else if (channelko == HCL_KoStatusBrightness) {
-                uint8_t brightness = ko.value(DPT_Scaling);
-                channel[i]->setHcl(channelIndexHCL, 0, brightness);
-            }
-        }
         return;
     }
 

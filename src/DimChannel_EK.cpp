@@ -176,8 +176,17 @@ void DimChannel_EK::setHcl(uint8_t channel, uint16_t kelvin, uint8_t brightness)
 {
     if (ParamEK_hclActive != 1 || channel != ParamEK_hclChannel)
         return;
-    if (brightness != 0) _currentValueEK = brightness;
-    // HCL is not supported for EK, so we ignore kelvin
+    if (ParamEK_hclStart == PT_hclStart_during) { // HCL active when channel is on
+        if (ParamEK_hclCheckBrightness == 1 && _isOn) {
+            logDebugP("HCL active - Channel: %i Kelvin: %i Brightness: %i", channel, kelvin, brightness);
+            _newValueEK = round((uint)(brightness * 2.55));
+            _currentTask = DimTaskEK::EK_DIM_B_SET;
+        } else {
+            _currentHclValue[0] = brightness;
+            _currentHclValue[1] = kelvin;
+            logDebugP("HCL will only apply if channel on, save for later use");
+        }
+    }
 }
 
 void DimChannel_EK::task()
@@ -202,8 +211,9 @@ void DimChannel_EK::sendKoStateOnChange(uint16_t koNr, const KNXValue &value, co
 
 void DimChannel_EK::updateDimValue()
 {
-    logDebugP("Send DimValue to KO - OnOff: %i B: %i", _currentValueEK > 0, _currentValueEK);
-    sendKoStateOnChange(EK_KoStatusOnOff, _currentValueEK > 0, DPT_Switch, false);
+    _isOn = _currentValueEK > 0;
+    logDebugP("Send DimValue to KO - OnOff: %i B: %i", _isOn, _currentValueEK);
+    sendKoStateOnChange(EK_KoStatusOnOff, _isOn, DPT_Switch, false);
     sendKoStateOnChange(EK_KoStatusBrightness, _currentValueEK, DPT_Percent_U8, true);
 }
 
@@ -240,7 +250,6 @@ void DimChannel_EK::dimmerTask()
 
 void DimChannel_EK::sendDimValue()
 {
-    // logDebugP("Send DimValue to HW - EK: %i", _currentValueEK);
     LEDModule::_instance->setHwChannelValue(m_hwchannel, _currentValueEK, m_curve);
 }
 

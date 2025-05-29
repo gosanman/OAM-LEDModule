@@ -27,11 +27,9 @@ void HclChannel::setup(uint8_t index)
     }
     else
         logDebugP("Nicht Konfiguriert");
-
-    //_lastCheck = _index * 3000;
 }
 
-void HclChannel::loop()
+void HclChannel::loop(uint16_t &out_k, uint8_t &out_b)
 {
     if (!_isConfigured || !openknx.sun.isSunCalculatioValid())
         return;
@@ -47,18 +45,18 @@ void HclChannel::loop()
     if (openknx.time.getLocalTime().hour < _sunRise.hour || (openknx.time.getLocalTime().hour == _sunRise.hour && openknx.time.getLocalTime().minute < _sunRise.minute))
     {
         logDebugP("Vor Sonnenaufgang %i K (%i:%i)", minT, _sunRise.hour, _sunRise.minute);
-        if (ParamHCL_checkTemperature)
-            KoHCL_StatusColorTemp.value(minT, Dpt(7, 600));
-        if (ParamHCL_checkBrightness)
-            KoHCL_StatusBrightness.value(minB, DPT_Scaling);
+        KoHCL_StatusColorTemp.value(minT, Dpt(7, 600));
+        KoHCL_StatusBrightness.value(minB, DPT_Scaling);
+        out_k = minT;
+        out_b = minB;
     }
     else if (openknx.time.getLocalTime().hour > _sunSet.hour || (openknx.time.getLocalTime().hour == _sunSet.hour && openknx.time.getLocalTime().minute > _sunSet.minute))
     {
         logDebugP("Nach Sonnenuntergang %i K (%i:%i)", minT, _sunSet.hour, _sunSet.minute);
-        if (ParamHCL_checkTemperature)
-            KoHCL_StatusColorTemp.value(minT, Dpt(7, 600));
-        if (ParamHCL_checkBrightness)
-            KoHCL_StatusBrightness.value(minB, DPT_Scaling);
+        KoHCL_StatusColorTemp.value(minT, Dpt(7, 600));
+        KoHCL_StatusBrightness.value(minB, DPT_Scaling);
+        out_k = minT;
+        out_b = minB;
     }
     else
     {
@@ -78,22 +76,18 @@ void HclChannel::loop()
 
         uint16_t currentMin = openknx.time.getLocalTime().hour * 60 + openknx.time.getLocalTime().minute;
         // logDebugP("start %i | stop %i | curr %i", startMin, stopMin, currentMin);
-        uint16_t response = 0;
+        uint16_t response_k = 0;
+        uint8_t response_b = 0;
         uint16_t maxT = ParamHCL_colorTempMax;
         uint8_t maxB = ParamHCL_briMax;
 
-        if (ParamHCL_checkTemperature)
-        {
-            response = getValueFromSun(currentMin - startMin, stopMin - startMin, minT, maxT);
-            logDebugP("response: %i K", response);
-            KoHCL_StatusColorTemp.value(response, Dpt(7, 600));
-        }
-        if (ParamHCL_checkBrightness)
-        {
-            response = getValueFromSun(currentMin - startMin, stopMin - startMin, minB, maxB);
-            logDebugP("response: %i %", response);
-            KoHCL_StatusBrightness.value(response, DPT_Scaling);
-        }
+        response_k = getValueFromSun(currentMin - startMin, stopMin - startMin, minT, maxT);
+        response_b = getValueFromSun(currentMin - startMin, stopMin - startMin, minB, maxB);
+        logDebugP("Response - Kelvin: %i K and Brightness: %i %", response_k, response_b);
+        KoHCL_StatusColorTemp.value(response_k, Dpt(7, 600));
+        KoHCL_StatusBrightness.value(response_b, DPT_Scaling);
+        out_k = response_k;
+        out_b = response_b;
     }
 }
 

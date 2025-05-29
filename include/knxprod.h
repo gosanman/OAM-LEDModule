@@ -21,12 +21,14 @@
 #define PT_hclOffset_no 0
 #define PT_hclOffset_plus 1
 #define PT_hclOffset_minus 2
+#define PT_hclStart_start 0
+#define PT_hclStart_during 1
 //--------------------Allgemein---------------------------
 #define MAIN_OpenKnxId 0xA8
 #define MAIN_ApplicationNumber 0x01
-#define MAIN_ApplicationVersion 0x05
+#define MAIN_ApplicationVersion 0x06
 #define MAIN_OrderNumber "OpenKnxLEDDimmer"
-#define MAIN_ParameterSize 732
+#define MAIN_ParameterSize 733
 #define MAIN_MaxKoNumber 684
 
 
@@ -111,6 +113,9 @@
 #define APP_FrontPanelPresent		0x0007
 // Offset: 7, BitOffset: 7, Size: 1 Bit, Text: Bedienfeld verbaut
 #define ParamAPP_FrontPanelPresent knx.paramBit(APP_FrontPanelPresent, 7)
+#define APP_FrontPanelControl		0x0012
+// Offset: 18, Size: 1 Bit, Text: Steuerung über das Bedienfeld zulassen
+#define ParamAPP_FrontPanelControl knx.paramBit(APP_FrontPanelControl, 0)
 //!< Number: 31, Text: Spannung, Function: Messwert
 #define APP_KoVoltageV 31
 #define KoAPP_VoltageV knx.getGroupObject(APP_KoVoltageV)
@@ -145,15 +150,15 @@
 //---------------------Modules----------------------------
 
 //-----Module specific starts
-#define BASE_Share_ParamBlockOffset 18
+#define BASE_Share_ParamBlockOffset 19
 #define BASE_Share_ParamBlockSize 45
-#define EK_ParamBlockOffset 63
+#define EK_ParamBlockOffset 64
 #define EK_ParamBlockSize 21
-#define TW_ParamBlockOffset 315
+#define TW_ParamBlockOffset 316
 #define TW_ParamBlockSize 39
-#define RGB_ParamBlockOffset 549
+#define RGB_ParamBlockOffset 550
 #define RGB_ParamBlockSize 39
-#define HCL_ParamBlockOffset 705
+#define HCL_ParamBlockOffset 706
 #define HCL_ParamBlockSize 9
 #define BASE_Share_KoOffset 49
 #define BASE_Share_KoBlockSize 13
@@ -412,6 +417,11 @@
 #define ParamEK_hclActiveIndex(X) knx.paramBit((EK_ParamBlockOffset + EK_ParamBlockSize * X + EK_hclActive), 7)
 // Offset: 2, BitOffset: 7, Size: 1 Bit, Text: HCL für diesen Kanal aktivieren
 #define ParamEK_hclActive knx.paramBit((EK_ParamBlockOffset + EK_ParamBlockSize * channelIndex() + EK_hclActive), 7)
+#define EK_hclCheckBrightness		0x0003
+// Offset: 3, BitOffset: 7, Size: 1 Bit, Text: Helligkeit aktivieren
+#define ParamEK_hclCheckBrightnessIndex(X) knx.paramBit((EK_ParamBlockOffset + EK_ParamBlockSize * X + EK_hclCheckBrightness), 7)
+// Offset: 3, BitOffset: 7, Size: 1 Bit, Text: Helligkeit aktivieren
+#define ParamEK_hclCheckBrightness knx.paramBit((EK_ParamBlockOffset + EK_ParamBlockSize * channelIndex() + EK_hclCheckBrightness), 7)
 //!< Number: 0, Text: EK{{argChan}}: {{0:---}}, Function: Schalten
 #define EK_KoSwitch 0
 #define KoEK_SwitchIndex(X) knx.getGroupObject(EK_KoBlockSize * X + EK_KoSwitch + EK_KoOffset)
@@ -637,6 +647,16 @@
 #define ParamTW_hclActiveIndex(X) knx.paramBit((TW_ParamBlockOffset + TW_ParamBlockSize * X + TW_hclActive), 7)
 // Offset: 6, BitOffset: 7, Size: 1 Bit, Text: HCL für diesen Kanal aktivieren
 #define ParamTW_hclActive knx.paramBit((TW_ParamBlockOffset + TW_ParamBlockSize * channelIndex() + TW_hclActive), 7)
+#define TW_hclCheckTemperature		0x000B
+// Offset: 11, BitOffset: 7, Size: 1 Bit, Text: Farbtemperatur aktivieren
+#define ParamTW_hclCheckTemperatureIndex(X) knx.paramBit((TW_ParamBlockOffset + TW_ParamBlockSize * X + TW_hclCheckTemperature), 7)
+// Offset: 11, BitOffset: 7, Size: 1 Bit, Text: Farbtemperatur aktivieren
+#define ParamTW_hclCheckTemperature knx.paramBit((TW_ParamBlockOffset + TW_ParamBlockSize * channelIndex() + TW_hclCheckTemperature), 7)
+#define TW_hclCheckBrightness		0x000C
+// Offset: 12, BitOffset: 7, Size: 1 Bit, Text: Helligkeit aktivieren
+#define ParamTW_hclCheckBrightnessIndex(X) knx.paramBit((TW_ParamBlockOffset + TW_ParamBlockSize * X + TW_hclCheckBrightness), 7)
+// Offset: 12, BitOffset: 7, Size: 1 Bit, Text: Helligkeit aktivieren
+#define ParamTW_hclCheckBrightness knx.paramBit((TW_ParamBlockOffset + TW_ParamBlockSize * channelIndex() + TW_hclCheckBrightness), 7)
 //!< Number: 0, Text: TW{{argChan}}: {{0:---}}, Function: Schalten
 #define TW_KoSwitch 0
 #define KoTW_SwitchIndex(X) knx.getGroupObject(TW_KoBlockSize * X + TW_KoSwitch + TW_KoOffset)
@@ -826,6 +846,16 @@
 #define ParamRGB_hclActiveIndex(X) knx.paramBit((RGB_ParamBlockOffset + RGB_ParamBlockSize * X + RGB_hclActive), 7)
 // Offset: 8, BitOffset: 7, Size: 1 Bit, Text: HCL für diesen Kanal aktivieren
 #define ParamRGB_hclActive knx.paramBit((RGB_ParamBlockOffset + RGB_ParamBlockSize * channelIndex() + RGB_hclActive), 7)
+#define RGB_hclCheckTemperature		0x0009
+// Offset: 9, BitOffset: 3, Size: 1 Bit, Text: Farbtemperatur aktivieren
+#define ParamRGB_hclCheckTemperatureIndex(X) knx.paramBit((RGB_ParamBlockOffset + RGB_ParamBlockSize * X + RGB_hclCheckTemperature), 3)
+// Offset: 9, BitOffset: 3, Size: 1 Bit, Text: Farbtemperatur aktivieren
+#define ParamRGB_hclCheckTemperature knx.paramBit((RGB_ParamBlockOffset + RGB_ParamBlockSize * channelIndex() + RGB_hclCheckTemperature), 3)
+#define RGB_hclCheckBrightness		0x0009
+// Offset: 9, BitOffset: 4, Size: 1 Bit, Text: Helligkeit aktivieren
+#define ParamRGB_hclCheckBrightnessIndex(X) knx.paramBit((RGB_ParamBlockOffset + RGB_ParamBlockSize * X + RGB_hclCheckBrightness), 4)
+// Offset: 9, BitOffset: 4, Size: 1 Bit, Text: Helligkeit aktivieren
+#define ParamRGB_hclCheckBrightness knx.paramBit((RGB_ParamBlockOffset + RGB_ParamBlockSize * channelIndex() + RGB_hclCheckBrightness), 4)
 //!< Number: 0, Text: RGB{{argChan}}: {{0:---}}, Function: Schalten
 #define RGB_KoSwitch 0
 #define KoRGB_SwitchIndex(X) knx.getGroupObject(RGB_KoBlockSize * X + RGB_KoSwitch + RGB_KoOffset)
@@ -983,16 +1013,6 @@
 #define ParamHCL_briMaxIndex(X) ((uint32_t)((knx.paramByte((HCL_ParamBlockOffset + HCL_ParamBlockSize * X + HCL_briMax)) >> HCL_briMax_Shift) & HCL_briMax_Mask))
 // Offset: 8, Size: 7 Bit, Text: Helligkeit Max
 #define ParamHCL_briMax ((uint32_t)((knx.paramByte((HCL_ParamBlockOffset + HCL_ParamBlockSize * channelIndex() + HCL_briMax)) >> HCL_briMax_Shift) & HCL_briMax_Mask))
-#define HCL_checkTemperature		0x0000
-// Offset: 0, BitOffset: 6, Size: 1 Bit, Text: Farbtemperatur aktivieren
-#define ParamHCL_checkTemperatureIndex(X) knx.paramBit((HCL_ParamBlockOffset + HCL_ParamBlockSize * X + HCL_checkTemperature), 6)
-// Offset: 0, BitOffset: 6, Size: 1 Bit, Text: Farbtemperatur aktivieren
-#define ParamHCL_checkTemperature knx.paramBit((HCL_ParamBlockOffset + HCL_ParamBlockSize * channelIndex() + HCL_checkTemperature), 6)
-#define HCL_checkBrightness		0x0000
-// Offset: 0, BitOffset: 7, Size: 1 Bit, Text: Helligkeit aktivieren
-#define ParamHCL_checkBrightnessIndex(X) knx.paramBit((HCL_ParamBlockOffset + HCL_ParamBlockSize * X + HCL_checkBrightness), 7)
-// Offset: 0, BitOffset: 7, Size: 1 Bit, Text: Helligkeit aktivieren
-#define ParamHCL_checkBrightness knx.paramBit((HCL_ParamBlockOffset + HCL_ParamBlockSize * channelIndex() + HCL_checkBrightness), 7)
 //!< Number: 0, Text: HCL{{argChan}}: {{0:---}}, Function: Status Farbtemperatur (Kelvin)
 #define HCL_KoStatusColorTemp 0
 #define KoHCL_StatusColorTempIndex(X) knx.getGroupObject(HCL_KoBlockSize * X + HCL_KoStatusColorTemp + HCL_KoOffset)

@@ -12,6 +12,12 @@ enum DimTaskRGB {
     RGB_DIM_SOFT_OFF,
     RGB_DIM_RGB_SET,
     RGB_DIM_RGB_REL,
+    RGB_DIM_H_UP,
+    RGB_DIM_H_DOWN,
+    RGB_DIM_S_UP,
+    RGB_DIM_S_DOWN,
+    RGB_DIM_V_UP,
+    RGB_DIM_V_DOWN
 };
 
 // scene actions
@@ -61,6 +67,7 @@ private:
     uint8_t _lastDayValue[3] = {125, 125, 125};   // 0 = Red, 1 = Green, 2 = Blue
     uint8_t _lastNightValue[3] = {125, 125, 125}; // 0 = Red, 1 = Green, 2 = Blue
     uint8_t _valueOff[3] = {0, 0, 0};             // 0 = Red, 1 = Green, 2 = Blue
+    uint16_t _currentHclValue[2] = {0, 0};        // 0 = Brightness, 1 = Kelvin
 
     bool isNight = false;
 
@@ -96,7 +103,8 @@ private:
     uint32_t _time;
     float _dimIncrement[3] = {0};
     float _dimAcc[3] = {0};
-    bool  _dimmingInit = false;
+    bool _dimmingInit = false;
+    bool _isOn = false;         // true = on, false = off
 
     void handleDimStop();
     void handleDimSoftOn();
