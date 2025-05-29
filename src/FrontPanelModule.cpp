@@ -61,11 +61,11 @@ void FrontPanelModule::loop1()
     if (!digitalRead(IO1_PIN))
         handleButtonPress(BUTTON_BACK); // Button back pressed   - ■
     if (!digitalRead(IO2_PIN))
-        handleButtonPress(BUTTON_LEFT); // Button left pressed   - 🞀
+        handleButtonPress(BUTTON_LEFT); // Button left pressed   - ◀
     if (!digitalRead(IO3_PIN))
-        handleButtonPress(BUTTON_RIGHT); // Button right pressed  - 🞂
+        handleButtonPress(BUTTON_RIGHT); // Button right pressed  - ▶
     if (!digitalRead(IO4_PIN))
-        handleButtonPress(BUTTON_SELECT); // Button select pressed - 🞉
+        handleButtonPress(BUTTON_SELECT); // Button select pressed - ⬤
 
     // Show OpenKNX Logo and welcome message once at startup
     if (startupscreen == true)
