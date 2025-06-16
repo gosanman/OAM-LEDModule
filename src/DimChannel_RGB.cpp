@@ -34,13 +34,13 @@ void DimChannel_RGB::setup(uint8_t *hwchannel)
               m_curve, m_gammacorrection, ParamRGB_hclActive, ParamRGB_hclChannel, ParamRGB_hclStart);
 
     // set default values for gamma correction
-    if (m_gammacorrection >= 1.0f && m_gammacorrection <= 3)
-    {
-        if (m_gammacorrection != 2.8f)
+    if (m_gammacorrection >= 1.0f && m_gammacorrection <= 3) {
+        if (m_gammacorrection != 2.8f) {
             LEDHelper::calcGammaTable(m_gammacorrection);
             logDebugP("Finish recalculate gamma correction table with value: %.1f", m_gammacorrection);
         }
     }
+}
 
 void DimChannel_RGB::processInputKo(GroupObject &ko)
 {

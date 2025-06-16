@@ -186,7 +186,8 @@ void FrontPanelModule::handleButtonPress(uint8_t button)
         }
         else if (currentscreen == SUBSCREEN_CONNECTIONS)
         {
-            toggleLedChannel(currentconnectionscreen);
+            if (ParamAPP_FrontPanelControl)
+                toggleLedChannel(currentconnectionscreen);
         }
         break;
 
