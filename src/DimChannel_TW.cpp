@@ -26,41 +26,14 @@ void DimChannel_TW::setup(uint8_t *hwchannel)
     m_usenightvalue = ParamTW_UseNightValue;
     m_nightbrightness = round(ParamTW_NightBrightness * 2.55);
     m_nightcolortemp = ParamTW_NightColorTemp;
-    m_durationrelativ = getTimeWithPattern(ParamTW_RelativDimTime, ParamTW_RelativDimBase);
-    m_durationabsolut = getTimeWithPattern(ParamTW_OnOffTime, ParamTW_OnOffBase);
+    m_durationrelativ = LEDHelper::getTimeWithPattern(ParamTW_RelativDimTime, ParamTW_RelativDimBase);
+    m_durationabsolut = LEDHelper::getTimeWithPattern(ParamTW_OnOffTime, ParamTW_OnOffBase);
     m_curve = ParamTW_DimCurve; // 0=A, 1=B, 2=C, 3=D, 4=E
 
-    // setup hw channels
-    hwchannels[m_hwchannel_ww] = new HWChannel(m_hwchannel_ww);
-    hwchannels[m_hwchannel_cw] = new HWChannel(m_hwchannel_cw);
-    hwchannels[m_hwchannel_ww]->setup(m_hwchannel_ww, m_curve, m_durationabsolut, m_durationrelativ);
-    hwchannels[m_hwchannel_cw]->setup(m_hwchannel_cw, m_curve, m_durationabsolut, m_durationrelativ);
-
-    logDebugP("------------------ DEBUG -------------------");
-    logDebugP("Channel Index: %i", _channelIndex);
-    logDebugP("KO Switch: %i", calcKoNumber(TW_KoSwitch));
-    logDebugP("KO Dim Absolute Brightness: %i", calcKoNumber(TW_KoDimAbsoluteBrightness));
-    logDebugP("KO Dim Absolute Kelvin: %i", calcKoNumber(TW_KoDimAbsoluteColorTemp));
-    logDebugP("KO Dim Relativ Brightness: %i", calcKoNumber(TW_KoDimRelativBrightness));
-    logDebugP("KO Dim Relativ Kelvin: %i", calcKoNumber(TW_KoDimRelativColorTemp));
-    logDebugP("KO Status OnOff: %i", calcKoNumber(TW_KoStatusOnOff));
-    logDebugP("KO Status Brightness: %i", calcKoNumber(TW_KoStatusBrightness));
-    logDebugP("KO Status Kelvin: %i", calcKoNumber(TW_KoStatusColorTemp));
-    logDebugP("KO Scene: %i", calcKoNumber(TW_KoSceneNumber));
-    logDebugP("HW Port WW: %i", m_hwchannel_ww);
-    logDebugP("HW Port CW: %i", m_hwchannel_cw);
-    logDebugP("PT ColorTemp WW: %i K", m_colortempww);
-    logDebugP("PT ColorTemp CW: %i K", m_colortempcw);
-    logDebugP("PT UseDayValue: %i", m_usedayvalue);
-    logDebugP("PT DayBrightness: %i", m_daybrightness);
-    logDebugP("PT DayColorTemp: %i K", m_daycolortemp);
-    logDebugP("PT UseNightValue: %i", m_usenightvalue);
-    logDebugP("PT NightBrightness: %i", m_nightbrightness);
-    logDebugP("PT NightColorTemp: %i K", m_nightcolortemp);
-    logDebugP("PT DurationRelativ: %i", m_durationrelativ);
-    logDebugP("PT DurationAbsolut: %i", m_durationabsolut);
-    logDebugP("PT Curve: %i", m_curve);
-    logDebugP("--------------------------------------------");
+    logDebugP("CH: %i, | HW WW: %i, CW: %i, | CT WW: %i, CW: %i, | Use Day: %i, B: %i, K: %i, | Use Night: %i, B: %i, K: %i, | Dur Rel: %i, Abs: %i, Curve: %i, | HCL Act: %i, Ch: %i, St: %i",
+              _index, m_hwchannel_ww, m_hwchannel_cw, m_colortempww, m_colortempcw, m_usedayvalue, m_daybrightness, m_daycolortemp,
+              m_usenightvalue, m_nightbrightness, m_nightcolortemp, m_durationrelativ, m_durationabsolut, m_curve, ParamTW_hclActive,
+              ParamTW_hclChannel, ParamTW_hclStart);
 }
 
 void DimChannel_TW::processInputKo(GroupObject &ko)
@@ -103,56 +76,37 @@ void DimChannel_TW::koHandleSwitch(GroupObject &ko)
     bool value = ko.value(DPT_Switch);
     if (value)
     { // on
-        if (isNight)
-        {
-            if (m_usenightvalue)
-            {
-                _currentValueTW[0] = m_nightbrightness;
-                _currentValueTW[1] = m_nightcolortemp;
-            }
-            else
-            {
-                _currentValueTW[0] = _lastNightValue[0];
-                _currentValueTW[1] = _lastNightValue[1];
-            }
-        }
-        else
-        {
-            if (m_usedayvalue)
-            {
-                _currentValueTW[0] = m_daybrightness;
-                _currentValueTW[1] = m_daycolortemp;
-            }
-            else
-            {
-                _currentValueTW[0] = _lastDayValue[0];
-                _currentValueTW[1] = _lastDayValue[1];
-            }
-        }
-        logDebugP(isNight ? "Switch Night - with value: %i - Kelvin: %i - Brightness: %i" : "Switch Day - with value: %i - Kelvin: %i - Brightness: %i", value, _currentValueTW[1], _currentValueTW[0]);
-        sendDimValue();
+        switchOnHelper();
+        logDebugP(isNight ? "Switch On Night - with value: %i - Kelvin: %i - Brightness: %i" : "Switch On Day - with value: %i - Kelvin: %i - Brightness: %i", value, _currentValueTW[1], _newValueTW[0]);
+        _currentTask = DimTaskTW::TW_DIM_SOFT_ON;
     }
     else
     { // off
-        hwchannels[m_hwchannel_ww]->taskSoftOff();
-        hwchannels[m_hwchannel_cw]->taskSoftOff();
+        switchOffHelper();
+        logDebugP(isNight ? "Switch Off Night - with value: %i" : "Switch Off Day - with value: %i", value);
+        _currentTask = DimTaskTW::TW_DIM_SOFT_OFF;
     }
 }
 
 void DimChannel_TW::koHandleDimmAbsBrightness(GroupObject &ko)
 {
-    uint8_t brightness = ko.value(DPT_Percent_U8);
-    _currentValueTW[0] = brightness;
-    logDebugP("Dim Absolute - Kelvin: %i - Brightness: %i", _currentValueTW[1], _currentValueTW[0]);
-    sendDimValue();
+    _newValueTW[0] = ko.value(DPT_Percent_U8);
+    logDebugP("Dim Absolute Brightness - Kelvin: %i - Brightness: %i", _currentValueTW[1], _newValueTW[0]);
+    _currentTask = DimTaskTW::TW_DIM_B_SET;
 }
 
 void DimChannel_TW::koHandleDimmAbsColorTemp(GroupObject &ko)
 {
-    uint16_t kelvin = ko.value(Dpt(7, 600));
-    _currentValueTW[1] = kelvin;
-    logDebugP("Dim Kelvin - Kelvin: %i - Brightness: %i", _currentValueTW[1], _currentValueTW[0]);
-    sendDimValue();
+    _newValueTW[1] = ko.value(Dpt(7, 600));
+    if (_currentValueTW[0] == 0) {
+        logDebugP("Dim Absolute Kelvin - Kelvin: %i - Brightness: %i (Brightness is 0, we only save Kelvin)", _newValueTW[1], _currentValueTW[0]);
+        _currentValueTW[1] = _newValueTW[1]; // Save kelvin but do not change brightness
+        (isNight ? _lastNightValue[1] : _lastDayValue[1]) = _newValueTW[1]; // Save kelvin for later use
+        updateDimValue(); // Update KO state for Kelvin
+    } else {
+        logDebugP("Dim Absolute Kelvin - Kelvin: %i - Brightness: %i", _newValueTW[1], _currentValueTW[0]);
+        _currentTask = DimTaskTW::TW_DIM_K_SET;
+    }
 }
 
 void DimChannel_TW::koHandleDimmRelBrightness(GroupObject &ko)
@@ -161,20 +115,15 @@ void DimChannel_TW::koHandleDimmRelBrightness(GroupObject &ko)
     uint8_t step = ko.value(Dpt(3, 7, 1));
     logDebugP("Dim Relativ Brightness - Direction: %i, Step: %i", direction, step);
     // direction true = dim up, false = dim down, step = 0 then stop
-    if (step == 0)
-    {
+    if (step == 0) {
         logDebugP("Dim Relativ Brightness - Stop");
-        _currentTask = DIM_STOP;
-    }
-    else if (direction == 1)
-    {
+        _currentTask = DimTaskTW::TW_DIM_STOP;
+    } else if (direction == 1) {
         logDebugP("Dim Relativ Brightness - DimUp");
-        _currentTask = DIM_B_UP;
-    }
-    else if (direction == 0)
-    {
+        _currentTask = DimTaskTW::TW_DIM_B_UP;
+    } else if (direction == 0) {
         logDebugP("Dim Relativ Brightness - DimDown");
-        _currentTask = DIM_B_DOWN;
+        _currentTask = DimTaskTW::TW_DIM_B_DOWN;
     }
 }
 
@@ -184,20 +133,15 @@ void DimChannel_TW::koHandleDimmRelColorTemp(GroupObject &ko)
     uint8_t step = ko.value(Dpt(3, 7, 1));
     logDebugP("Dim Relativ Kelvin - Direction: %i, Step: %i", direction, step);
     // direction true = dim up, false = dim down, step = 0 then stop
-    if (step == 0)
-    {
+    if (step == 0) {
         logDebugP("Dim Relativ Kelvin - Stop");
-        _currentTask = DIM_STOP;
-    }
-    else if (direction == 1)
-    {
+        _currentTask = DimTaskTW::TW_DIM_STOP;
+    } else if (direction == 1) {
         logDebugP("Dim Relativ Kelvin - DimUp");
-        _currentTask = DIM_K_UP;
-    }
-    else if (direction == 0)
-    {
+        _currentTask = DimTaskTW::TW_DIM_K_UP;
+    } else if (direction == 0) {
         logDebugP("Dim Relativ Kelvin - DimDown");
-        _currentTask = DIM_K_DOWN;
+        _currentTask = DimTaskTW::TW_DIM_K_DOWN;
     }
 }
 
@@ -218,27 +162,60 @@ void DimChannel_TW::koHandleScene(GroupObject &ko)
                 // do nothing
                 break;
             case SC_TW_OnValueDayNight:
-                sendDimValue();
+                switchOnHelper();
+                _currentTask = DimTaskTW::TW_DIM_SOFT_ON;
                 break;
             case SC_TW_SetBrightness:
-                _currentValueTW[0] = round(((uint)((knx.paramByte((TW_ParamBlockOffset + TW_ParamBlockSize * channelIndex() + TW_SceneBrightnessA + i))))) * 2.55);
-                sendDimValue();
+                _newValueTW[0] = round(((uint)((knx.paramByte((TW_ParamBlockOffset + TW_ParamBlockSize * channelIndex() + TW_SceneBrightnessA + i))))) * 2.55);
+                _currentTask = DimTaskTW::TW_DIM_B_SET;
                 break;
             case SC_TW_SetColorTemp:
-                _currentValueTW[1] = ((uint)((knx.paramWord((TW_ParamBlockOffset + TW_ParamBlockSize * channelIndex() + TW_SceneKelvinA + (i * 2))))));
-                sendDimValue();
+                _newValueTW[1] = ((uint)((knx.paramWord((TW_ParamBlockOffset + TW_ParamBlockSize * channelIndex() + TW_SceneKelvinA + (i * 2))))));
+                _currentTask = DimTaskTW::TW_DIM_K_SET;
                 break;
             case SC_TW_SetBoth:
-                _currentValueTW[0] = round(((uint)((knx.paramByte((TW_ParamBlockOffset + TW_ParamBlockSize * channelIndex() + TW_SceneBrightnessA + i))))) * 2.55);
+                _newValueTW[0] = round(((uint)((knx.paramByte((TW_ParamBlockOffset + TW_ParamBlockSize * channelIndex() + TW_SceneBrightnessA + i))))) * 2.55);
                 _currentValueTW[1] = ((uint)((knx.paramWord((TW_ParamBlockOffset + TW_ParamBlockSize * channelIndex() + TW_SceneKelvinA + (i * 2))))));
-                sendDimValue();
+                _currentTask = DimTaskTW::TW_DIM_SOFT_ON;
                 break;
             case SC_EK_Off:
-                hwchannels[m_hwchannel_ww]->taskSoftOff();
-                hwchannels[m_hwchannel_cw]->taskSoftOff();
+                switchOffHelper();
+                _currentTask = DimTaskTW::TW_DIM_SOFT_OFF;
                 break;
             }
         }
+    }
+}
+
+void DimChannel_TW::switchOnHelper()
+{
+    if (isNight) {
+        if (m_usenightvalue) {
+            _newValueTW[0] = m_nightbrightness;
+            _currentValueTW[1] = m_nightcolortemp;
+        } else {
+            _newValueTW[0] = _lastNightValue[0];
+            _currentValueTW[1] = _lastNightValue[1];
+        }
+    } else {
+        if (m_usedayvalue) {
+            _newValueTW[0] = m_daybrightness;
+            _currentValueTW[1] = m_daycolortemp;
+        } else {
+            _newValueTW[0] = _lastDayValue[0];
+            _currentValueTW[1] = _lastDayValue[1];
+        }
+    }
+}
+
+void DimChannel_TW::switchOffHelper()
+{
+    if (isNight) {
+        _lastNightValue[0] = _currentValueTW[0];
+        _lastNightValue[1] = _currentValueTW[1];
+    } else {
+         _lastDayValue[0] = _currentValueTW[0];
+         _lastDayValue[1] = _currentValueTW[1];
     }
 }
 
@@ -260,18 +237,38 @@ uint8_t DimChannel_TW::getChannelIndex()
     return _index;
 }
 
+uint8_t DimChannel_TW::getChannelType()
+{
+    return ChannelType::TW; // 2 = TW
+}
+
+void DimChannel_TW::setHcl(uint8_t channel, uint16_t kelvin, uint8_t brightness)
+{
+    if (ParamTW_hclActive != 1 || channel != ParamTW_hclChannel)
+        return;
+    if (ParamTW_hclStart == PT_hclStart_during && _isOn) { // HCL active when channel is on
+        logDebugP("HCL active - Channel: %i Kelvin: %i Brightness: %i", channel, kelvin, brightness);
+        if (ParamTW_hclCheckTemperature == 1 && ParamTW_hclCheckBrightness == 1) {
+            _currentValueTW[0] = brightness;
+            _newValueTW[1] = kelvin;
+            _currentTask = DimTaskTW::TW_DIM_K_SET;
+        } else if (ParamTW_hclCheckTemperature == 1 && ParamTW_hclCheckBrightness == 0) {
+            _newValueTW[1] = kelvin;
+            _currentTask = DimTaskTW::TW_DIM_K_SET;
+        } else if (ParamTW_hclCheckTemperature == 0 && ParamTW_hclCheckBrightness == 1) {
+            _newValueTW[0] = brightness;
+            _currentTask = DimTaskTW::TW_DIM_B_SET;
+        }
+    } else {
+        _currentHclValue[0] = brightness;
+        _currentHclValue[1] = kelvin;
+        logDebugP("HCL will only apply if channel on, save for later use");
+    }
+}
+
 void DimChannel_TW::task()
 {
-    hwchannels[m_hwchannel_ww]->task();
-    hwchannels[m_hwchannel_cw]->task();
     dimmerTask();
-    // run ko update every 100ms
-    _currentUpdateRun = millis();
-    if (_currentUpdateRun - _lastUpdatekRun >= 100)
-    {
-        updateDimValue();
-        _lastUpdatekRun = millis();
-    }
 }
 
 uint16_t DimChannel_TW::calcKoNumber(int koNum)
@@ -282,104 +279,20 @@ uint16_t DimChannel_TW::calcKoNumber(int koNum)
 void DimChannel_TW::sendKoStateOnChange(uint16_t koNr, const KNXValue &value, const Dpt &type, bool alwayssend)
 {
     GroupObject &ko = knx.getGroupObject(calcKoNumber(koNr));
-    if (ko.valueNoSendCompare(value, type))
-    {
+    if (ko.valueNoSendCompare(value, type)) {
+        ko.objectWritten();
+    } else if (alwayssend == true) {
         ko.objectWritten();
     }
-    else if (alwayssend == true)
-    {
-        ko.objectWritten();
-    }
-}
-
-void DimChannel_TW::sendDimValue()
-{
-    percent = prozToDim(_currentValueTW[0], 3);
-    percentWW = (percent * (m_colortempcw - _currentValueTW[1])) / (m_colortempcw - m_colortempww);
-    percentCW = (percent * (_currentValueTW[1] - m_colortempww)) / (m_colortempcw - m_colortempww);
-    // logDebugP("protzToDim Correction Value - WW: %i CW: %i", percentWW, percentCW);
-    hwchannels[m_hwchannel_ww]->taskNewValue(percentWW);
-    hwchannels[m_hwchannel_cw]->taskNewValue(percentCW);
-}
-
-void DimChannel_TW::setDimValue()
-{
-    percent = prozToDim(_currentValueTW[0], 3);
-    percentWW = (percent * (m_colortempcw - _currentValueTW[1])) / (m_colortempcw - m_colortempww);
-    percentCW = (percent * (_currentValueTW[1] - m_colortempww)) / (m_colortempcw - m_colortempww);
-    // logDebugP("protzToDim Correction Value - WW: %i CW: %i", percentWW, percentCW);
-    hwchannels[m_hwchannel_ww]->taskSetValue(percentWW);
-    hwchannels[m_hwchannel_cw]->taskSetValue(percentCW);
 }
 
 void DimChannel_TW::updateDimValue()
 {
-    if (_busy == true)
-    {
-        return;
-    }
-    if (hwchannels[m_hwchannel_ww]->isBusy() || hwchannels[m_hwchannel_cw]->isBusy())
-    {
-        return;
-    }
-    if (hwchannels[m_hwchannel_ww]->updateAvailable() || hwchannels[m_hwchannel_cw]->updateAvailable())
-    {
-        hwchannels[m_hwchannel_ww]->resetUpdateFlag();
-        hwchannels[m_hwchannel_cw]->resetUpdateFlag();
-        uint8_t ww = hwchannels[m_hwchannel_ww]->getCurrentValue();
-        uint8_t cw = hwchannels[m_hwchannel_cw]->getCurrentValue();
-
-        if (isNight)
-        {
-            _lastNightValue[0] = _currentValueTW[0];
-            _lastNightValue[1] = _currentValueTW[1];
-        }
-        else
-        {
-            _lastDayValue[0] = _currentValueTW[0];
-            _lastDayValue[1] = _currentValueTW[1];
-        }
-        logDebugP("Send DimValue to KO");
-        if (ww != 0 || cw != 0)
-        {
-            sendKoStateOnChange(TW_KoStatusOnOff, (bool)1, DPT_Switch, false);
-            sendKoStateOnChange(TW_KoStatusBrightness, _currentValueTW[0], DPT_Percent_U8, true);
-            sendKoStateOnChange(TW_KoStatusColorTemp, _currentValueTW[1], Dpt(7, 600), true);
-        }
-        else
-        {
-            sendKoStateOnChange(TW_KoStatusOnOff, (bool)0, DPT_Switch, false);
-            sendKoStateOnChange(TW_KoStatusBrightness, (uint8_t)0, DPT_Percent_U8, false);
-            sendKoStateOnChange(TW_KoStatusColorTemp, _currentValueTW[1], Dpt(7, 600), false);
-        }
-    }
-}
-
-uint16_t DimChannel_TW::prozToDim(uint8_t value, uint8_t curve)
-{
-    return proztable[value][curve];
-}
-
-uint32_t DimChannel_TW::getTimeWithPattern(uint16_t time, uint8_t base)
-{
-    if (base == TIMEBASE_HOURS && time > 1000)
-    {
-        time = 1000; // Begrenzung auf maximal 1000 Stunden
-    }
-
-    switch (base)
-    {
-    case TIMEBASE_TENTH_SECONDS:
-        return time * 100;
-    case TIMEBASE_SECONDS:
-        return time * 1000;
-    case TIMEBASE_MINUTES:
-        return time * 60000;
-    case TIMEBASE_HOURS:
-        return time * 3600000;
-    default:
-        return 0;
-    }
+    _isOn = _currentValueTW[0] > 0;
+    logDebugP("Send DimValue to KO - OnOff: %i B: %i K: %i", _isOn, _currentValueTW[0], _currentValueTW[1]);
+    sendKoStateOnChange(TW_KoStatusOnOff, _isOn, DPT_Switch, false);
+    sendKoStateOnChange(TW_KoStatusBrightness, _currentValueTW[0], DPT_Percent_U8, false);
+    sendKoStateOnChange(TW_KoStatusColorTemp, _currentValueTW[1], Dpt(7, 600), false);
 }
 
 //----------------------------- TW Dimmer Task ------------------------------
@@ -389,98 +302,134 @@ void DimChannel_TW::dimmerTask()
     _currentMillis = millis();
     switch (_currentTask)
     {
-    // stop all activities
-    case DIM_STOP:
-        _busy = false;
-        _currentTask = DIM_IDLE;
-        logDebugP("Dim Relativ - Stop");
+    case DimTaskTW::TW_DIM_STOP:
+        handleDimStop();
         break;
-    // increase value brightness
-    case DIM_B_UP:
-        if (_currentValueTW[0] < _valueMaxBrightness)
-        {
-            if (!_busy)
-            {
-                _delayRelative = (word)(m_durationrelativ / (_valueMaxBrightness - _currentValueTW[0]));
-            }
-            if (_currentMillis - _lastTaskExecution >= _delayRelative)
-            {
-                _currentValueTW[0]++;
-                _busy = true;
-                setDimValue();
-                _lastTaskExecution = millis();
-            }
-        }
-        else
-        {
-            _currentTask = DIM_STOP;
-        }
+    case DimTaskTW::TW_DIM_SOFT_ON:
+        handleDimSoftOn();
         break;
-    // decrease value brightness
-    case DIM_B_DOWN:
-        if (_currentValueTW[0] > _valueMinBrightness)
-        {
-            if (!_busy)
-            {
-                _delayRelative = (word)(m_durationrelativ / (_currentValueTW[0] - _valueMinBrightness));
-            }
-            if (_currentMillis - _lastTaskExecution >= _delayRelative)
-            {
-                _currentValueTW[0]--;
-                _busy = true;
-                setDimValue();
-                _lastTaskExecution = millis();
-            }
-        }
-        else
-        {
-            _currentTask = DIM_STOP;
-        }
+    case DimTaskTW::TW_DIM_SOFT_OFF:
+        handleDimSoftOff();
         break;
-    // increase value kelvin
-    case DIM_K_UP:
-        if (_currentValueTW[1] < m_colortempcw)
-        {
-            if (!_busy)
-            {
-                _delayRelative = (word)(m_durationrelativ / (m_colortempcw - _currentValueTW[1]));
-            }
-            if (_currentMillis - _lastTaskExecution >= _delayRelative)
-            {
-                _currentValueTW[1]++;
-                _busy = true;
-                setDimValue();
-                _lastTaskExecution = millis();
-            }
-        }
-        else
-        {
-            _currentTask = DIM_STOP;
-        }
+    case DimTaskTW::TW_DIM_B_SET:
+        handleDimSetBrightness();
         break;
-    // decrease value kelvin
-    case DIM_K_DOWN:
-        if (_currentValueTW[1] > m_colortempww)
-        {
-            if (!_busy)
-            {
-                _delayRelative = (word)(m_durationrelativ / (_currentValueTW[1] - m_colortempww));
-            }
-            if (_currentMillis - _lastTaskExecution >= _delayRelative)
-            {
-                _currentValueTW[1]--;
-                _busy = true;
-                setDimValue();
-                _lastTaskExecution = millis();
-            }
-        }
-        else
-        {
-            _currentTask = DIM_STOP;
-        }
+    case DimTaskTW::TW_DIM_K_SET:
+        handleDimSetColorTemp();
         break;
-    case DIM_IDLE:
+    case DimTaskTW::TW_DIM_B_UP:
+        handleDimBrightnessUp();
+        break;
+    case DimTaskTW::TW_DIM_B_DOWN:
+        handleDimBrightnessDown();
+        break;
+    case DimTaskTW::TW_DIM_K_UP:
+        handleDimColorTempUp();
+        break;
+    case DimTaskTW::TW_DIM_K_DOWN:
+        handleDimColorTempDown();
+        break;
+    case DimTaskTW::TW_DIM_IDLE:
     default:
         break;
     }
+}
+
+void DimChannel_TW::sendDimValue()
+{
+    /*
+    // Mired-basierte Methode
+    const float M_warm = 1000000.0f / m_colortempww;
+    const float M_cool = 1000000.0f / m_colortempcw;
+
+    uint8_t percentWW = 0;
+    uint8_t percentCW = 0;
+
+    if (_currentValueTW[1] <= m_colortempww) {
+        percentWW = _currentValueTW[0];
+        percentCW = 0;
+    } else if (_currentValueTW[1] >= m_colortempcw) {
+        percentWW = 0;
+        percentCW = _currentValueTW[0];
+    } else {
+        float M_desired = 1000000.0f / (float)_currentValueTW[1];
+        float r = (M_desired - M_cool) / (M_warm - M_cool);
+        percentWW = (int)round(r * _currentValueTW[0]);
+        percentCW = (int)round((1.0f - r) * _currentValueTW[0]);
+    }
+    */
+    // Lineare Interpolation
+    float t = (float)(_currentValueTW[1] - m_colortempww) / (m_colortempcw - m_colortempww);
+    if (t < 0) t = 0;
+    if (t > 1) t = 1;
+    uint8_t percentWW = (uint8_t)((1.0f - t) * _currentValueTW[0]);
+    uint8_t percentCW = (uint8_t)(t * _currentValueTW[0]);
+    // logDebugP("Send DimValue to HW - WW: %i CW: %i", percentWW, percentCW);
+    LEDModule::_instance->setHwChannelValue(m_hwchannel_ww, percentWW, m_curve);
+    LEDModule::_instance->setHwChannelValue(m_hwchannel_cw, percentCW, m_curve);
+}
+
+void DimChannel_TW::handleDimGeneric(uint16_t &currentValue, uint16_t targetValue, uint16_t minValue, uint16_t maxValue, bool isAbsolute)
+{
+    if (currentValue == targetValue) {
+        _currentTask = DimTaskTW::TW_DIM_STOP;
+        return;
+    }
+    if (!_busy) {
+        uint32_t duration = isAbsolute ? m_durationabsolut : m_durationrelativ;
+        uint16_t delta = abs((int)targetValue - (int)currentValue);
+        _time = (word)(duration / delta);
+    }
+    if (_currentMillis - _lastTaskExecution >= _time) {
+        if (currentValue < targetValue && currentValue < maxValue) {
+            currentValue++;
+        } else if (currentValue > targetValue && currentValue > minValue) {
+            currentValue--;
+        } else {
+            _currentTask = DimTaskTW::TW_DIM_STOP;
+            return;
+        }
+        _busy = true;
+        sendDimValue();
+        _lastTaskExecution = millis();
+    }
+}
+
+void DimChannel_TW::handleDimStop()
+{
+    _busy = false;
+    _currentTask = DimTaskTW::TW_DIM_IDLE;
+    updateDimValue();
+}
+
+void DimChannel_TW::handleDimSoftOn() {
+    handleDimGeneric(_currentValueTW[0], _newValueTW[0], _valueMinBrightness, _valueMaxBrightness, true);
+}
+
+void DimChannel_TW::handleDimSoftOff() {
+    handleDimGeneric(_currentValueTW[0], _valueMinBrightness, _valueMinBrightness, _valueMaxBrightness, true);
+}
+
+void DimChannel_TW::handleDimSetBrightness() {
+    handleDimGeneric(_currentValueTW[0], _newValueTW[0], _valueMinBrightness, _valueMaxBrightness, true);
+}
+
+void DimChannel_TW::handleDimSetColorTemp() {
+    handleDimGeneric(_currentValueTW[1], _newValueTW[1], m_colortempww, m_colortempcw, true);
+}
+
+void DimChannel_TW::handleDimBrightnessUp() {
+    handleDimGeneric(_currentValueTW[0], _valueMaxBrightness, _valueMinBrightness, _valueMaxBrightness, false);
+}
+
+void DimChannel_TW::handleDimBrightnessDown() {
+    handleDimGeneric(_currentValueTW[0], _valueMinBrightness, _valueMinBrightness, _valueMaxBrightness, false);
+}
+
+void DimChannel_TW::handleDimColorTempUp() {
+    handleDimGeneric(_currentValueTW[1], m_colortempcw, m_colortempww, m_colortempcw, false);
+}
+
+void DimChannel_TW::handleDimColorTempDown() {
+    handleDimGeneric(_currentValueTW[1], m_colortempww, m_colortempww, m_colortempcw, false);
 }

@@ -60,6 +60,7 @@
     #define MAXCHANNELSTW    3
     #define MAXCHANNELSRGB   2
     #define MAXCHANNELSCENE  5
+    #define MAXCHANNELSHCL   3
 #endif
 #if defined(BOARD_KNXLED_DK_12_V10) || defined(BOARD_KNXLED_DK_12_V12)
     #define MAXCHANNELSHW    12
@@ -67,12 +68,22 @@
     #define MAXCHANNELSTW    6
     #define MAXCHANNELSRGB   4
     #define MAXCHANNELSCENE  5
+    #define MAXCHANNELSHCL   3
 #endif
 
 const char HWPortsMapping[12] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'};   // Mapping of HW ports to letters
 
-#define KNX_UART_RX_PIN 1       // Use GPIO01 as KNX RX PIN
-#define KNX_UART_TX_PIN 0       // Use GPIO00 as KNX TX PIN
+enum ChannelType {
+    NONE,
+    EK,
+    TW,
+    RGB
+};
+
+#define KNX_UART_NUM 0          // Use UART0 for KNX communication
+
+#define KNX_UART_RX_PIN 1       // Use GPIO01 as KNX RX PIN - UART0 TX
+#define KNX_UART_TX_PIN 0       // Use GPIO00 as KNX TX PIN - UART0 RX
 #define SAVE_INTERRUPT_PIN 5    // Use GPIO05 as KNX SAVE PIN
 
 #define WIRE1_SDA 14                        // Use GP14 as I2C1 SDA

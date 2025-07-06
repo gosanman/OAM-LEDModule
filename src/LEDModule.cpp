@@ -4,7 +4,6 @@
 #include "DimChannel_TW.h"
 #include "DimChannel_RGB.h"
 #include "DimChannel.h"
-#include "HwChannel.h"
 
 LEDModule *LEDModule::_instance = nullptr;
 
@@ -47,10 +46,8 @@ void LEDModule::setup()
     }
 
     // Debug
-    logDebugP("Selected Device: %i", deviceSelect);
-    logDebugP("Operating Mode: %i", operatinModeSelect);
-    logDebugP("PWM frequenz: %i", pwmFreqSelect);
-    logDebugP("DayNight: %i", ParamAPP_DayNight);
+    logDebugP("CONFIG - Controller Device: %i - Operating Mode: %i - PWM freq: %i Hz - DayNight: %i", 
+              deviceSelect, operatinModeSelect, pwmFreqSelect, ParamAPP_DayNight);
 
     // Init I2C connection and Lib
     _pwm = Adafruit_PWMServoDriver(I2C_PCA9685_DEVICE_ADDRESS, Wire1);
@@ -275,6 +272,15 @@ void LEDModule::setup()
         break;
     }
 
+    // Set the default value for the HCL channels
+    for (int i = 0; i < MAXCHANNELSHCL; i++)
+    {
+        hclchannel[i] = new HclChannel();
+        hclchannel[i]->setup(i);
+    }
+
+// ▲ - Symbol for Program Button
+// ••• - Symbol for Func1 Button
 #ifdef FUNC1_BUTTON_PIN
     openknx.func1Button.onShortClick([=]
                                      { 
@@ -303,6 +309,20 @@ void LEDModule::loop()
     // do nothing when not parameterized
     if (!knx.configured())
         return;
+    // run loop of all HCL channels ervery minute
+    if (delayCheck(_timerCheckHclChannel, 60000))
+    {
+        for (int ch = 0; ch < MAXCHANNELSHCL; ch++)
+        {
+            hclchannel[ch]->loop(hclKelvin, hclBrightness);
+            logDebugP("Broadcast values from HCL%i", ch+1);
+            for (int i = 0; i < usedChannels; i++) 
+            {
+                channel[i]->setHcl(ch, hclKelvin, hclBrightness);
+            }
+        }    
+        _timerCheckHclChannel = millis();
+    }
 }
 
 void LEDModule::loop1()
@@ -330,7 +350,7 @@ void LEDModule::setHwChannelValue(byte channel, byte value, int curve)
 void LEDModule::processInputKo(GroupObject &ko)
 {
     uint16_t koNum = ko.asap();
-    if (koNum < EK_KoOffset) return;    // ignore KO smaler than EK_KoOffset
+    if (koNum < EK_KoOffset) return;        // ignore KO smaler than EK_KoOffset - no Common
     logDebugP("Received KO %i", koNum);
 
     // EK Dimmer Class
@@ -618,6 +638,17 @@ std::vector<uint8_t> LEDModule::getChannelHWPort(uint8_t channelIndex)
         return channel[channelIndex]->getHWPorts();
     }
     return {0, 0, 0};
+}
+
+void LEDModule::toggleChannelHWPort(uint8_t channel)
+{
+    if (channel < usedChannels)
+    {
+        uint16_t _state = _pwm.getPWM(channel);
+        logDebugP("  HW Port: %i - Value %i to %i", channel, _state, _state == 0 ? 4095 : 0);
+        // Set PWM to 4095 if current value is 0, otherwise set to 0
+        _pwm.setPin(channel, _state == 0 ? 4095 : 0);
+    }
 }
 
 uint8_t LEDModule::getChannelIndex(uint8_t channelIndex)

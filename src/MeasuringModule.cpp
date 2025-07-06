@@ -57,27 +57,12 @@ void MeasuringModule::setup()
     _ina226 = INA226_WE(&Wire1, I2C_INA226_DEVICE_ADDRESS);
     initI2cConnectionIna();
     
-    // Debug
-    logDebugP("Measuring send: %i", measurementSend);
-    logDebugP("Measuring interval: %i", measurementInterval);
-    logDebugP("Shunt value in Ohm: %.3f", shuntValue / 1000);
-    logDebugP("Max current in A: %.2f", maxcurrent);
-    logDebugP("Temp sensor present: %i", tempSensorPresent);
-    logDebugP("Monitor Temp: %i", checkTemp);
-    if (tempSensorPresent) {
-        if (checkTemp) { 
-            logDebugP("Max Temp: %.2f", overTemp); 
-        }
-    }    
-    logDebugP("Monitor Voltage: %i", checkVoltage);
-    if (checkVoltage) { 
-        logDebugP("Over Voltage: %.2f", overVoltage);
-        logDebugP("Under Voltage: %.2f", underVoltage); 
-    }   
-    logDebugP("Monitor Current: %i", checkCurrent);
-        if (checkCurrent) { 
-        logDebugP("Max Current: %.2f", overCurrent); 
-    }                 
+    // Debug - All in one line
+    logDebugP("Send: %i, Int: %i sec, Shunt: %.3f Ohm, MaxI: %.2f A, | TempSens: %i, | MonTemp: %i%s, | MonV: %i%s, | MonI: %i%s",
+              measurementSend, measurementInterval / 1000, shuntValue / 1000, maxcurrent, tempSensorPresent,
+              checkTemp, (tempSensorPresent && checkTemp) ? (", MaxT: " + String(overTemp)).c_str() : "",
+              checkVoltage, checkVoltage ? (", OverV: " + String(overVoltage) + ", UnderV: " + String(underVoltage)).c_str() : "",
+              checkCurrent, checkCurrent ? (", MaxI: " + String(overCurrent)).c_str() : "");
 }
 
 void MeasuringModule::setup1() {
@@ -109,9 +94,9 @@ void MeasuringModule::loop1() {
             _lastMeasurementSend = millis();
         }
     }
-    // check ina226 overflow every 30 seconds
-    if (delayCheck(_timerCheckOverflow, 30000)) {
-        getOverflowValue();
+    // check ina226 alerts every 10 seconds
+    if (delayCheck(_timerCheckOverflow, 10000)) {
+        getAlertValues();
         _timerCheckOverflow = millis();
     }  
     // check if I2C connection possible every 45 seconds, if not reset and init the connection
@@ -155,14 +140,14 @@ void MeasuringModule::sendSingleMeasurement()
     }
 }
 
-void MeasuringModule::getOverflowValue()
+void MeasuringModule::getAlertValues()
 {
     _ina226.readAndClearFlags();
-    if (_ina226.overflow) {
+    if (_ina226.limitAlert) {
         // to power off all LED channels reboot
-        logErrorP("Current over limit %.2f", current_A);
-        openknx.console.writeDiagenoseKo("OF");
-        //openknx.restart();
+        logErrorP("Current internal over limit %.2f A (Define: %.2f A)", current_A, (OVER_CURRENT / 1000.0));
+        openknx.console.writeDiagenoseKo("INT OVER CURRE");
+        openknx.restart();
     }
 }
 
@@ -313,6 +298,7 @@ bool MeasuringModule::initI2cConnectionIna()
     _ina226.setCorrectionFactor(0.95);                          // Correction factor = current delivered from calibrated equipment / current delivered by INA226
     _ina226.startSingleMeasurementNoWait();                     // Don't wait for conversion to complete     
     _ina226.enableAlertLatch();                                 // With enableAltertLatch(), the flag will have to be deleted with readAndClearFlags()
+    //_ina226.setAlertPinActiveHigh();                            // Set alert pin active high
 
     /* Set the alert type and the limit
       * Mode *        * Description *           * limit unit *
@@ -324,7 +310,7 @@ bool MeasuringModule::initI2cConnectionIna()
     BUS_UNDER      Bus Voltage under limit           V
     POWER_OVER     Power over limit                  mW
     */
-    _ina226.setAlertType(CURRENT_OVER, 4000);    // Testweise abgesichert auf 4.0 A
+    _ina226.setAlertType(CURRENT_OVER, OVER_CURRENT);    // Abgesichert mit 4 A = 4000 mA
     logInfoP("Init messurment I2C connection INA226 sucessful");
     doResetI2cIna = false;
     inaI2cConnection = true;

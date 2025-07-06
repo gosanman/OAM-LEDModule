@@ -4,7 +4,6 @@
 #include <OpenKNX.h>
 
 #include "LEDModule.h"
-#include "HwChannel.h"
 
 class LEDModule;
 class DimChannel : public OpenKNX::Channel
@@ -21,6 +20,8 @@ public:
     virtual void processInputKo(GroupObject &ko);
     virtual void task();
     virtual void setDayNight(bool value);
+    virtual uint8_t getChannelType();
+    virtual void setHcl(uint8_t channel, uint16_t kelvin, uint8_t brightness);
 
 private:
 };

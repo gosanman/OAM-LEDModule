@@ -4,6 +4,7 @@
 #include <Adafruit_PWMServoDriver.h>
 #include <OpenKNX.h>
 #include "hardware.h"
+#include "HclChannel.h"
 
 #include "LEDHelper.h"
 
@@ -34,6 +35,7 @@ public:
     uint8_t getUsedChannels();
     const std::string getChannelName(uint8_t channelIndex);
     std::vector<uint8_t> getChannelHWPort(uint8_t channelIndex);
+    void toggleChannelHWPort(uint8_t channelIndex);
     uint8_t getChannelIndex(uint8_t channelIndex);
 
     static LEDModule *instance();
@@ -50,7 +52,12 @@ private:
     unsigned long currentTime = 0;
     int8_t usedChannels = 0;
     uint32_t _timerCheckI2cConnection = 0;
+    uint32_t _timerCheckHclChannel = 0;
     bool doResetI2c = false;
+
+    // hcl channels
+    uint8_t hclBrightness = 0;
+    uint16_t hclKelvin = 0;
 
     // Status flags for I2C connection
     bool pcaI2cConnection = false;
@@ -72,6 +79,7 @@ private:
     DimChannel *channelEK[MAXCHANNELSHW];
     DimChannel *channelTW[MAXCHANNELSHW];
     DimChannel *channelRGB[MAXCHANNELSHW];
+    HclChannel *hclchannel[MAXCHANNELSHCL];
     HWChannel *hwchannels[MAXCHANNELSHW];
 };
 

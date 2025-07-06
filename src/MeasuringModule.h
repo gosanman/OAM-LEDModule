@@ -11,6 +11,8 @@
 #define TIMEBASE_HOURS          2
 #define TIMEBASE_TENTH_SECONDS  3
 
+#define OVER_CURRENT    4000 // 4A = 4000mA
+
 class MeasuringModule : public OpenKNX::Module
 {
 public:
@@ -90,7 +92,7 @@ private:
     bool checkI2cConnectionTemp();
     bool initI2cConnectionIna();
     bool checkI2cConnectionIna();
-    void getOverflowValue();
+    void getAlertValues();
     void checkAlarmDefinitions();
     void checkAndTriggerAlarm(bool condition, bool &triggeredFlag, uint16_t alarmKo, const String &messageDiagnoseKo);
 

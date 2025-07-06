@@ -27,7 +27,7 @@ void FrontPanelModule::setup()
     // do nothing when no front panel is present
     if (!ParamAPP_FrontPanelPresent)
         return;
-    
+
     // save default values from PA
     _menuTimeout = (ParamAPP_DisplayTimeOut * 1000);
 
@@ -41,7 +41,7 @@ void FrontPanelModule::setup()
     pinMode(IO4_PIN, INPUT_PULLUP); // Button select
 
     // Debug
-    logDebugP("Display Timeout: %i", _menuTimeout);
+    logDebugP("Timeout: %i sec", _menuTimeout / 1000);
 }
 
 void FrontPanelModule::setup1()
@@ -61,11 +61,11 @@ void FrontPanelModule::loop1()
     if (!digitalRead(IO1_PIN))
         handleButtonPress(BUTTON_BACK); // Button back pressed   - ■
     if (!digitalRead(IO2_PIN))
-        handleButtonPress(BUTTON_LEFT); // Button left pressed   - 🞀
+        handleButtonPress(BUTTON_LEFT); // Button left pressed   - ◀
     if (!digitalRead(IO3_PIN))
-        handleButtonPress(BUTTON_RIGHT); // Button right pressed  - 🞂
+        handleButtonPress(BUTTON_RIGHT); // Button right pressed  - ▶
     if (!digitalRead(IO4_PIN))
-        handleButtonPress(BUTTON_SELECT); // Button select pressed - 🞉
+        handleButtonPress(BUTTON_SELECT); // Button select pressed - ⬤
 
     // Show OpenKNX Logo and welcome message once at startup
     if (startupscreen == true)
@@ -73,7 +73,7 @@ void FrontPanelModule::loop1()
         startUpScreen();
     }
 
-    if (delayCheck(_lastScreenUpdate, 250) && _runScreenUpdate)
+    if (delayCheck(_lastScreenUpdate, SCREEN_UPDATE_INTERVAL) && _runScreenUpdate)
     {
         updateCurrentScreen();
         _lastScreenUpdate = millis();
@@ -85,7 +85,7 @@ void FrontPanelModule::showHelp()
     // do nothing when no front panel is present
     if (!ParamAPP_FrontPanelPresent)
         return;
-        
+
     openknx.logger.color(CONSOLE_HEADLINE_COLOR);
     openknx.logger.log("======================== FrontPanel Module ===================================");
     openknx.logger.color(0);
@@ -132,53 +132,68 @@ bool FrontPanelModule::processCommand(const std::string cmd, bool diagnoseKo)
     return false;
 }
 
+bool FrontPanelModule::isButtonDebounced(uint8_t button)
+{
+    uint32_t currentTime = millis();
+
+    if ((currentTime - _lastDebounceTime[button]) <= BUTTON_DEBOUNCE_TIME)
+    {
+        return false;
+    }
+
+    _lastDebounceTime[button] = currentTime;
+    _lastButtonPressed = currentTime;
+    _runScreenUpdate = true;
+
+    return true;
+}
+
 void FrontPanelModule::handleButtonPress(uint8_t button)
 {
-    if ((millis() - _lastDebounceTime[button]) > _debounceDelay)
+    if (!isButtonDebounced(button))
+        return;
+
+    switch (button)
     {
-        if (button == BUTTON_RIGHT)
+    case BUTTON_RIGHT:
+        if (currentscreen < SCREEN_MAX)
         {
-            if (currentscreen < 8)
-            {
-                currentscreen++;
-            }
-            else if (currentscreen == 20)
-            {
-                if (currentconnectionscreen < openknxLEDModule.getUsedChannels() - 1)
-                {
-                    currentconnectionscreen++;
-                }
-            }
+            currentscreen++;
         }
-        else if (button == BUTTON_LEFT)
+        else if (currentscreen == SUBSCREEN_CONNECTIONS &&
+                 currentconnectionscreen < openknxLEDModule.getUsedChannels() - 1)
         {
-            if (currentscreen > 1 && currentscreen != 20)
-            {
-                currentscreen--;
-            }
-            else if (currentscreen == 20)
-            {
-                if (currentconnectionscreen > 0)
-                {
-                    currentconnectionscreen--;
-                }
-            }
+            currentconnectionscreen++;
         }
-        else if (button == BUTTON_SELECT)
+        break;
+
+    case BUTTON_LEFT:
+        if (currentscreen > 1 && currentscreen != SUBSCREEN_CONNECTIONS)
         {
-            if (currentscreen == 1)
-            {
-                currentscreen = 20;
-                currentconnectionscreen = 0;
-            }
+            currentscreen--;
         }
-        else if (button == BUTTON_BACK)
+        else if (currentscreen == SUBSCREEN_CONNECTIONS && currentconnectionscreen > SCREEN_OFF)
         {
-            currentscreen = 1;
+            currentconnectionscreen--;
         }
-        _lastDebounceTime[button] = millis();
-        _lastButtonPressed = millis();
-        _runScreenUpdate = true;
+        break;
+
+    case BUTTON_SELECT:
+        if (currentscreen == SCREEN_INFORMATION)
+        {
+            currentscreen = SUBSCREEN_CONNECTIONS;
+            currentconnectionscreen = 0;
+        }
+        else if (currentscreen == SUBSCREEN_CONNECTIONS)
+        {
+            if (ParamAPP_FrontPanelControl)
+                toggleLedChannel(currentconnectionscreen);
+        }
+        break;
+
+    case BUTTON_BACK:
+        currentscreen = SCREEN_INFORMATION;
+        break;
     }
 }
 
@@ -188,10 +203,10 @@ void FrontPanelModule::updateCurrentScreen()
     { // Screen off
         _display.clearDisplay();
         _display.display();
-        currentscreen = 0;
+        currentscreen = SCREEN_OFF;
         _runScreenUpdate = false;
     }
-    else if (currentscreen == 1)
+    else if (currentscreen == SCREEN_INFORMATION)
     { // Screen information
         _display.clearDisplay();
         _display.drawBitmap(0, 0, bitmap_openknx, 32, 32, 1);
@@ -206,7 +221,7 @@ void FrontPanelModule::updateCurrentScreen()
         _display.print(openknx.info.humanIndividualAddress().c_str());
         _display.display();
     }
-    else if (currentscreen == 2)
+    else if (currentscreen == SCREEN_STATUS)
     { // Screen status
         _display.clearDisplay();
         _display.drawBitmap(0, 0, bitmap_list_status, 32, 32, 1);
@@ -223,7 +238,7 @@ void FrontPanelModule::updateCurrentScreen()
         _display.print(openknxLEDModule.getPcaI2cConnectionState() ? "OK.." : "Error");
         _display.display();
     }
-    else if (currentscreen == 3)
+    else if (currentscreen == SCREEN_MEASURING)
     { // Screen measuring values
         _display.clearDisplay();
         _display.drawBitmap(0, 0, bitmap_information_box_outline, 32, 32, 1);
@@ -243,7 +258,7 @@ void FrontPanelModule::updateCurrentScreen()
         _display.print(" W");
         _display.display();
     }
-    else if (currentscreen == 4)
+    else if (currentscreen == SCREEN_TEMPERATURE)
     { // Screen temperature values
         _display.clearDisplay();
         _display.drawBitmap(0, 0, bitmap_thermometer_lines, 32, 32, 1);
@@ -256,7 +271,7 @@ void FrontPanelModule::updateCurrentScreen()
         _display.print("C");
         _display.display();
     }
-    else if (currentscreen == 5)
+    else if (currentscreen == SCREEN_VOLTAGE)
     { // Screen voltage values
         _display.clearDisplay();
         _display.drawBitmap(0, 0, bitmap_lightning_bolt_outline, 32, 32, 1);
@@ -267,7 +282,7 @@ void FrontPanelModule::updateCurrentScreen()
         _display.print(" V");
         _display.display();
     }
-    else if (currentscreen == 6)
+    else if (currentscreen == SCREEN_CURRENT)
     { // Screen current values
         _display.clearDisplay();
         _display.drawBitmap(0, 0, bitmap_current_dc, 32, 32, 1);
@@ -278,7 +293,7 @@ void FrontPanelModule::updateCurrentScreen()
         _display.print(" A");
         _display.display();
     }
-    else if (currentscreen == 7)
+    else if (currentscreen == SCREEN_POWER)
     { // Screen power values
         _display.clearDisplay();
         _display.drawBitmap(0, 0, bitmap_gauge, 32, 32, 1);
@@ -289,7 +304,7 @@ void FrontPanelModule::updateCurrentScreen()
         _display.print(" W");
         _display.display();
     }
-    else if (currentscreen == 8)
+    else if (currentscreen == SCREEN_ENERGY)
     { // Screen energy values
         _display.clearDisplay();
         _display.drawBitmap(0, 0, bitmap_meter_electric_outline, 32, 32, 1);
@@ -300,7 +315,41 @@ void FrontPanelModule::updateCurrentScreen()
         _display.print(" Wh");
         _display.display();
     }
-    else if (currentscreen == 20)
+    else if (currentscreen == SCREEN_DATETIME)
+    { // Screen datetime values
+        _display.clearDisplay();
+        _display.drawBitmap(0, 0, bitmap_clock, 32, 32, 1);
+        _display.setTextSize(1);
+        _display.setTextColor(SSD1306_WHITE);   
+    
+        if (openknx.time.isValid())
+        {
+            auto localTime = openknx.time.getLocalTime();
+            char bufferdate[11] = {0};
+            char buffertime[6] = {0};
+            char bufferup[32] = {0};
+            sprintf(bufferdate, "%02d.%02d.%04d", (int)localTime.day, (int)localTime.month, (int)localTime.year);
+            sprintf(buffertime, "%02d:%02d", (int)localTime.hour, (int)localTime.minute);
+            std::string uptimeStr = openknx.logger.buildUptime();
+            sprintf(bufferup, "%s", uptimeStr.c_str());
+            _display.setCursor(38, 0);
+            _display.print("T: ");
+            _display.print(buffertime);
+            _display.setCursor(38, 10);
+            _display.print("D: ");
+            _display.print(bufferdate);
+            _display.setCursor(38, 20);
+            _display.print("UP: ");
+            _display.print(bufferup);
+        }
+        else
+        {
+            _display.setCursor(38, 12);
+            _display.print("No valid time");
+        }
+        _display.display();
+    }
+    else if (currentscreen == SUBSCREEN_CONNECTIONS)
     { // Screen information
         showConnectionScreen(currentconnectionscreen);
     }
@@ -332,7 +381,7 @@ void FrontPanelModule::startUpScreen()
 void FrontPanelModule::showConnectionScreen(uint8_t index)
 {
     _display.clearDisplay();
-    _display.drawBitmap(0, 0, bitmap_progress_wrench, 32, 32, 1);
+    _display.drawBitmap(0, 0, lightbulb_on_outline, 32, 32, 1);
     _display.setTextSize(1);
     _display.setTextColor(SSD1306_WHITE);
     _display.setCursor(38, 5);
@@ -382,6 +431,16 @@ void FrontPanelModule::showConnectionScreen(uint8_t index)
         _display.print(HWPortsMapping[ports[2]]);
     }
     _display.display();
+}
+
+void FrontPanelModule::toggleLedChannel(uint8_t index)
+{
+    logDebugP("Toggle Channel: %i", index);
+    std::vector<uint8_t> ports = openknxLEDModule.getChannelHWPort(index);
+    for (uint8_t i = 0; i < ports.size(); i++)
+    {
+        openknxLEDModule.toggleChannelHWPort(ports[i]);
+    }
 }
 
 bool FrontPanelModule::initI2cConnectionLcd()

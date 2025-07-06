@@ -3,12 +3,20 @@
 
 #include "DimChannel.h"
 #include "LEDModule.h"
-#include "HwChannel.h"
 
-#define TIMEBASE_SECONDS        0
-#define TIMEBASE_MINUTES        1
-#define TIMEBASE_HOURS          2
-#define TIMEBASE_TENTH_SECONDS  3
+// dim actions
+enum DimTaskEK {
+    EK_DIM_IDLE,
+    EK_DIM_STOP,
+    EK_DIM_SOFT_ON,
+    EK_DIM_SOFT_OFF,
+    EK_DIM_B_SET,
+    EK_DIM_K_SET,
+    EK_DIM_B_UP,
+    EK_DIM_B_DOWN,
+    EK_DIM_K_UP,
+    EK_DIM_K_DOWN
+};
 
 // scene actions
 #define SC_EK_None              0
@@ -32,6 +40,8 @@ public:
     void setDayNight(bool value) override;
     std::vector<uint8_t> getHWPorts() override;
     uint8_t getChannelIndex() override;
+    uint8_t getChannelType() override;
+    void setHcl(uint8_t channel, uint16_t kelvin, uint8_t brightness) override;
 
 private:
     uint8_t m_hwchannel;
@@ -46,12 +56,11 @@ private:
 
     uint8_t _index;
 
+    uint8_t _newValueEK = 255;
     uint8_t _currentValueEK = 0;
     uint8_t _lastDayValue = 255;
-    uint8_t _lastNightValue = 25;
-
-    uint32_t _currentUpdateRun = 0;
-    uint32_t _lastUpdatekRun = 0;
+    uint8_t _lastNightValue = 100;
+    uint16_t _currentHclValue[2] = {0, 0};     // 0 = Brightness, 1 = Kelvin
 
     bool isNight = false;
 
@@ -60,14 +69,32 @@ private:
     void koHandleDimmRel(GroupObject &ko);
     void koHandleScene(GroupObject &ko);
 
+    void switchOnHelper();
+    void switchOffHelper();
+
     uint16_t calcKoNumber(int koNum);
     void sendKoStateOnChange(uint16_t koNr, const KNXValue &value, const Dpt &type, bool alwayssend);
     void sendDimValue();
     void updateDimValue();
 
-    uint32_t getTimeWithPattern(uint16_t time, uint8_t base);
+   // dimmer task
+    void dimmerTask();
+    void handleDimGeneric(uint8_t& currentValue, uint8_t targetValue, uint8_t minValue, uint8_t maxValue, bool isAbsolute);
+    bool _busy = false;
+    uint8_t _valueMinBrightness = 0;
+    uint8_t _valueMaxBrightness = 255;
+    uint8_t _currentTask = DimTaskEK::EK_DIM_IDLE;
+    uint32_t _currentMillis = 0;
+    uint32_t _lastTaskExecution;
+    uint32_t _time;
+    bool _isOn = false;         // true = on, false = off
 
-    HWChannel *hwchannels[MAXCHANNELSHW];
+    void handleDimStop();
+    void handleDimSoftOn();
+    void handleDimSoftOff();
+    void handleDimSetBrightness();
+    void handleDimBrightnessUp();
+    void handleDimBrightnessDown();
 };
 
 #endif

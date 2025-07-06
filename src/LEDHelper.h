@@ -1,28 +1,30 @@
 #pragma once
 
 #include <Arduino.h>
+#include "OpenKNX.h"
 
-/*
+#define TIMEBASE_SECONDS        0
+#define TIMEBASE_MINUTES        1
+#define TIMEBASE_HOURS          2
+#define TIMEBASE_TENTH_SECONDS  3
 
-void setDimmingCurves();
+class LEDHelper
+{
+public:
+    static void hsvToRGB(uint16_t in_h, uint16_t in_s, uint16_t in_v, uint8_t &out_r, uint8_t &out_g, uint8_t &out_b);
+    static void rgbToHSV(uint8_t in_r, uint8_t in_g, uint8_t in_b, uint16_t &out_h, uint16_t &out_s, uint16_t &out_v);
+    static void kelvinToRGB(uint16_t kelvin, uint8_t brightness, uint8_t &out_r, uint8_t &out_g, uint8_t &out_b);
+    static void adjustRGBBrightness(uint8_t r, uint8_t g, uint8_t b, uint8_t brightness, uint8_t &out_r, uint8_t &out_g, uint8_t &out_b);
+    static void calcGammaTable(float gamma);
+    static uint32_t getTimeWithPattern(uint16_t time, uint8_t base);
+private:
+    static double threeway_max(double a, double b, double c);
+    static double threeway_min(double a, double b, double c);
+};
 
-// calc RGBW curve
-uint8_t firstOnValue = 1;
-uint8_t maxR = 255; // to match the same brightness on different colors
-uint8_t maxG = 255; // reduce brightnes of some colors
-uint8_t maxB = 255; // also usefull to make not "to blueisch" white
-uint8_t maxW = 255; // recomended values: R:255,G:176,B:240,W:255
-uint8_t whiteType = 0; // if RGBW used, 0=warm, 1=neutral, 2=cold
-float gammaCorrection = 1.0;
-
-byte curveR[256];
-byte curveG[256];
-byte curveB[256];
-byte curveW[256];
-// calc RGB curve
-
-*/
-
+// gamma 2.8 lookup table used for color correction
+extern uint8_t gammaT[256];
+  
 // all dim curves with 12 bit resolution 0(A) = linear, 1(B) = gamma 2.8, 2(C) = gamma 3.8, 3(D) = CIE, 4(E) = DALI
 const uint16_t curves[256][5] PROGMEM = {
 {0, 0, 0, 0, 0},

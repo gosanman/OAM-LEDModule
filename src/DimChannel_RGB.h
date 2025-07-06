@@ -2,14 +2,23 @@
 #define DIMCHANNEL_RGB_H
 
 #include "DimChannel.h"
-
 #include "LEDModule.h"
-#include "HwChannel.h"
 
-#define TIMEBASE_SECONDS        0
-#define TIMEBASE_MINUTES        1
-#define TIMEBASE_HOURS          2
-#define TIMEBASE_TENTH_SECONDS  3
+// dim actions
+enum DimTaskRGB {
+    RGB_DIM_IDLE,
+    RGB_DIM_STOP,
+    RGB_DIM_SOFT_ON,
+    RGB_DIM_SOFT_OFF,
+    RGB_DIM_RGB_SET,
+    RGB_DIM_RGB_REL,
+    RGB_DIM_H_UP,
+    RGB_DIM_H_DOWN,
+    RGB_DIM_S_UP,
+    RGB_DIM_S_DOWN,
+    RGB_DIM_V_UP,
+    RGB_DIM_V_DOWN
+};
 
 // scene actions
 #define SC_RGB_None             0
@@ -30,9 +39,11 @@ public:
     void processInputKo(GroupObject &ko) override;
     void task() override;
 
-    void setDayNight(bool isNight);
+    void setDayNight(bool isNight) override;
     std::vector<uint8_t> getHWPorts() override;
     uint8_t getChannelIndex() override;
+    uint8_t getChannelType() override;
+    void setHcl(uint8_t channel, uint16_t kelvin, uint8_t brightness) override;
 
 private:
     uint8_t m_hwchannel_r;
@@ -50,13 +61,13 @@ private:
 
     uint8_t _index;
 
+    uint8_t _newValueRGB[3];                      // 0 = Red, 1 = Green, 2 = Blue
     uint8_t _currentValueRGB[3];                  // 0 = Red, 1 = Green, 2 = Blue
     uint16_t _currentValueHSV[3];                 // 0 = h, 1 = s, 2 = v
     uint8_t _lastDayValue[3] = {125, 125, 125};   // 0 = Red, 1 = Green, 2 = Blue
     uint8_t _lastNightValue[3] = {125, 125, 125}; // 0 = Red, 1 = Green, 2 = Blue
-
-    uint32_t _currentUpdateRun = 0;
-    uint32_t _lastUpdatekRun = 0;
+    uint8_t _valueOff[3] = {0, 0, 0};             // 0 = Red, 1 = Green, 2 = Blue
+    uint16_t _currentHclValue[2] = {0, 0};        // 0 = Brightness, 1 = Kelvin
 
     bool isNight = false;
 
@@ -65,30 +76,41 @@ private:
     void koHandleDimmAbsColorHSV(GroupObject &ko);
     void koHandleDimmAbsRGB(GroupObject &ko, uint8_t index);
     void koHandleDimmAbsHSV(GroupObject &ko, uint8_t index);
-
     void koHandleDimmRelH(GroupObject &ko);
     void koHandleDimmRelS(GroupObject &ko);
     void koHandleDimmRelV(GroupObject &ko);
-    void koHandleDimmRelRGB(GroupObject &ko, uint8_t hwchannel, uint8_t index);
+    void koHandleDimmRelRGB(GroupObject &ko, uint8_t index);
     void koHandleScene(GroupObject &ko);
+
+    void switchOnHelper();
+    void switchOffHelper();
 
     uint16_t calcKoNumber(int koNum);
     void sendKoStateOnChange(uint16_t koNr, const KNXValue &value, const Dpt &type, bool alwayssend);
-    void setCurrentValueRGB(uint8_t *value);
+    void setNewValueRGB(uint8_t *value);
     void sendDimValue();
     void updateDimValue();
 
-    uint32_t getTimeWithPattern(uint16_t time, uint8_t base);
+    // dimmer task
+    void dimmerTask();
+    void handleDimGeneric(uint8_t *currentValues, uint8_t *targetValues, uint8_t minValue, uint8_t maxValue, bool isAbsolute);
+    bool _busy = false;
+    uint8_t _valueMin = 0;
+    uint8_t _valueMax = 255;
+    uint8_t _currentTask = DimTaskRGB::RGB_DIM_IDLE;
+    uint32_t _currentMillis = 0;
+    uint32_t _lastTaskExecution;
+    uint32_t _time;
+    float _dimIncrement[3] = {0};
+    float _dimAcc[3] = {0};
+    bool _dimmingInit = false;
+    bool _isOn = false;         // true = on, false = off
 
-    static void hsvToRGB(uint8_t in_h, uint8_t in_s, uint8_t in_v, uint8_t &out_r, uint8_t &out_g, uint8_t &out_b);
-    static void rgbToHSV(uint8_t in_r, uint8_t in_g, uint8_t in_b, uint16_t &out_h, uint16_t &out_s, uint16_t &out_v);
-    static double threeway_max(double a, double b, double c);
-    static double threeway_min(double a, double b, double c);
-
-    static uint8_t gammaT[];
-    void calcGammaTable(float gamma);
-
-    HWChannel *hwchannels[MAXCHANNELSHW];
+    void handleDimStop();
+    void handleDimSoftOn();
+    void handleDimSoftOff();
+    void handleDimSetRGB();
+    void handleDimRelRGB();
 };
 
 #endif
