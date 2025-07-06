@@ -100,7 +100,8 @@ void DimChannel_TW::koHandleDimmAbsColorTemp(GroupObject &ko)
     _newValueTW[1] = ko.value(Dpt(7, 600));
     if (_currentValueTW[0] == 0) {
         logDebugP("Dim Absolute Kelvin - Kelvin: %i - Brightness: %i (Brightness is 0, we only save Kelvin)", _newValueTW[1], _currentValueTW[0]);
-        _currentValueTW[1] = _newValueTW[1]; // Save Kelvin but do not change brightness
+        _currentValueTW[1] = _newValueTW[1]; // Save kelvin but do not change brightness
+        (isNight ? _lastNightValue[1] : _lastDayValue[1]) = _newValueTW[1]; // Save kelvin for later use
         updateDimValue(); // Update KO state for Kelvin
     } else {
         logDebugP("Dim Absolute Kelvin - Kelvin: %i - Brightness: %i", _newValueTW[1], _currentValueTW[0]);

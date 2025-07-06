@@ -26,10 +26,10 @@
 //--------------------Allgemein---------------------------
 #define MAIN_OpenKnxId 0xA8
 #define MAIN_ApplicationNumber 0x01
-#define MAIN_ApplicationVersion 0x06
+#define MAIN_ApplicationVersion 0x03
 #define MAIN_OrderNumber "OpenKnxLEDDimmer"
-#define MAIN_ParameterSize 733
-#define MAIN_MaxKoNumber 684
+#define MAIN_ParameterSize 797
+#define MAIN_MaxKoNumber 679
 
 
 #define APP_ControllerType		0x0000
@@ -151,24 +151,24 @@
 
 //-----Module specific starts
 #define BASE_Share_ParamBlockOffset 19
-#define BASE_Share_ParamBlockSize 45
-#define EK_ParamBlockOffset 64
+#define BASE_Share_ParamBlockSize 109
+#define EK_ParamBlockOffset 128
 #define EK_ParamBlockSize 21
-#define TW_ParamBlockOffset 316
+#define TW_ParamBlockOffset 380
 #define TW_ParamBlockSize 39
-#define RGB_ParamBlockOffset 550
+#define RGB_ParamBlockOffset 614
 #define RGB_ParamBlockSize 39
-#define HCL_ParamBlockOffset 706
+#define HCL_ParamBlockOffset 770
 #define HCL_ParamBlockSize 9
 #define BASE_Share_KoOffset 49
-#define BASE_Share_KoBlockSize 13
-#define EK_KoOffset 62
+#define BASE_Share_KoBlockSize 8
+#define EK_KoOffset 57
 #define EK_KoBlockSize 28
-#define TW_KoOffset 398
+#define TW_KoOffset 393
 #define TW_KoBlockSize 28
-#define RGB_KoOffset 566
+#define RGB_KoOffset 561
 #define RGB_KoBlockSize 28
-#define HCL_KoOffset 678
+#define HCL_KoOffset 673
 #define HCL_KoBlockSize 2
 
 //-----Module: Common Share
@@ -216,55 +216,58 @@
 #define BASE_SummertimeKO_Mask	0x0003
 // UnionOffset: 4, ParaOffset: 0, BitOffset: 6, Size: 2 Bit, Text: Sommerzeit ermitteln durch
 #define ParamBASE_SummertimeKO ((uint32_t)((knx.paramByte((BASE_Share_ParamBlockOffset + BASE_SummertimeKO))) & BASE_SummertimeKO_Mask))
-#define BASE_Latitude		0x0005
-// UnionOffset: 5, ParaOffset: 0, Size: 16 Bit (2 Byte), Text: Breitengrad
+#define BASE_TimezoneCustom		0x0005
+// UnionOffset: 4, ParaOffset: 1, Size: 504 Bit (63 Byte), Text: POSIX TZ-String
+#define ParamBASE_TimezoneCustom knx.paramData((BASE_Share_ParamBlockOffset + BASE_TimezoneCustom))
+#define BASE_Latitude		0x0045
+// UnionOffset: 69, ParaOffset: 0, Size: 16 Bit (2 Byte), Text: Breitengrad
 #define ParamBASE_Latitude knx.paramFloat((BASE_Share_ParamBlockOffset + BASE_Latitude), Float_Enc_IEEE754Single)
-#define BASE_Longitude		0x0009
-// UnionOffset: 5, ParaOffset: 4, Size: 16 Bit (2 Byte), Text: Längengrad
+#define BASE_Longitude		0x0049
+// UnionOffset: 69, ParaOffset: 4, Size: 16 Bit (2 Byte), Text: Längengrad
 #define ParamBASE_Longitude knx.paramFloat((BASE_Share_ParamBlockOffset + BASE_Longitude), Float_Enc_IEEE754Single)
-#define BASE_Diagnose		0x000D
-// UnionOffset: 13, ParaOffset: 0, Size: 1 Bit, Text: Diagnoseobjekt anzeigen
+#define BASE_Diagnose		0x004D
+// UnionOffset: 77, ParaOffset: 0, Size: 1 Bit, Text: Diagnoseobjekt anzeigen
 #define ParamBASE_Diagnose knx.paramBit((BASE_Share_ParamBlockOffset + BASE_Diagnose), 0)
-#define BASE_Watchdog		0x000D
-// UnionOffset: 13, ParaOffset: 0, BitOffset: 1, Size: 1 Bit, Text: Watchdog aktivieren
+#define BASE_Watchdog		0x004D
+// UnionOffset: 77, ParaOffset: 0, BitOffset: 1, Size: 1 Bit, Text: Watchdog aktivieren
 #define ParamBASE_Watchdog knx.paramBit((BASE_Share_ParamBlockOffset + BASE_Watchdog), 1)
-#define BASE_ReadTimeDate		0x000D
-// UnionOffset: 13, ParaOffset: 0, BitOffset: 2, Size: 1 Bit, Text: Bei Neustart vom Bus lesen
+#define BASE_ReadTimeDate		0x004D
+// UnionOffset: 77, ParaOffset: 0, BitOffset: 2, Size: 1 Bit, Text: Bei Neustart vom Bus lesen
 #define ParamBASE_ReadTimeDate knx.paramBit((BASE_Share_ParamBlockOffset + BASE_ReadTimeDate), 2)
-#define BASE_HeartbeatExtended		0x000D
-// UnionOffset: 13, ParaOffset: 0, BitOffset: 3, Size: 1 Bit, Text: Erweitertes "In Betrieb"
+#define BASE_HeartbeatExtended		0x004D
+// UnionOffset: 77, ParaOffset: 0, BitOffset: 3, Size: 1 Bit, Text: Erweitertes "In Betrieb"
 #define ParamBASE_HeartbeatExtended knx.paramBit((BASE_Share_ParamBlockOffset + BASE_HeartbeatExtended), 3)
-#define BASE_InternalTime		0x000D
-// UnionOffset: 13, ParaOffset: 0, BitOffset: 4, Size: 1 Bit, Text: InternalTime
+#define BASE_InternalTime		0x004D
+// UnionOffset: 77, ParaOffset: 0, BitOffset: 4, Size: 1 Bit, Text: InternalTime
 #define ParamBASE_InternalTime knx.paramBit((BASE_Share_ParamBlockOffset + BASE_InternalTime), 4)
-#define BASE_ManualSave		0x000D
+#define BASE_ManualSave		0x004D
 #define BASE_ManualSave_Mask	0x0007
-// UnionOffset: 13, ParaOffset: 0, BitOffset: 5, Size: 3 Bit, Text: Manuelles speichern
+// UnionOffset: 77, ParaOffset: 0, BitOffset: 5, Size: 3 Bit, Text: Manuelles speichern
 #define ParamBASE_ManualSave ((uint32_t)((knx.paramByte((BASE_Share_ParamBlockOffset + BASE_ManualSave))) & BASE_ManualSave_Mask))
-#define BASE_PeriodicSave		0x000E
-// UnionOffset: 13, ParaOffset: 1, Size: 8 Bit (1 Byte), Text: Zyklisches speichern
+#define BASE_PeriodicSave		0x004E
+// UnionOffset: 77, ParaOffset: 1, Size: 8 Bit (1 Byte), Text: Zyklisches speichern
 #define ParamBASE_PeriodicSave ((uint32_t)((knx.paramByte((BASE_Share_ParamBlockOffset + BASE_PeriodicSave)))))
 //!< Number: 1, Text: In Betrieb, Function: Zyklisch
 #define BASE_KoHeartbeat 1 + BASE_Share_KoOffset
 #define KoBASE_Heartbeat knx.getGroupObject(BASE_KoHeartbeat)
-//!< Number: 2, Text: Uhrzeit/Datum, Function: Eingang
+//!< Number: 2, Text: Uhrzeit, Function: Eingang
 #define BASE_KoTime 2 + BASE_Share_KoOffset
 #define KoBASE_Time knx.getGroupObject(BASE_KoTime)
 //!< Number: 3, Text: Datum, Function: Eingang
 #define BASE_KoDate 3 + BASE_Share_KoOffset
 #define KoBASE_Date knx.getGroupObject(BASE_KoDate)
+//!< Number: 4, Text: Uhrzeit/Datum, Function: Eingang
+#define BASE_KoDateTime 4 + BASE_Share_KoOffset
+#define KoBASE_DateTime knx.getGroupObject(BASE_KoDateTime)
+//!< Number: 5, Text: Sommerzeit aktiv, Function: Eingang
+#define BASE_KoIsSummertime 5 + BASE_Share_KoOffset
+#define KoBASE_IsSummertime knx.getGroupObject(BASE_KoIsSummertime)
+//!< Number: 6, Text: Speichern, Function: Eingang
+#define BASE_KoManualSave 6 + BASE_Share_KoOffset
+#define KoBASE_ManualSave knx.getGroupObject(BASE_KoManualSave)
 //!< Number: 7, Text: Diagnose, Function: Diagnoseobjekt
 #define BASE_KoDiagnose 7 + BASE_Share_KoOffset
 #define KoBASE_Diagnose knx.getGroupObject(BASE_KoDiagnose)
-//!< Number: 10, Text: Sommerzeit aktiv, Function: Eingang
-#define BASE_KoIsSummertime 10 + BASE_Share_KoOffset
-#define KoBASE_IsSummertime knx.getGroupObject(BASE_KoIsSummertime)
-//!< Number: 11, Text: Speichern, Function: Eingang
-#define BASE_KoManualSave 11 + BASE_Share_KoOffset
-#define KoBASE_ManualSave knx.getGroupObject(BASE_KoManualSave)
-//!< Number: 12, Text: Uhrzeit/Datum, Function: Ausgang
-#define BASE_KoDateTime 12 + BASE_Share_KoOffset
-#define KoBASE_DateTime knx.getGroupObject(BASE_KoDateTime)
 
 //-----Module: EK
 #define EK_UseOnValue		0x0000
