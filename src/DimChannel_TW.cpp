@@ -365,8 +365,20 @@ void DimChannel_TW::sendDimValue()
     uint8_t percentWW = (uint8_t)((1.0f - t) * _currentValueTW[0]);
     uint8_t percentCW = (uint8_t)(t * _currentValueTW[0]);
     // logDebugP("Send DimValue to HW - WW: %i CW: %i", percentWW, percentCW);
-    LEDModule::_instance->setHwChannelValue(m_hwchannel_ww, percentWW, m_curve);
-    LEDModule::_instance->setHwChannelValue(m_hwchannel_cw, percentCW, m_curve);
+    //LEDModule::_instance->setHwChannelValue(m_hwchannel_ww, percentWW, m_curve);
+    //LEDModule::_instance->setHwChannelValue(m_hwchannel_cw, percentCW, m_curve);
+
+    // for TW LEDs we use a special PWM dimming method to shift the PWM frequency
+    // this should reduce the visible flickering of the LEDs and current peaks
+    uint16_t ticksWW = curves[percentWW][m_curve];
+    uint16_t ticksCW = curves[percentCW][m_curve];
+    uint16_t startWW = 0;
+    uint16_t endWW = startWW + ticksWW;
+    uint16_t startCW = endWW % 4096;
+    uint16_t endCW   = (startCW + ticksCW) % 4096;
+
+    LEDModule::_instance->setHwChannelValuePWM(m_hwchannel_ww, startWW, endWW ,m_curve);
+    LEDModule::_instance->setHwChannelValuePWM(m_hwchannel_cw, startCW, endCW, m_curve);
 }
 
 void DimChannel_TW::handleDimGeneric(uint16_t &currentValue, uint16_t targetValue, uint16_t minValue, uint16_t maxValue, bool isAbsolute)
