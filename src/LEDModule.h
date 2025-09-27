@@ -42,6 +42,7 @@ public:
     static LEDModule *_instance;
 
     void setHwChannelValue(byte channel, byte value, int curve);
+    void setHwChannelValuePWM(byte channel, word start, word end, int curve);
     bool processFunctionProperty(uint8_t objectIndex, uint8_t propertyId, uint8_t length, uint8_t *data, uint8_t *resultData, uint8_t &resultLength) override;
 
 private:

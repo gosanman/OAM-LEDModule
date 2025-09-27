@@ -22,7 +22,7 @@ void MeasuringModule::setup()
 {
     // save default values from PA
     measurementSend = ParamAPP_SendMeasuredValues;
-    measurementInterval = getTimeWithPattern(ParamAPP_MeasurementIntervalTime, ParamAPP_MeasurementIntervalBase);
+    measurementInterval = LEDHelper::getTimeWithPattern(ParamAPP_MeasurementIntervalTime, ParamAPP_MeasurementIntervalBase);
     tempSensorPresent = ParamAPP_TempSensorPresent;
     shuntValue = ParamAPP_ShuntValue;
     maxcurrent = (shuntValue == 10) ? 8.0 : 16.0; // 0,010Ω = max.  8A, 0,005Ω = max. 16A
@@ -386,21 +386,6 @@ uint16_t MeasuringModule::flashSize()
 {
     // Version + Data (Channel * Inputs * (Dpt + Value))
     return 1 + 8;
-}
-
-uint32_t MeasuringModule::getTimeWithPattern(uint16_t time, uint8_t base) 
-{
-    if (base == TIMEBASE_HOURS && time > 1000) {
-        time = 1000; // Begrenzung auf maximal 1000 Stunden
-    }
-
-    switch (base) {
-        case TIMEBASE_TENTH_SECONDS: return time * 100;
-        case TIMEBASE_SECONDS:       return time * 1000;
-        case TIMEBASE_MINUTES:       return time * 60000;
-        case TIMEBASE_HOURS:         return time * 3600000;
-        default:                     return 0;
-    }
 }
 
 MeasuringModule openknxMeasuringModule;

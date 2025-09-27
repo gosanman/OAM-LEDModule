@@ -80,6 +80,8 @@ enum ChannelType {
     RGB
 };
 
+#define FIRMWARE_NAME "LEDModule"
+
 #define KNX_UART_NUM 0          // Use UART0 for KNX communication
 
 #define KNX_UART_RX_PIN 1       // Use GPIO01 as KNX RX PIN - UART0 TX

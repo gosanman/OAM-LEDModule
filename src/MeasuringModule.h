@@ -6,6 +6,8 @@
 #include <OpenKNX.h>
 #include "hardware.h"
 
+#include "LEDHelper.h"
+
 #define TIMEBASE_SECONDS        0
 #define TIMEBASE_MINUTES        1
 #define TIMEBASE_HOURS          2

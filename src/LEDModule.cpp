@@ -61,11 +61,11 @@ void LEDModule::setup()
 
     // Create dimmer groups based on the parameter PT_OperationMode
     // Pin 0 = A    Pin  6 = G
-    // Pin 1 = B    Pin  7 = H
+    // Pin 1 = B    Pin  7 = H            DK-12x24V               DK-12x24V               DK-06x24V            DK-06x24V
     // Pin 2 = C    Pin  8 = I      _____________________   _______________________
-    // Pin 3 = D    Pin  9 = J      | V+ V+ G H I J K L |   | V+ V+ 6 7 8 9 10 11 |   __________________
-    // Pin 4 = E    Pin 10 = K      | V+ V+ A B C D E F |   | V+ V+ 0 1 2 3  4  5 |   | V+ 0 1 2 3 4 5 |
-    // Pin 5 = F    Pin 11 = L      =====================   =======================   ==================
+    // Pin 3 = D    Pin  9 = J      | V+ V+ G H I J K L |   | V+ V+ 6 7 8 9 10 11 |   __________________   __________________
+    // Pin 4 = E    Pin 10 = K      | V+ V+ A B C D E F |   | V+ V+ 0 1 2 3  4  5 |   | V+ A B C D E F |   | V+ 0 1 2 3 4 5 |
+    // Pin 5 = F    Pin 11 = L      =====================   =======================   ==================   ==================
 
     switch (operatinModeSelect)
     {
@@ -345,6 +345,10 @@ void LEDModule::loop1()
 void LEDModule::setHwChannelValue(byte channel, byte value, int curve)
 {
     _pwm.setPin(channel, curves[value][curve]);
+}
+void LEDModule::setHwChannelValuePWM(byte channel, word start, word end, int curve)
+{
+    _pwm.setPWM(channel, start, end);
 }
 
 void LEDModule::processInputKo(GroupObject &ko)
