@@ -8,6 +8,10 @@
 
 #include "LEDHelper.h"
 
+// Timing parameters
+#define LED_CHECK_I2C           10000   // ms
+#define HCL_TIMER_BROADCAST     60000   // ms
+
 class DimChannel_EK;
 class DimChannel_TW;
 class DimChannel_RGB;

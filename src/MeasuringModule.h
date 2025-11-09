@@ -13,7 +13,12 @@
 #define TIMEBASE_HOURS          2
 #define TIMEBASE_TENTH_SECONDS  3
 
-#define OVER_CURRENT    4000 // 4A = 4000mA
+#define OVER_CURRENT    6000 // 6A = 6000mA
+
+// Timing parameters
+#define MEASUREMENT_ALARM_CHECK     5000    // ms
+#define MEASUREMENT_CHECK_I2C       10000   // ms
+#define MEASUREMENT_INA_OVERFLOW    6000    // ms
 
 class MeasuringModule : public OpenKNX::Module
 {

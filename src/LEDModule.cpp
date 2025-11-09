@@ -309,8 +309,8 @@ void LEDModule::loop()
     // do nothing when not parameterized
     if (!knx.configured())
         return;
-    // run loop of all HCL channels ervery minute
-    if (delayCheck(_timerCheckHclChannel, 60000))
+    // run loop of all HCL channels
+    if (delayCheck(_timerCheckHclChannel, HCL_TIMER_BROADCAST))
     {
         for (int ch = 0; ch < MAXCHANNELSHCL; ch++)
         {
@@ -330,14 +330,17 @@ void LEDModule::loop1()
     // do nothing when not parameterized
     if (!knx.configured())
         return;
-    // run task of all channels
-    for (int i = 0; i < usedChannels; i++)
-        channel[i]->task();
     // check if I2C connection possible, if not reset and init the pwm
-    if (delayCheck(_timerCheckI2cConnection, 30000))
+    if (delayCheck(_timerCheckI2cConnection, LED_CHECK_I2C)) 
     {
         checkI2cConnection();
         _timerCheckI2cConnection = millis();
+    }
+    // run task of all channels if pca connection ok
+    if (pcaI2cConnection) 
+    {
+        for (int i = 0; i < usedChannels; i++)
+            channel[i]->task();
     }
 }
 
@@ -465,6 +468,7 @@ bool LEDModule::processCommand(const std::string cmd, bool diagnoseKo)
             uint16_t on_time = phaseShift % 4096;
             uint16_t off_time = 4095;
             _pwm.setPWM(i, on_time, off_time);
+            openknx.logger.logWithPrefixAndValues("LED", "Set Channel %i - ON: %i - OFF: %i", i, on_time, off_time);
         }
         openknx.logger.logWithPrefixAndValues("LED", "Finish PCA9685 LED test....");
         return true;
@@ -598,7 +602,7 @@ bool LEDModule::initI2cConnection()
 
 bool LEDModule::checkI2cConnection()
 {
-    if (doResetI2c)
+    if (doResetI2c) 
     {
         return initI2cConnection();
     }

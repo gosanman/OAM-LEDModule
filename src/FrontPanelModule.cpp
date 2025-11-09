@@ -35,10 +35,10 @@ void FrontPanelModule::setup()
     _display = Adafruit_SSD1306(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire1, OLED_RESET);
     initI2cConnectionLcd();
 
-    pinMode(IO1_PIN, INPUT_PULLUP); // Button back
-    pinMode(IO2_PIN, INPUT_PULLUP); // Button left
-    pinMode(IO3_PIN, INPUT_PULLUP); // Button right
-    pinMode(IO4_PIN, INPUT_PULLUP); // Button select
+    pinMode(IO1_PIN, INPUT_PULLUP); // Button back - ■
+    pinMode(IO2_PIN, INPUT_PULLUP); // Button left - ◀
+    pinMode(IO3_PIN, INPUT_PULLUP); // Button right - ▶
+    pinMode(IO4_PIN, INPUT_PULLUP); // Button select - ⬤
 
     // Debug
     logDebugP("Timeout: %i sec", _menuTimeout / 1000);
@@ -75,8 +75,17 @@ void FrontPanelModule::loop1()
 
     if (delayCheck(_lastScreenUpdate, SCREEN_UPDATE_INTERVAL) && _runScreenUpdate)
     {
+        if (!openknxMeasuringModule.getTempI2cConnectionState() ||
+            !openknxMeasuringModule.getInaI2cConnectionState() ||
+            !openknxLEDModule.getPcaI2cConnectionState())
+        {
+            showWarningScreen();
+        }
+        else 
+        {
         updateCurrentScreen();
         _lastScreenUpdate = millis();
+        }
     }
 }
 
@@ -381,7 +390,7 @@ void FrontPanelModule::startUpScreen()
 void FrontPanelModule::showConnectionScreen(uint8_t index)
 {
     _display.clearDisplay();
-    _display.drawBitmap(0, 0, lightbulb_on_outline, 32, 32, 1);
+    _display.drawBitmap(0, 0, bitmap_lightbulb_on_outline, 32, 32, 1);
     _display.setTextSize(1);
     _display.setTextColor(SSD1306_WHITE);
     _display.setCursor(38, 5);
@@ -431,6 +440,31 @@ void FrontPanelModule::showConnectionScreen(uint8_t index)
         _display.print(HWPortsMapping[ports[2]]);
     }
     _display.display();
+}
+
+void FrontPanelModule::showWarningScreen()
+{
+        _display.clearDisplay();
+        // Icon blinken lassen
+        if (millis() - _warnLastBlinkTime >= BLINK_INTERVAL) {
+            _warnBlinkOn = !_warnBlinkOn;
+            _warnLastBlinkTime = millis();
+        }
+        if (_warnBlinkOn) {
+            _display.drawBitmap(0, 0, bitmap_alert_outline, 32, 32, 1);
+        }
+        _display.setTextSize(1);
+        _display.setTextColor(SSD1306_WHITE);
+        _display.setCursor(38, 0);
+        _display.print("Temp: ");
+        _display.print(openknxMeasuringModule.getTempI2cConnectionState() ? "OK.." : "Error");
+        _display.setCursor(38, 10);
+        _display.print("Power: ");
+        _display.print(openknxMeasuringModule.getInaI2cConnectionState() ? "OK.." : "Error");
+        _display.setCursor(38, 20);
+        _display.print("Dimmer: ");
+        _display.print(openknxLEDModule.getPcaI2cConnectionState() ? "OK.." : "Error");
+        _display.display();
 }
 
 void FrontPanelModule::toggleLedChannel(uint8_t index)
