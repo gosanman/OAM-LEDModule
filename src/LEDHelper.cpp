@@ -190,13 +190,13 @@ uint32_t LEDHelper::getTimeWithPattern(uint16_t time, uint8_t base)
     switch (base)
     {
     case TIMEBASE_TENTH_SECONDS:
-        return time * 100;
+        return (uint32_t)time * 100UL;
     case TIMEBASE_SECONDS:
-        return time * 1000;
+        return (uint32_t)time * 1000UL;
     case TIMEBASE_MINUTES:
-        return time * 60000;
+        return (uint32_t)time * 60000UL;
     case TIMEBASE_HOURS:
-        return time * 3600000;
+        return (uint32_t)time * 3600000UL;
     default:
         return 0;
     }

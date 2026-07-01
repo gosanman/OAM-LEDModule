@@ -166,11 +166,16 @@ void DimChannel_RGB::koHandleDimmAbsRGB(GroupObject &ko, uint8_t index)
 void DimChannel_RGB::koHandleDimmAbsHSV(GroupObject &ko, uint8_t index)
 {
     if (index == 0) { // H
-        _currentValueHSV[index] = ko.value(DPT_Angle);
+        _currentValueHSV[index] = ko.value(DPT_Angle);   // KNX-Einheit: 0-360
     } else { // S or V
-        _currentValueHSV[index] = ko.value(DPT_Scaling);
+        _currentValueHSV[index] = ko.value(DPT_Scaling); // KNX-Einheit: 0-100
     }
-    LEDHelper::hsvToRGB(_currentValueHSV[0], _currentValueHSV[1], _currentValueHSV[2], _newValueRGB[0], _newValueRGB[1], _newValueRGB[2]);
+    // _currentValueHSV in KNX-Einheiten (H 0-360, S/V 0-100), hsvToRGB erwartet je 0-255
+    // -> hier umrechnen (analog zum *2.55 im R/G/B-Pfad)
+    uint8_t h255 = (uint8_t)round(_currentValueHSV[0] * 255.0 / 360.0);
+    uint8_t s255 = (uint8_t)round(_currentValueHSV[1] * 2.55);
+    uint8_t v255 = (uint8_t)round(_currentValueHSV[2] * 2.55);
+    LEDHelper::hsvToRGB(h255, s255, v255, _newValueRGB[0], _newValueRGB[1], _newValueRGB[2]);
     logDebugP("Dim Absolute HSV index: %i withe value: %i", index, _currentValueHSV[index]);
     _currentTask = DimTaskRGB::RGB_DIM_RGB_SET;
 }
@@ -453,7 +458,7 @@ void DimChannel_RGB::handleDimGeneric(uint8_t *currentValues, uint8_t *targetVal
             _dimAcc[i] = 0.0f;
         }
         uint32_t duration = isAbsolute ? m_durationabsolut : m_durationrelativ;
-        _time = (word)(maxDelta ? (duration / maxDelta) : duration);
+        _time = maxDelta ? (duration / maxDelta) : duration;
         _dimmingInit = true;
         _busy = true;
     }

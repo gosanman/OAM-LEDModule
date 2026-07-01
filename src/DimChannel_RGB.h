@@ -54,8 +54,8 @@ private:
     uint8_t *m_dayvalue;
     bool m_usenightvalue;
     uint8_t *m_nightvalue;
-    uint16_t m_durationrelativ;
-    uint16_t m_durationabsolut;
+    uint32_t m_durationrelativ; // ms aus getTimeWithPattern (darf > 65535 sein)
+    uint32_t m_durationabsolut;
     uint8_t m_curve;
     float m_gammacorrection;
 
@@ -99,8 +99,8 @@ private:
     uint8_t _valueMax = 255;
     uint8_t _currentTask = DimTaskRGB::RGB_DIM_IDLE;
     uint32_t _currentMillis = 0;
-    uint32_t _lastTaskExecution;
-    uint32_t _time;
+    uint32_t _lastTaskExecution = 0;
+    uint32_t _time = 0;
     float _dimIncrement[3] = {0};
     float _dimAcc[3] = {0};
     bool _dimmingInit = false;

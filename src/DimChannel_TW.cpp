@@ -390,7 +390,7 @@ void DimChannel_TW::handleDimGeneric(uint16_t &currentValue, uint16_t targetValu
     if (!_busy) {
         uint32_t duration = isAbsolute ? m_durationabsolut : m_durationrelativ;
         uint16_t delta = abs((int)targetValue - (int)currentValue);
-        _time = (word)(duration / delta);
+        _time = duration / delta;
     }
     if (_currentMillis - _lastTaskExecution >= _time) {
         if (currentValue < targetValue && currentValue < maxValue) {

@@ -365,6 +365,7 @@ void LEDModule::processInputKo(GroupObject &ko)
     {
         int channelIndexEK = floor((koNum - EK_KoOffset) / EK_KoBlockSize);
         logDebugP("For Channel EG %i", channelIndexEK);
+        if (channelEK[channelIndexEK] == nullptr) return; // Slot in dieser Betriebsart nicht belegt
         channelEK[channelIndexEK]->processInputKo(ko);
         return;
     }
@@ -373,6 +374,7 @@ void LEDModule::processInputKo(GroupObject &ko)
     {
         int channelIndexTW = floor((koNum - TW_KoOffset) / TW_KoBlockSize);
         logDebugP("For Channel TW %i", channelIndexTW);
+        if (channelTW[channelIndexTW] == nullptr) return; // Slot in dieser Betriebsart nicht belegt
         channelTW[channelIndexTW]->processInputKo(ko);
         return;
     }
@@ -381,6 +383,7 @@ void LEDModule::processInputKo(GroupObject &ko)
     {
         int channelIndexRGB = floor((koNum - RGB_KoOffset) / RGB_KoBlockSize);
         logDebugP("For Channel RGB %i", channelIndexRGB);
+        if (channelRGB[channelIndexRGB] == nullptr) return; // Slot in dieser Betriebsart nicht belegt
         channelRGB[channelIndexRGB]->processInputKo(ko);
         return;
     }

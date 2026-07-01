@@ -50,8 +50,8 @@ private:
     uint8_t m_dayvalue = 255;
     bool m_usenightvalue;
     uint8_t m_nightvalue = 25;
-    uint16_t m_durationrelativ;
-    uint16_t m_durationabsolut;
+    uint32_t m_durationrelativ; // ms aus getTimeWithPattern (darf > 65535 sein)
+    uint32_t m_durationabsolut;
     uint8_t m_curve;
 
     uint8_t _index;
@@ -85,8 +85,8 @@ private:
     uint8_t _valueMaxBrightness = 255;
     uint8_t _currentTask = DimTaskEK::EK_DIM_IDLE;
     uint32_t _currentMillis = 0;
-    uint32_t _lastTaskExecution;
-    uint32_t _time;
+    uint32_t _lastTaskExecution = 0;
+    uint32_t _time = 0;
     bool _isOn = false;         // true = on, false = off
 
     void handleDimStop();
