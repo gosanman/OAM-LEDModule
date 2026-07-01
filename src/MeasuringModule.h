@@ -1,10 +1,11 @@
 #ifndef MEASURINGMODULE_H
 #define MEASURINGMODULE_H
 
-#include "INA226_WE.h"
 #include "LIB_TEMP100.h"
+#include "LIB_INA.h"
 #include <OpenKNX.h>
 #include "hardware.h"
+#include "LEDModule.h"
 
 #include "LEDHelper.h"
 
@@ -13,7 +14,7 @@
 #define TIMEBASE_HOURS          2
 #define TIMEBASE_TENTH_SECONDS  3
 
-#define OVER_CURRENT    6000 // 6A = 6000mA
+#define OVER_CURRENT    6.0 // 6A
 
 // Timing parameters
 #define MEASUREMENT_ALARM_CHECK     5000    // ms
@@ -86,6 +87,7 @@ private:
     float power_mW = 0.0;
     float power_W = 0.0;
     float totalEnergy_Wh = 0.0;
+    float lastEnergy_Wh = 0.0;
     
     float temperatur_C = 0.0;
 
@@ -105,7 +107,7 @@ private:
 
     uint32_t getTimeWithPattern(uint16_t time, uint8_t base);
 
-    INA226_WE _ina226;
+    INASensor _ina;
     TMP100_WE _tmp100;
 };
 

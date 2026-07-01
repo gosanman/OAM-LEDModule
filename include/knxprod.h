@@ -26,31 +26,32 @@
 //--------------------Allgemein---------------------------
 #define MAIN_OpenKnxId 0xA8
 #define MAIN_ApplicationNumber 0x01
-#define MAIN_ApplicationVersion 0x03
+#define MAIN_ApplicationVersion 0x04
 #define MAIN_OrderNumber "OpenKnxLEDDimmer"
-#define MAIN_ParameterSize 797
+#define MAIN_ParameterSize 809
 #define MAIN_MaxKoNumber 679
 
 
 #define APP_ControllerType		0x0000
-// Offset: 0, Size: 1 Bit, Text: Gerät
-#define ParamAPP_ControllerType knx.paramBit(APP_ControllerType, 0)
+#define APP_ControllerType_Shift	6
+#define APP_ControllerType_Mask	0x0003
+// Offset: 0, Size: 2 Bit, Text: Gerät
+#define ParamAPP_ControllerType ((uint32_t)((knx.paramByte(APP_ControllerType) >> APP_ControllerType_Shift) & APP_ControllerType_Mask))
 #define APP_OperatingMode		0x0000
-#define APP_OperatingMode_Shift	1
 #define APP_OperatingMode_Mask	0x003F
-// Offset: 0, BitOffset: 1, Size: 6 Bit, Text: Betriebsmodus
-#define ParamAPP_OperatingMode ((uint32_t)((knx.paramByte(APP_OperatingMode) >> APP_OperatingMode_Shift) & APP_OperatingMode_Mask))
+// Offset: 0, BitOffset: 2, Size: 6 Bit, Text: Betriebsmodus
+#define ParamAPP_OperatingMode ((uint32_t)((knx.paramByte(APP_OperatingMode)) & APP_OperatingMode_Mask))
 #define APP_PwmFrequenz		0x0001
 #define APP_PwmFrequenz_Shift	5
 #define APP_PwmFrequenz_Mask	0x07FF
 // Offset: 1, Size: 11 Bit, Text: PWM Frequenz
 #define ParamAPP_PwmFrequenz ((uint32_t)((knx.paramWord(APP_PwmFrequenz) >> APP_PwmFrequenz_Shift) & APP_PwmFrequenz_Mask))
-#define APP_SendMeasuredValues		0x0000
-// Offset: 0, BitOffset: 7, Size: 1 Bit, Text: Messwerte zyklisch senden
-#define ParamAPP_SendMeasuredValues knx.paramBit(APP_SendMeasuredValues, 7)
+#define APP_SendMeasuredValues		0x0003
+// Offset: 3, Size: 1 Bit, Text: Messwerte zyklisch senden
+#define ParamAPP_SendMeasuredValues knx.paramBit(APP_SendMeasuredValues, 0)
 #define APP_TempSensorPresent		0x0003
-// Offset: 3, Size: 1 Bit, Text: Temperatursensor verbaut
-#define ParamAPP_TempSensorPresent knx.paramBit(APP_TempSensorPresent, 0)
+// Offset: 3, BitOffset: 1, Size: 1 Bit, Text: Temperatursensor verbaut
+#define ParamAPP_TempSensorPresent knx.paramBit(APP_TempSensorPresent, 1)
 #define APP_MeasurementIntervalTime		0x0004
 #define APP_MeasurementIntervalTime_Shift	2
 #define APP_MeasurementIntervalTime_Mask	0x3FFF
@@ -58,41 +59,40 @@
 #define ParamAPP_MeasurementIntervalTime ((uint32_t)((knx.paramWord(APP_MeasurementIntervalTime) >> APP_MeasurementIntervalTime_Shift) & APP_MeasurementIntervalTime_Mask))
 #define ParamAPP_MeasurementIntervalTimeMS (paramDelay(ParamAPP_MeasurementIntervalTime))
 #define APP_MeasurementIntervalBase		0x0003
-#define APP_MeasurementIntervalBase_Shift	5
+#define APP_MeasurementIntervalBase_Shift	4
 #define APP_MeasurementIntervalBase_Mask	0x0003
-// Offset: 3, BitOffset: 1, Size: 2 Bit, Text: Zeitbasis
+// Offset: 3, BitOffset: 2, Size: 2 Bit, Text: Zeitbasis
 #define ParamAPP_MeasurementIntervalBase ((uint32_t)((knx.paramByte(APP_MeasurementIntervalBase) >> APP_MeasurementIntervalBase_Shift) & APP_MeasurementIntervalBase_Mask))
 #define APP_ShuntValue		0x0003
-#define APP_ShuntValue_Shift	1
 #define APP_ShuntValue_Mask	0x000F
-// Offset: 3, BitOffset: 3, Size: 4 Bit, Text: Wert des verbauten Messwiderstand
-#define ParamAPP_ShuntValue ((uint32_t)((knx.paramByte(APP_ShuntValue) >> APP_ShuntValue_Shift) & APP_ShuntValue_Mask))
-#define APP_DayNight		0x0003
-// Offset: 3, BitOffset: 7, Size: 1 Bit, Text: Tag/Nacht Objekt
-#define ParamAPP_DayNight knx.paramBit(APP_DayNight, 7)
+// Offset: 3, BitOffset: 4, Size: 4 Bit, Text: Wert des verbauten Messwiderstand
+#define ParamAPP_ShuntValue ((uint32_t)((knx.paramByte(APP_ShuntValue)) & APP_ShuntValue_Mask))
+#define APP_DayNight		0x0006
+// Offset: 6, Size: 1 Bit, Text: Tag/Nacht Objekt
+#define ParamAPP_DayNight knx.paramBit(APP_DayNight, 0)
 #define APP_Func1BtnClick		0x0006
-#define APP_Func1BtnClick_Shift	4
+#define APP_Func1BtnClick_Shift	3
 #define APP_Func1BtnClick_Mask	0x000F
-// Offset: 6, Size: 4 Bit, Text: Aktion - Func1 Button Klick
+// Offset: 6, BitOffset: 1, Size: 4 Bit, Text: Aktion - Func1 Button Klick
 #define ParamAPP_Func1BtnClick ((uint32_t)((knx.paramByte(APP_Func1BtnClick) >> APP_Func1BtnClick_Shift) & APP_Func1BtnClick_Mask))
-#define APP_Func1BtnDblClick		0x0006
+#define APP_Func1BtnDblClick		0x0007
+#define APP_Func1BtnDblClick_Shift	4
 #define APP_Func1BtnDblClick_Mask	0x000F
-// Offset: 6, BitOffset: 4, Size: 4 Bit, Text: Aktion - Func1 Button Doppelklick
-#define ParamAPP_Func1BtnDblClick ((uint32_t)((knx.paramByte(APP_Func1BtnDblClick)) & APP_Func1BtnDblClick_Mask))
+// Offset: 7, Size: 4 Bit, Text: Aktion - Func1 Button Doppelklick
+#define ParamAPP_Func1BtnDblClick ((uint32_t)((knx.paramByte(APP_Func1BtnDblClick) >> APP_Func1BtnDblClick_Shift) & APP_Func1BtnDblClick_Mask))
 #define APP_Func1BtnLongClick		0x0007
-#define APP_Func1BtnLongClick_Shift	4
 #define APP_Func1BtnLongClick_Mask	0x000F
-// Offset: 7, Size: 4 Bit, Text: Aktion - Func1 Button Langer Klick
-#define ParamAPP_Func1BtnLongClick ((uint32_t)((knx.paramByte(APP_Func1BtnLongClick) >> APP_Func1BtnLongClick_Shift) & APP_Func1BtnLongClick_Mask))
-#define APP_AlarmUseVoltage		0x0007
-// Offset: 7, BitOffset: 4, Size: 1 Bit, Text: Spannungsbereich überwachen
-#define ParamAPP_AlarmUseVoltage knx.paramBit(APP_AlarmUseVoltage, 4)
-#define APP_AlarmUseOverTemp		0x0007
-// Offset: 7, BitOffset: 5, Size: 1 Bit, Text: Übertemperatur überwachen
-#define ParamAPP_AlarmUseOverTemp knx.paramBit(APP_AlarmUseOverTemp, 5)
-#define APP_AlarmUseOverCurrent		0x0007
-// Offset: 7, BitOffset: 6, Size: 1 Bit, Text: Überstrom überwachen
-#define ParamAPP_AlarmUseOverCurrent knx.paramBit(APP_AlarmUseOverCurrent, 6)
+// Offset: 7, BitOffset: 4, Size: 4 Bit, Text: Aktion - Func1 Button Langer Klick
+#define ParamAPP_Func1BtnLongClick ((uint32_t)((knx.paramByte(APP_Func1BtnLongClick)) & APP_Func1BtnLongClick_Mask))
+#define APP_AlarmUseVoltage		0x0006
+// Offset: 6, BitOffset: 5, Size: 1 Bit, Text: Spannungsbereich überwachen
+#define ParamAPP_AlarmUseVoltage knx.paramBit(APP_AlarmUseVoltage, 5)
+#define APP_AlarmUseOverTemp		0x0006
+// Offset: 6, BitOffset: 6, Size: 1 Bit, Text: Übertemperatur überwachen
+#define ParamAPP_AlarmUseOverTemp knx.paramBit(APP_AlarmUseOverTemp, 6)
+#define APP_AlarmUseOverCurrent		0x0006
+// Offset: 6, BitOffset: 7, Size: 1 Bit, Text: Überstrom überwachen
+#define ParamAPP_AlarmUseOverCurrent knx.paramBit(APP_AlarmUseOverCurrent, 7)
 #define APP_AlarmOverVoltage		0x0008
 // Offset: 8, Size: 16 Bit (2 Byte), Text: Grenzwert Überspannung
 #define ParamAPP_AlarmOverVoltage knx.paramFloat(APP_AlarmOverVoltage, Float_Enc_DPT9)
@@ -110,26 +110,38 @@
 #define APP_DisplayTimeOut_Mask	0x03FF
 // Offset: 16, Size: 10 Bit, Text: Anzeige ausschalten nach
 #define ParamAPP_DisplayTimeOut ((uint32_t)((knx.paramWord(APP_DisplayTimeOut) >> APP_DisplayTimeOut_Shift) & APP_DisplayTimeOut_Mask))
-#define APP_FrontPanelPresent		0x0007
-// Offset: 7, BitOffset: 7, Size: 1 Bit, Text: Bedienfeld verbaut
-#define ParamAPP_FrontPanelPresent knx.paramBit(APP_FrontPanelPresent, 7)
+#define APP_FrontPanelPresent		0x0012
+// Offset: 18, Size: 1 Bit, Text: Bedienfeld verbaut
+#define ParamAPP_FrontPanelPresent knx.paramBit(APP_FrontPanelPresent, 0)
 #define APP_FrontPanelControl		0x0012
-// Offset: 18, Size: 1 Bit, Text: Steuerung über das Bedienfeld zulassen
-#define ParamAPP_FrontPanelControl knx.paramBit(APP_FrontPanelControl, 0)
+// Offset: 18, BitOffset: 1, Size: 1 Bit, Text: Steuerung über das Bedienfeld zulassen
+#define ParamAPP_FrontPanelControl knx.paramBit(APP_FrontPanelControl, 1)
 //!< Number: 31, Text: Spannung, Function: Messwert
 #define APP_KoVoltageV 31
 #define KoAPP_VoltageV knx.getGroupObject(APP_KoVoltageV)
-//!< Number: 32, Text: Strom, Function: Messwert
-#define APP_KoCurrentA 32
+//!< Number: 32, Text: Spannung Ext, Function: Messwert
+#define APP_KoVoltageVext 32
+#define KoAPP_VoltageVext knx.getGroupObject(APP_KoVoltageVext)
+//!< Number: 33, Text: Strom, Function: Messwert
+#define APP_KoCurrentA 33
 #define KoAPP_CurrentA knx.getGroupObject(APP_KoCurrentA)
-//!< Number: 33, Text: Wirkleistung, Function: Messwert
-#define APP_KoPowerW 33
+//!< Number: 34, Text: Strom Ext, Function: Messwert
+#define APP_KoCurrentAext 34
+#define KoAPP_CurrentAext knx.getGroupObject(APP_KoCurrentAext)
+//!< Number: 35, Text: Wirkleistung, Function: Messwert
+#define APP_KoPowerW 35
 #define KoAPP_PowerW knx.getGroupObject(APP_KoPowerW)
-//!< Number: 34, Text: Wirkleistung (Wh), Function: Zähler
-#define APP_KoActivePowerWh 34
+//!< Number: 36, Text: Wirkleistung Ext, Function: Messwert
+#define APP_KoPowerWext 36
+#define KoAPP_PowerWext knx.getGroupObject(APP_KoPowerWext)
+//!< Number: 37, Text: Wirkleistung (Wh), Function: Zähler
+#define APP_KoActivePowerWh 37
 #define KoAPP_ActivePowerWh knx.getGroupObject(APP_KoActivePowerWh)
-//!< Number: 35, Text: Gerätetemperatur, Function: Messwert
-#define APP_KoTempC 35
+//!< Number: 38, Text: Wirkleistung (Wh) Ext, Function: Zähler
+#define APP_KoActivePowerWhext 38
+#define KoAPP_ActivePowerWhext knx.getGroupObject(APP_KoActivePowerWhext)
+//!< Number: 39, Text: Gerätetemperatur, Function: Messwert
+#define APP_KoTempC 39
 #define KoAPP_TempC knx.getGroupObject(APP_KoTempC)
 //!< Number: 40, Text: Tag/Nacht, Function: Allgemein
 #define APP_KoDayNight 40
@@ -159,7 +171,7 @@
 #define RGB_ParamBlockOffset 614
 #define RGB_ParamBlockSize 39
 #define HCL_ParamBlockOffset 770
-#define HCL_ParamBlockSize 9
+#define HCL_ParamBlockSize 13
 #define BASE_Share_KoOffset 49
 #define BASE_Share_KoBlockSize 8
 #define EK_KoOffset 57
@@ -1016,6 +1028,26 @@
 #define ParamHCL_briMaxIndex(X) ((uint32_t)((knx.paramByte((HCL_ParamBlockOffset + HCL_ParamBlockSize * X + HCL_briMax)) >> HCL_briMax_Shift) & HCL_briMax_Mask))
 // Offset: 8, Size: 7 Bit, Text: Helligkeit Max
 #define ParamHCL_briMax ((uint32_t)((knx.paramByte((HCL_ParamBlockOffset + HCL_ParamBlockSize * channelIndex() + HCL_briMax)) >> HCL_briMax_Shift) & HCL_briMax_Mask))
+#define HCL_startTimeHour		0x0009
+// Offset: 9, Size: 8 Bit (1 Byte), Text: 
+#define ParamHCL_startTimeHourIndex(X) ((uint32_t)((knx.paramByte((HCL_ParamBlockOffset + HCL_ParamBlockSize * X + HCL_startTimeHour)))))
+// Offset: 9, Size: 8 Bit (1 Byte), Text: 
+#define ParamHCL_startTimeHour ((uint32_t)((knx.paramByte((HCL_ParamBlockOffset + HCL_ParamBlockSize * channelIndex() + HCL_startTimeHour)))))
+#define HCL_startTimeMinute		0x000A
+// Offset: 10, Size: 8 Bit (1 Byte), Text: 
+#define ParamHCL_startTimeMinuteIndex(X) ((uint32_t)((knx.paramByte((HCL_ParamBlockOffset + HCL_ParamBlockSize * X + HCL_startTimeMinute)))))
+// Offset: 10, Size: 8 Bit (1 Byte), Text: 
+#define ParamHCL_startTimeMinute ((uint32_t)((knx.paramByte((HCL_ParamBlockOffset + HCL_ParamBlockSize * channelIndex() + HCL_startTimeMinute)))))
+#define HCL_endTimeHour		0x000B
+// Offset: 11, Size: 8 Bit (1 Byte), Text: 
+#define ParamHCL_endTimeHourIndex(X) ((uint32_t)((knx.paramByte((HCL_ParamBlockOffset + HCL_ParamBlockSize * X + HCL_endTimeHour)))))
+// Offset: 11, Size: 8 Bit (1 Byte), Text: 
+#define ParamHCL_endTimeHour ((uint32_t)((knx.paramByte((HCL_ParamBlockOffset + HCL_ParamBlockSize * channelIndex() + HCL_endTimeHour)))))
+#define HCL_endTimeMinute		0x000C
+// Offset: 12, Size: 8 Bit (1 Byte), Text: 
+#define ParamHCL_endTimeMinuteIndex(X) ((uint32_t)((knx.paramByte((HCL_ParamBlockOffset + HCL_ParamBlockSize * X + HCL_endTimeMinute)))))
+// Offset: 12, Size: 8 Bit (1 Byte), Text: 
+#define ParamHCL_endTimeMinute ((uint32_t)((knx.paramByte((HCL_ParamBlockOffset + HCL_ParamBlockSize * channelIndex() + HCL_endTimeMinute)))))
 //!< Number: 0, Text: HCL{{argChan}}: {{0:---}}, Function: Status Farbtemperatur (Kelvin)
 #define HCL_KoStatusColorTemp 0
 #define KoHCL_StatusColorTempIndex(X) knx.getGroupObject(HCL_KoBlockSize * X + HCL_KoStatusColorTemp + HCL_KoOffset)

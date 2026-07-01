@@ -19,7 +19,7 @@ const std::string FrontPanelModule::name()
 
 const std::string FrontPanelModule::version()
 {
-    return "0.3.0";
+    return "0.4.0";
 }
 
 void FrontPanelModule::setup()
@@ -34,12 +34,12 @@ void FrontPanelModule::setup()
     // Init I2C connection and Lib SSD1306
     _display = Adafruit_SSD1306(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire1, OLED_RESET);
     initI2cConnectionLcd();
-
+#ifdef FRONT_PANEL_PRESENT
     pinMode(IO1_PIN, INPUT_PULLUP); // Button back - ■
     pinMode(IO2_PIN, INPUT_PULLUP); // Button left - ◀
     pinMode(IO3_PIN, INPUT_PULLUP); // Button right - ▶
     pinMode(IO4_PIN, INPUT_PULLUP); // Button select - ⬤
-
+#endif
     // Debug
     logDebugP("Timeout: %i sec", _menuTimeout / 1000);
 }
@@ -57,7 +57,7 @@ void FrontPanelModule::loop1()
     // do nothing when not parameterized or no front panel is present
     if (!knx.configured() || !ParamAPP_FrontPanelPresent)
         return;
-
+#ifdef FRONT_PANEL_PRESENT
     if (!digitalRead(IO1_PIN))
         handleButtonPress(BUTTON_BACK); // Button back pressed   - ■
     if (!digitalRead(IO2_PIN))
@@ -66,7 +66,7 @@ void FrontPanelModule::loop1()
         handleButtonPress(BUTTON_RIGHT); // Button right pressed  - ▶
     if (!digitalRead(IO4_PIN))
         handleButtonPress(BUTTON_SELECT); // Button select pressed - ⬤
-
+#endif
     // Show OpenKNX Logo and welcome message once at startup
     if (startupscreen == true)
     {

@@ -1,4 +1,4 @@
 ﻿------- Built with -------
-ee3c00e v1 lib/knx https://github.com/OpenKNX/knx.git
-3a96b4e v1 lib/OFM-FileTransferModule https://github.com/OpenKNX/OFM-FileTransferModule.git
-193e462 v1 lib/OGM-Common https://github.com/OpenKNX/OGM-Common.git
+f6111d3 v1 lib/knx https://github.com/OpenKNX/knx.git
+178f186 v1 lib/OFM-FileTransferModule https://github.com/OpenKNX/OFM-FileTransferModule.git
+193e462 v1_1.5.1 lib/OGM-Common https://github.com/OpenKNX/OGM-Common.git

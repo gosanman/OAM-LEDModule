@@ -3,107 +3,7 @@
     // for the documentation about the tasks.json format
     "version": "2.0.0",
     "tasks": [
-        // --- BOARD_KNXLED_DK_06_V10 ---
-        {
-            "label": "develop_LEDDK_06_USB_V10",
-            "type": "shell",
-            "command": "lib/OGM-Common/scripts/build/OpenKNX-Build.ps1",
-            "args": [
-                "develop_LEDDK_06_USB_V10"
-            ],
-            "group": "build",
-            "problemMatcher": [],
-            "dependsOrder": "sequence",
-            "dependsOn": ["Gen. Dependencies.txt"]
-        },
-        {
-            "label": "develop_LEDDK_06_JLINK_V10",
-            "type": "shell",
-            "command": "lib/OGM-Common/scripts/build/OpenKNX-Build.ps1",
-            "args": [
-                "develop_LEDDK_06_JLINK_V10",
-            ],
-            "group": "build",
-            "problemMatcher": [],
-            "dependsOrder": "sequence",
-            "dependsOn": ["Gen. Dependencies.txt"]
-        },
-        // --- BOARD_KNXLED_DK_12_V10 ---
-        {
-            "label": "develop_LEDDK_12_USB_V10",
-            "type": "shell",
-            "command": "lib/OGM-Common/scripts/build/OpenKNX-Build.ps1",
-            "args": [
-                "develop_LEDDK_12_USB_V10"
-            ],
-            "group": "build",
-            "problemMatcher": [],
-            "dependsOrder": "sequence",
-            "dependsOn": ["Gen. Dependencies.txt"]
-        },
-        {
-            "label": "develop_LEDDK_12_JLINK_V10",
-            "type": "shell",
-            "command": "lib/OGM-Common/scripts/build/OpenKNX-Build.ps1",
-            "args": [
-                "develop_LEDDK_12_JLINK_V10",
-            ],
-            "group": "build",
-            "problemMatcher": [],
-            "dependsOrder": "sequence",
-            "dependsOn": ["Gen. Dependencies.txt"]
-        },
-        // --- BOARD_KNXLED_DK_06_V12 ---
-        {
-            "label": "develop_LEDDK_06_USB_V12",
-            "type": "shell",
-            "command": "lib/OGM-Common/scripts/build/OpenKNX-Build.ps1",
-            "args": [
-                "develop_LEDDK_06_USB_V12"
-            ],
-            "group": "build",
-            "problemMatcher": [],
-            "dependsOrder": "sequence",
-            "dependsOn": ["Gen. Dependencies.txt"]
-        },
-        {
-            "label": "develop_LEDDK_06_JLINK_V12",
-            "type": "shell",
-            "command": "lib/OGM-Common/scripts/build/OpenKNX-Build.ps1",
-            "args": [
-                "develop_LEDDK_06_JLINK_V12",
-            ],
-            "group": "build",
-            "problemMatcher": [],
-            "dependsOrder": "sequence",
-            "dependsOn": ["Gen. Dependencies.txt"]
-        },
-        // --- BOARD_KNXLED_DK_12_V10 ---
-        {
-            "label": "develop_LEDDK_12_USB_V12",
-            "type": "shell",
-            "command": "lib/OGM-Common/scripts/build/OpenKNX-Build.ps1",
-            "args": [
-                "develop_LEDDK_12_USB_V12"
-            ],
-            "group": "build",
-            "problemMatcher": [],
-            "dependsOrder": "sequence",
-            "dependsOn": ["Gen. Dependencies.txt"]
-        },
-        {
-            "label": "develop_LEDDK_12_JLINK_V12",
-            "type": "shell",
-            "command": "lib/OGM-Common/scripts/build/OpenKNX-Build.ps1",
-            "args": [
-                "develop_LEDDK_12_JLINK_V12",
-            ],
-            "group": "build",
-            "problemMatcher": [],
-            "dependsOrder": "sequence",
-            "dependsOn": ["Gen. Dependencies.txt"]
-        },
-        // --- COMMON ---
+        // --- OpenKNXproducer - NOT USED IN THIS PROJECT ---
         {
             "label": "OpenKNXproducer",
             "type": "shell",
@@ -117,88 +17,171 @@
             "problemMatcher": [],
             "group": "test",
             "dependsOrder": "sequence",
-            "dependsOn": ["Gen. Dependencies.txt"]
+            "dependsOn": [
+                "Gen. Dependencies.txt"
+            ]
         },
-        {
-            "label": "Gen. Dependencies.txt",
-            "type": "shell",
-            "command": "lib/OGM-Common/scripts/setup/reusable/Build-Dependencies.ps1",
-            "args": [
-            ],
-            "problemMatcher": [],
-            "group": "test"
-        },
-        {
-            "label": "Pull",
-            "type": "shell",
-            "command": "git pull --ff-only",
-            "args": [
-            ],
-            "options": {
-                "cwd": "${workspaceFolder}/"
-            },
-            "problemMatcher": [],
-            "group": "test"
-        },
-        {
-            "label": "Pull & Restore",
-            "type": "shell",
-            "command": "${workspaceFolder}/restore/Restore-Checkout-Branch.ps1",
-            "args": [
-            ],
-            "options": {
-                "cwd": "${workspaceFolder}/restore/"
-            },
-            "problemMatcher": [],
-            "group": "test",
-            "dependsOn": ["Pull"]
-        },
+        // --- Build KNXprod use KaenxConsole ---
         {
             "label": "Build KNXprod",
             "type": "shell",
             "command": "scripts/Build-KNXprod.ps1",
-            "args": [
-            ],
+            "args": [],
             "problemMatcher": [],
             "group": "test"
         },
-        // Build a release package for distribution
-        // --- BOARD_KNXLED_DK_06_V10 ---
+        // --- Generate Dependencies.txt ---
         {
-            "label": "release_LEDDK_06_V10",
+            "label": "Gen. Dependencies.txt",
+            "type": "shell",
+            "command": "lib/OGM-Common/scripts/setup/reusable/Build-Dependencies.ps1",
+            "args": [],
+            "problemMatcher": [],
+            "group": "test"
+        },
+        //
+        // --------------------------------------------------------------------------------
+        // Development Tasks
+        // --------------------------------------------------------------------------------
+        //
+        // --- Development Tasks - Deckeneinbau Version V1.0 ---
+        {
+            "label": "develop_LEDDK_06_USB_V10",
+            "type": "shell",
+            "command": "lib/OGM-Common/scripts/build/OpenKNX-Build.ps1",
+            "args": [
+                "develop_LEDDK_06_USB_V10"
+            ],
+            "group": "build",
+            "problemMatcher": [],
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "Gen. Dependencies.txt"
+            ]
+        },
+        {
+            "label": "develop_LEDDK_12_USB_V10",
+            "type": "shell",
+            "command": "lib/OGM-Common/scripts/build/OpenKNX-Build.ps1",
+            "args": [
+                "develop_LEDDK_12_USB_V10"
+            ],
+            "group": "build",
+            "problemMatcher": [],
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "Gen. Dependencies.txt"
+            ]
+        },
+        // --- Development Tasks - Deckeneinbau Version V1.2 ---
+        {
+            "label": "develop_LEDDK_06_USB_V12",
+            "type": "shell",
+            "command": "lib/OGM-Common/scripts/build/OpenKNX-Build.ps1",
+            "args": [
+                "develop_LEDDK_06_USB_V12"
+            ],
+            "group": "build",
+            "problemMatcher": [],
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "Gen. Dependencies.txt"
+            ]
+        },
+        {
+            "label": "develop_LEDDK_12_USB_V12",
+            "type": "shell",
+            "command": "lib/OGM-Common/scripts/build/OpenKNX-Build.ps1",
+            "args": [
+                "develop_LEDDK_12_USB_V12"
+            ],
+            "group": "build",
+            "problemMatcher": [],
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "Gen. Dependencies.txt"
+            ]
+        },
+        // --- Development Tasks - Applikation Reg-V1 Version V1.0 ---
+        {
+            "label": "develop_LEDAPP_06_USB_V01",
+            "type": "shell",
+            "command": "lib/OGM-Common/scripts/build/OpenKNX-Build.ps1",
+            "args": [
+                "develop_LEDAPP_06_USB_V01"
+            ],
+            "group": "build",
+            "problemMatcher": [],
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "Gen. Dependencies.txt"
+            ]
+        },
+        //
+        // --------------------------------------------------------------------------------
+        // Release Tasks
+        // --------------------------------------------------------------------------------
+        //
+        // --- Build release package for distribution
+        {
+            "label": "Build-Release",
             "type": "shell",
             "command": "scripts/Build-Release.ps1",
             "args": [
+                "Release"
             ],
             "problemMatcher": [],
             "group": "test"
         },
-        // --- BOARD_KNXLED_DK_12_V10 ---
+        // --- Release Tasks - Deckeneinbau Version V1.0 ---
+        {
+            "label": "release_LEDDK_06_V10",            
+            "type": "shell",
+            "command": "lib/OGM-Common/scripts/build/OpenKNX-Build.ps1",
+            "args": [
+                "release_LEDDK_06_V10"
+            ],
+            "problemMatcher": [],
+            "group": "test"
+        },
         {
             "label": "release_LEDDK_12_V10",
             "type": "shell",
-            "command": "scripts/Build-Release.ps1",
+            "command": "lib/OGM-Common/scripts/build/OpenKNX-Build.ps1",
             "args": [
+                "release_LEDDK_12_V10"
             ],
             "problemMatcher": [],
             "group": "test"
         },
-        // --- BOARD_KNXLED_DK_06_V12 ---
+        // --- Release Tasks - Deckeneinbau Version V1.2 ---
         {
             "label": "release_LEDDK_06_V12",
             "type": "shell",
-            "command": "scripts/Build-Release.ps1",
+            "command": "lib/OGM-Common/scripts/build/OpenKNX-Build.ps1",
             "args": [
+                "release_LEDDK_06_V12"
             ],
             "problemMatcher": [],
             "group": "test"
         },
-        // --- BOARD_KNXLED_DK_12_V10 ---
         {
             "label": "release_LEDDK_12_V12",
             "type": "shell",
-            "command": "scripts/Build-Release.ps1",
+            "command": "lib/OGM-Common/scripts/build/OpenKNX-Build.ps1",
             "args": [
+                "release_LEDDK_12_V12"
+            ],
+            "problemMatcher": [],
+            "group": "test"
+        },
+        // --- Release Tasks - Applikation Reg-V1 Version V1.0 ---
+        {
+            "label": "release_LEDAPP_06_V01",
+            "type": "shell",
+            "command": "lib/OGM-Common/scripts/build/OpenKNX-Build.ps1",
+            "args": [
+                "release_LEDAPP_06_V01"
             ],
             "problemMatcher": [],
             "group": "test"
