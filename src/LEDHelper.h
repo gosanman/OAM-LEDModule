@@ -15,7 +15,6 @@ public:
     static void rgbToHSV(uint8_t in_r, uint8_t in_g, uint8_t in_b, uint16_t &out_h, uint16_t &out_s, uint16_t &out_v);
     static void kelvinToRGB(uint16_t kelvin, uint8_t brightness, uint8_t &out_r, uint8_t &out_g, uint8_t &out_b);
     static void adjustRGBBrightness(uint8_t r, uint8_t g, uint8_t b, uint8_t brightness, uint8_t &out_r, uint8_t &out_g, uint8_t &out_b);
-    static void calcGammaTable(float gamma);                 // füllt die globale gammaT
     static void calcGammaTable(float gamma, uint8_t *table); // füllt eine übergebene Tabelle (z.B. per Kanal)
     static uint32_t getTimeWithPattern(uint16_t time, uint8_t base);
 private:
@@ -23,9 +22,6 @@ private:
     static double threeway_min(double a, double b, double c);
 };
 
-// gamma 2.8 lookup table used for color correction
-extern uint8_t gammaT[256];
-  
 // all dim curves with 12 bit resolution 0(A) = linear, 1(B) = gamma 2.8, 2(C) = gamma 3.8, 3(D) = CIE, 4(E) = DALI
 const uint16_t curves[256][5] PROGMEM = {
 {0, 0, 0, 0, 0},
