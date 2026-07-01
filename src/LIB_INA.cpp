@@ -18,7 +18,7 @@ bool INASensor::detectChipType()
   if (_id == 0x4127)
   {                        // INA226, INA230, INA231 Family after reset
     _dieId = read16(0xFF); // Try INA226 Die ID first
-    if (_dieId == 0x2260)
+    if ((_dieId & 0xFFF0) == 0x2260) // Bits 3:0 = Revisions-ID maskieren (Datenblatt Tab. 7-15)
     {
       _chipType = INA226_TYPE;
       return true;
@@ -51,12 +51,22 @@ bool INASensor::begin(float shuntResistance, float maxCurrent, ConversionTimeCod
     if (!initINA226(ct, avg))
       return false;
     calibrateINA226();
+    // Messprofil INA226: 16-bit Register, kein Shift; Spannung 1.25 mV/LSB
+    _busVSpec = {INA226_BUS_V_REG, 2, 0, 16};    // signed 16-bit
+    _busVLSB = 0.00125f;
+    _currentSpec = {INA226_CURRENT_REG, 2, 0, 16}; // signed 16-bit
+    _powerSpec = {INA226_POWER_REG, 2, 0, 0};      // unsigned 16-bit
   }
   else if (_chipType == INA228_TYPE)
   {
     if (!initINA228(ct, avg))
       return false;
     calibrateINA228();
+    // Messprofil INA228: 24-bit Register; Spannung/Strom um 4 Bit geshiftet (20-bit), Spannung 195.3125 uV/LSB
+    _busVSpec = {INA228_VBUS_REG, 3, 4, 0};        // unsigned 20-bit
+    _busVLSB = 0.0001953125f;
+    _currentSpec = {INA228_CURRENT_REG, 3, 4, 20}; // signed 20-bit
+    _powerSpec = {INA228_POWER_REG, 3, 0, 0};      // unsigned 24-bit
   }
   else
   {
@@ -68,7 +78,8 @@ bool INASensor::begin(float shuntResistance, float maxCurrent, ConversionTimeCod
 bool INASensor::initINA226(ConversionTimeCode ct, Averaging avg)
 {
   // Configure: Continuous shunt and bus
-  uint16_t config = (static_cast<uint16_t>(avg) << 9) | // AVG Bits 9-11
+  uint16_t config = 0x4000 |                            // reservierte Bits 14:12 = 100 (POR 0x4127, Datenblatt Tab. 7-2)
+                    (static_cast<uint16_t>(avg) << 9) | // AVG Bits 9-11
                     (static_cast<uint16_t>(ct) << 6) |  // VBUSCT Bits 6-8
                     (static_cast<uint16_t>(ct) << 3) |  // VSHCT Bits 3-5
                     0x07;                               // MODE=111 (continuous shunt+bus)
@@ -114,53 +125,39 @@ void INASensor::calibrateINA228()
   _powerLSB = 3.2 * _currentLSB;
 }
 
+// Liest ein Mess-Register gemäß Profil (Breite/Shift/Vorzeichen) und skaliert mit lsb.
+float INASensor::readScaled(const ScaleSpec &spec, float lsb)
+{
+  uint32_t raw = (spec.bytes == 3 ? read24(spec.reg) : (uint32_t)read16(spec.reg)) >> spec.shift;
+  if (spec.signBits) // Vorzeichen aus signBits auf 32 Bit erweitern
+  {
+    uint32_t signBit = 1u << (spec.signBits - 1);
+    if (raw & signBit)
+      raw |= ~((signBit << 1) - 1);
+    return (int32_t)raw * lsb;
+  }
+  return (float)raw * lsb; // vorzeichenlos
+}
+
 float INASensor::getVoltage()
 {
-  if (_chipType == INA226_TYPE)
-  {
-    int16_t raw = read16(INA226_BUS_V_REG);
-    return raw * 0.00125; // 1.25 mV/LSB
-  }
-  else if (_chipType == INA228_TYPE)
-  {
-    uint32_t raw = read24(INA228_VBUS_REG) >> 4; // 20-bit
-    return raw * 0.0001953125;                   // 195.3125 uV/LSB
-  }
-  return 0.0f;
+  if (_chipType != INA226_TYPE && _chipType != INA228_TYPE)
+    return 0.0f;
+  return readScaled(_busVSpec, _busVLSB);
 }
 
 float INASensor::getCurrent()
 {
-  if (_chipType == INA226_TYPE)
-  {
-    int16_t raw = read16(INA226_CURRENT_REG);
-    return raw * _currentLSB;
-  }
-  else if (_chipType == INA228_TYPE)
-  {
-    int32_t raw = (int32_t)(read24(INA228_CURRENT_REG) >> 4);
-    if (raw & 0x00080000)
-    {
-      raw |= 0xFFF00000;
-    }
-    return raw * _currentLSB;
-  }
-  return 0.0f;
+  if (_chipType != INA226_TYPE && _chipType != INA228_TYPE)
+    return 0.0f;
+  return readScaled(_currentSpec, _currentLSB);
 }
 
 float INASensor::getPower()
 {
-  if (_chipType == INA226_TYPE)
-  {
-    uint16_t raw = read16(INA226_POWER_REG);
-    return raw * _powerLSB; // raw * 25 * CURRENT_LSB
-  }
-  else if (_chipType == INA228_TYPE)
-  {
-    uint32_t raw = read24(INA228_POWER_REG);
-    return raw * _powerLSB; // raw * 3.2 * CURRENT_LSB
-  }
-  return 0.0f;
+  if (_chipType != INA226_TYPE && _chipType != INA228_TYPE)
+    return 0.0f;
+  return readScaled(_powerSpec, _powerLSB);
 }
 
 double INASensor::getEnergy()

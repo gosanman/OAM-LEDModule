@@ -103,9 +103,19 @@ private:
   uint16_t _dieId;
   TwoWire *_wire;
 
+  // Per-Chip Mess-Profil (Register / Lesebreite in Bytes / Rechts-Shift /
+  // signifikante Bits für Vorzeichenerweiterung, 0 = vorzeichenlos).
+  // Einmalig in begin() nach der Chip-Erkennung gesetzt.
+  struct ScaleSpec { uint8_t reg; uint8_t bytes; uint8_t shift; uint8_t signBits; };
+  ScaleSpec _busVSpec{};
+  ScaleSpec _currentSpec{};
+  ScaleSpec _powerSpec{};
+  float _busVLSB = 0.0f;
+
   uint16_t read16(uint8_t reg);
   uint32_t read24(uint8_t reg); // For 24-bit registers (INA228)
   uint64_t read40(uint8_t reg); // For 40-bit registers (INA228 Energy/Charge)
+  float readScaled(const ScaleSpec &spec, float lsb); // liest Register gemäß Profil und skaliert
   void write16(uint8_t reg, uint16_t value);
 
   bool initINA226(ConversionTimeCode ct, Averaging avg);
