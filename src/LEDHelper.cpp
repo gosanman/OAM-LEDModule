@@ -149,12 +149,17 @@ double LEDHelper::threeway_min(double a, double b, double c)
 //----------------------Gamma Converter ------------------------------
 
 // re-calculates & fills gamma table
-void LEDHelper::calcGammaTable(float gamma)
+void LEDHelper::calcGammaTable(float gamma, uint8_t *table)
 {
     for (size_t i = 0; i < 256; i++)
     {
-        gammaT[i] = (int)(powf((float)i / 255.0f, gamma) * 255.0f + 0.5f);
+        table[i] = (int)(powf((float)i / 255.0f, gamma) * 255.0f + 0.5f);
     }
+}
+
+void LEDHelper::calcGammaTable(float gamma)
+{
+    calcGammaTable(gamma, gammaT);
 }
 
 uint8_t gammaT[256] = {

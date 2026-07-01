@@ -58,6 +58,7 @@ private:
     uint32_t m_durationabsolut;
     uint8_t m_curve;
     float m_gammacorrection;
+    uint8_t m_gammaT[256]; // eigene Gamma-Tabelle je Kanal (globale gammaT wird sonst von allen geteilt)
 
     uint8_t _index;
 
@@ -92,6 +93,7 @@ private:
     void updateDimValue();
 
     // dimmer task
+    void startTask(uint8_t task); // setzt neue Aufgabe und erzwingt Neuberechnung von Increments/_time
     void dimmerTask();
     void handleDimGeneric(uint8_t *currentValues, uint8_t *targetValues, uint8_t minValue, uint8_t maxValue, bool isAbsolute);
     bool _busy = false;

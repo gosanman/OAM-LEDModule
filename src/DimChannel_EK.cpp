@@ -64,13 +64,13 @@ void DimChannel_EK::koHandleSwitch(GroupObject &ko)
     { // on
         switchOnHelper();
         logDebugP(isNight ? "Switch On Night - with value %i" : "Switch On Day - with value %i", _currentValueEK);
-        _currentTask = DimTaskEK::EK_DIM_SOFT_ON;
+        startTask(DimTaskEK::EK_DIM_SOFT_ON);
     }
     else
     { // off
         switchOffHelper();
         logDebugP(isNight ? "Switch Off Night - with value %i" : "Switch Off Day - with value %i", _currentValueEK);
-        _currentTask = DimTaskEK::EK_DIM_SOFT_OFF;
+        startTask(DimTaskEK::EK_DIM_SOFT_OFF);
     }
 }
 
@@ -78,7 +78,7 @@ void DimChannel_EK::koHandleDimmAbs(GroupObject &ko)
 {
     _newValueEK = ko.value(DPT_Percent_U8);
     logDebugP("Dim Absolut - Brightness: %i", _newValueEK);
-    _currentTask = DimTaskEK::EK_DIM_B_SET;
+    startTask(DimTaskEK::EK_DIM_B_SET);
 }
 
 void DimChannel_EK::koHandleDimmRel(GroupObject &ko)
@@ -89,13 +89,13 @@ void DimChannel_EK::koHandleDimmRel(GroupObject &ko)
     // direction true = dim up, false = dim down, step = 0 then stop
     if (step == 0) {
         logDebugP("Dim Relativ - Stop");
-        _currentTask = DimTaskEK::EK_DIM_STOP;
+        startTask(DimTaskEK::EK_DIM_STOP);
     } else if (direction == 1) {
         logDebugP("Dim Relativ - DimUp");
-        _currentTask = DimTaskEK::EK_DIM_B_UP;
+        startTask(DimTaskEK::EK_DIM_B_UP);
     } else if (direction == 0) {
         logDebugP("Dim Relativ - DimDown");
-        _currentTask = DimTaskEK::EK_DIM_B_DOWN;
+        startTask(DimTaskEK::EK_DIM_B_DOWN);
     }
 }
 
@@ -117,15 +117,15 @@ void DimChannel_EK::koHandleScene(GroupObject &ko)
                 break;
             case SC_EK_OnValueDayNight:
                 switchOnHelper();
-                _currentTask = DimTaskEK::EK_DIM_SOFT_ON;
+                startTask(DimTaskEK::EK_DIM_SOFT_ON);
                 break;
             case SC_EK_SetBrightness:
                 _newValueEK = round(((uint)((knx.paramByte((EK_ParamBlockOffset + EK_ParamBlockSize * channelIndex() + EK_SceneBrightnessA + i))))) * 2.55);
-                _currentTask = DimTaskEK::EK_DIM_B_SET;
+                startTask(DimTaskEK::EK_DIM_B_SET);
                 break;
             case SC_EK_Off:
                 switchOffHelper();
-                _currentTask = DimTaskEK::EK_DIM_SOFT_OFF;
+                startTask(DimTaskEK::EK_DIM_SOFT_OFF);
                 break;
             }
         }
@@ -180,7 +180,7 @@ void DimChannel_EK::setHcl(uint8_t channel, uint16_t kelvin, uint8_t brightness)
         if (ParamEK_hclCheckBrightness == 1 && _isOn) {
             logDebugP("HCL active - Channel: %i Kelvin: %i Brightness: %i", channel, kelvin, brightness);
             _newValueEK = round((uint)(brightness * 2.55));
-            _currentTask = DimTaskEK::EK_DIM_B_SET;
+            startTask(DimTaskEK::EK_DIM_B_SET);
         } else {
             _currentHclValue[0] = brightness;
             _currentHclValue[1] = kelvin;
@@ -219,6 +219,15 @@ void DimChannel_EK::updateDimValue()
 
 //----------------------------- TW Dimmer Task ------------------------------
 
+// Neue Aufgabe starten: _busy zuruecksetzen, damit handleDimGeneric _time
+// fuer die neue Rampe (neues Ziel/Dauer) frisch berechnet, auch wenn eine
+// laufende Rampe unterbrochen wird.
+void DimChannel_EK::startTask(uint8_t task)
+{
+    _currentTask = task;
+    _busy = false;
+}
+
 void DimChannel_EK::dimmerTask()
 {
     _currentMillis = millis();
@@ -256,7 +265,7 @@ void DimChannel_EK::sendDimValue()
 void DimChannel_EK::handleDimGeneric(uint8_t &currentValue, uint8_t targetValue, uint8_t minValue, uint8_t maxValue, bool isAbsolute)
 {
     if (currentValue == targetValue) {
-        _currentTask = DimTaskEK::EK_DIM_STOP;
+        startTask(DimTaskEK::EK_DIM_STOP);
         return;
     }
     if (!_busy) {
@@ -270,7 +279,7 @@ void DimChannel_EK::handleDimGeneric(uint8_t &currentValue, uint8_t targetValue,
         } else if (currentValue > targetValue && currentValue > minValue) {
             currentValue--;
         } else {
-            _currentTask = DimTaskEK::EK_DIM_STOP;
+            startTask(DimTaskEK::EK_DIM_STOP);
             return;
         }
         _busy = true;

@@ -78,13 +78,13 @@ void DimChannel_TW::koHandleSwitch(GroupObject &ko)
     { // on
         switchOnHelper();
         logDebugP(isNight ? "Switch On Night - with value: %i - Kelvin: %i - Brightness: %i" : "Switch On Day - with value: %i - Kelvin: %i - Brightness: %i", value, _currentValueTW[1], _newValueTW[0]);
-        _currentTask = DimTaskTW::TW_DIM_SOFT_ON;
+        startTask(DimTaskTW::TW_DIM_SOFT_ON);
     }
     else
     { // off
         switchOffHelper();
         logDebugP(isNight ? "Switch Off Night - with value: %i" : "Switch Off Day - with value: %i", value);
-        _currentTask = DimTaskTW::TW_DIM_SOFT_OFF;
+        startTask(DimTaskTW::TW_DIM_SOFT_OFF);
     }
 }
 
@@ -92,7 +92,7 @@ void DimChannel_TW::koHandleDimmAbsBrightness(GroupObject &ko)
 {
     _newValueTW[0] = ko.value(DPT_Percent_U8);
     logDebugP("Dim Absolute Brightness - Kelvin: %i - Brightness: %i", _currentValueTW[1], _newValueTW[0]);
-    _currentTask = DimTaskTW::TW_DIM_B_SET;
+    startTask(DimTaskTW::TW_DIM_B_SET);
 }
 
 void DimChannel_TW::koHandleDimmAbsColorTemp(GroupObject &ko)
@@ -105,7 +105,7 @@ void DimChannel_TW::koHandleDimmAbsColorTemp(GroupObject &ko)
         updateDimValue(); // Update KO state for Kelvin
     } else {
         logDebugP("Dim Absolute Kelvin - Kelvin: %i - Brightness: %i", _newValueTW[1], _currentValueTW[0]);
-        _currentTask = DimTaskTW::TW_DIM_K_SET;
+        startTask(DimTaskTW::TW_DIM_K_SET);
     }
 }
 
@@ -117,13 +117,13 @@ void DimChannel_TW::koHandleDimmRelBrightness(GroupObject &ko)
     // direction true = dim up, false = dim down, step = 0 then stop
     if (step == 0) {
         logDebugP("Dim Relativ Brightness - Stop");
-        _currentTask = DimTaskTW::TW_DIM_STOP;
+        startTask(DimTaskTW::TW_DIM_STOP);
     } else if (direction == 1) {
         logDebugP("Dim Relativ Brightness - DimUp");
-        _currentTask = DimTaskTW::TW_DIM_B_UP;
+        startTask(DimTaskTW::TW_DIM_B_UP);
     } else if (direction == 0) {
         logDebugP("Dim Relativ Brightness - DimDown");
-        _currentTask = DimTaskTW::TW_DIM_B_DOWN;
+        startTask(DimTaskTW::TW_DIM_B_DOWN);
     }
 }
 
@@ -135,13 +135,13 @@ void DimChannel_TW::koHandleDimmRelColorTemp(GroupObject &ko)
     // direction true = dim up, false = dim down, step = 0 then stop
     if (step == 0) {
         logDebugP("Dim Relativ Kelvin - Stop");
-        _currentTask = DimTaskTW::TW_DIM_STOP;
+        startTask(DimTaskTW::TW_DIM_STOP);
     } else if (direction == 1) {
         logDebugP("Dim Relativ Kelvin - DimUp");
-        _currentTask = DimTaskTW::TW_DIM_K_UP;
+        startTask(DimTaskTW::TW_DIM_K_UP);
     } else if (direction == 0) {
         logDebugP("Dim Relativ Kelvin - DimDown");
-        _currentTask = DimTaskTW::TW_DIM_K_DOWN;
+        startTask(DimTaskTW::TW_DIM_K_DOWN);
     }
 }
 
@@ -163,24 +163,24 @@ void DimChannel_TW::koHandleScene(GroupObject &ko)
                 break;
             case SC_TW_OnValueDayNight:
                 switchOnHelper();
-                _currentTask = DimTaskTW::TW_DIM_SOFT_ON;
+                startTask(DimTaskTW::TW_DIM_SOFT_ON);
                 break;
             case SC_TW_SetBrightness:
                 _newValueTW[0] = round(((uint)((knx.paramByte((TW_ParamBlockOffset + TW_ParamBlockSize * channelIndex() + TW_SceneBrightnessA + i))))) * 2.55);
-                _currentTask = DimTaskTW::TW_DIM_B_SET;
+                startTask(DimTaskTW::TW_DIM_B_SET);
                 break;
             case SC_TW_SetColorTemp:
                 _newValueTW[1] = ((uint)((knx.paramWord((TW_ParamBlockOffset + TW_ParamBlockSize * channelIndex() + TW_SceneKelvinA + (i * 2))))));
-                _currentTask = DimTaskTW::TW_DIM_K_SET;
+                startTask(DimTaskTW::TW_DIM_K_SET);
                 break;
             case SC_TW_SetBoth:
                 _newValueTW[0] = round(((uint)((knx.paramByte((TW_ParamBlockOffset + TW_ParamBlockSize * channelIndex() + TW_SceneBrightnessA + i))))) * 2.55);
                 _currentValueTW[1] = ((uint)((knx.paramWord((TW_ParamBlockOffset + TW_ParamBlockSize * channelIndex() + TW_SceneKelvinA + (i * 2))))));
-                _currentTask = DimTaskTW::TW_DIM_SOFT_ON;
+                startTask(DimTaskTW::TW_DIM_SOFT_ON);
                 break;
             case SC_EK_Off:
                 switchOffHelper();
-                _currentTask = DimTaskTW::TW_DIM_SOFT_OFF;
+                startTask(DimTaskTW::TW_DIM_SOFT_OFF);
                 break;
             }
         }
@@ -251,13 +251,13 @@ void DimChannel_TW::setHcl(uint8_t channel, uint16_t kelvin, uint8_t brightness)
         if (ParamTW_hclCheckTemperature == 1 && ParamTW_hclCheckBrightness == 1) {
             _currentValueTW[0] = brightness;
             _newValueTW[1] = kelvin;
-            _currentTask = DimTaskTW::TW_DIM_K_SET;
+            startTask(DimTaskTW::TW_DIM_K_SET);
         } else if (ParamTW_hclCheckTemperature == 1 && ParamTW_hclCheckBrightness == 0) {
             _newValueTW[1] = kelvin;
-            _currentTask = DimTaskTW::TW_DIM_K_SET;
+            startTask(DimTaskTW::TW_DIM_K_SET);
         } else if (ParamTW_hclCheckTemperature == 0 && ParamTW_hclCheckBrightness == 1) {
             _newValueTW[0] = brightness;
-            _currentTask = DimTaskTW::TW_DIM_B_SET;
+            startTask(DimTaskTW::TW_DIM_B_SET);
         }
     } else {
         _currentHclValue[0] = brightness;
@@ -296,6 +296,14 @@ void DimChannel_TW::updateDimValue()
 }
 
 //----------------------------- TW Dimmer Task ------------------------------
+
+// Neue Aufgabe starten: _busy zuruecksetzen, damit handleDimGeneric _time
+// fuer die neue Rampe frisch berechnet, auch beim Unterbrechen einer Rampe.
+void DimChannel_TW::startTask(uint8_t task)
+{
+    _currentTask = task;
+    _busy = false;
+}
 
 void DimChannel_TW::dimmerTask()
 {
@@ -388,7 +396,7 @@ void DimChannel_TW::sendDimValue()
 void DimChannel_TW::handleDimGeneric(uint16_t &currentValue, uint16_t targetValue, uint16_t minValue, uint16_t maxValue, bool isAbsolute)
 {
     if (currentValue == targetValue) {
-        _currentTask = DimTaskTW::TW_DIM_STOP;
+        startTask(DimTaskTW::TW_DIM_STOP);
         return;
     }
     if (!_busy) {
@@ -402,7 +410,7 @@ void DimChannel_TW::handleDimGeneric(uint16_t &currentValue, uint16_t targetValu
         } else if (currentValue > targetValue && currentValue > minValue) {
             currentValue--;
         } else {
-            _currentTask = DimTaskTW::TW_DIM_STOP;
+            startTask(DimTaskTW::TW_DIM_STOP);
             return;
         }
         _busy = true;

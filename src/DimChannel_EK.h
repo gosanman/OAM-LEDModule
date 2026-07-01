@@ -78,6 +78,7 @@ private:
     void updateDimValue();
 
    // dimmer task
+    void startTask(uint8_t task); // setzt neue Aufgabe und erzwingt _time-Neuberechnung
     void dimmerTask();
     void handleDimGeneric(uint8_t& currentValue, uint8_t targetValue, uint8_t minValue, uint8_t maxValue, bool isAbsolute);
     bool _busy = false;
