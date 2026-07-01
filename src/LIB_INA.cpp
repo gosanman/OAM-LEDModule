@@ -4,6 +4,7 @@ INASensor::INASensor(TwoWire *wire, uint8_t i2cAddress)
 {
   _wire = wire;
   _address = i2cAddress;
+  _chipType = INA_UNKNOWN; // definierter Startwert, falls detectChipType() fehlschlägt
   _shuntR = 0.0;
   _maxCurrent = 0.0;
   _currentLSB = 0.0;
@@ -362,7 +363,10 @@ uint16_t INASensor::read16(uint8_t reg)
   _wire->requestFrom(_address, (uint8_t)2);
   if (_wire->available() < 2)
     return 0;
-  return (_wire->read() << 8) | _wire->read();
+  // Reihenfolge der read()-Aufrufe explizit festlegen (Operanden-Auswertung ist in C++ unspezifiziert)
+  uint8_t b1 = _wire->read(); // MSB zuerst vom Bus
+  uint8_t b0 = _wire->read();
+  return ((uint16_t)b1 << 8) | b0;
 }
 
 uint32_t INASensor::read24(uint8_t reg)
@@ -373,7 +377,10 @@ uint32_t INASensor::read24(uint8_t reg)
   _wire->requestFrom(_address, (uint8_t)3);
   if (_wire->available() < 3)
     return 0;
-  return (_wire->read() << 16) | (_wire->read() << 8) | _wire->read();
+  uint8_t b2 = _wire->read(); // MSB zuerst vom Bus
+  uint8_t b1 = _wire->read();
+  uint8_t b0 = _wire->read();
+  return ((uint32_t)b2 << 16) | ((uint32_t)b1 << 8) | b0;
 }
 
 uint64_t INASensor::read40(uint8_t reg)
@@ -384,7 +391,12 @@ uint64_t INASensor::read40(uint8_t reg)
   _wire->requestFrom(_address, (uint8_t)5);
   if (_wire->available() < 5)
     return 0;
-  return ((uint64_t)_wire->read() << 32) | ((uint64_t)_wire->read() << 24) | ((uint64_t)_wire->read() << 16) | ((uint64_t)_wire->read() << 8) | _wire->read();
+  uint8_t b4 = _wire->read(); // MSB zuerst vom Bus
+  uint8_t b3 = _wire->read();
+  uint8_t b2 = _wire->read();
+  uint8_t b1 = _wire->read();
+  uint8_t b0 = _wire->read();
+  return ((uint64_t)b4 << 32) | ((uint64_t)b3 << 24) | ((uint64_t)b2 << 16) | ((uint64_t)b1 << 8) | b0;
 }
 
 void INASensor::write16(uint8_t reg, uint16_t value)

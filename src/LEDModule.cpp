@@ -37,16 +37,16 @@ void LEDModule::setup()
     {
     case 0: // BOARD_KNXLED_DK_06_V10 or V12 - LED-DK-06x24V
         operatinModeSelect = ParamAPP_OperatingMode;
-        logInfoP("Device: %ix24V - 6-Kanal OpenKNX LED Dimmer", DEVICE_ID);
+        logInfoP("Device: %sx24V - 6-Kanal OpenKNX LED Dimmer", DEVICE_ID);
         break;
     case 1: // BOARD_KNXLED_DK_12_V10 or V12 - LED-DK-12x24V
         operatinModeSelect = ParamAPP_OperatingMode - 10;
-        logInfoP("Device: %ix24V - 12-Kanal OpenKNX LED Dimmer", DEVICE_ID);
+        logInfoP("Device: %sx24V - 12-Kanal OpenKNX LED Dimmer", DEVICE_ID);
         break;
     }
 
     // Debug
-    logDebugP("CONFIG - Controller Device: %i (%i) - Operating Mode: %i - PWM freq: %i Hz - DayNight: %i", 
+    logDebugP("CONFIG - Controller Device: %s (%i) - Operating Mode: %i - PWM freq: %i Hz - DayNight: %i",
               DEVICE_ID, deviceSelect, operatinModeSelect, pwmFreqSelect, ParamAPP_DayNight);
 
     // Init I2C connection and Lib
@@ -336,8 +336,8 @@ void LEDModule::loop1()
         checkI2cConnection();
         _timerCheckI2cConnection = millis();
     }
-    // run task of all channels if pca connection ok
-    if (pcaI2cConnection) 
+    // run task of all channels if pca connection ok and no power fault latched
+    if (pcaI2cConnection && !_powerFault)
     {
         for (int i = 0; i < usedChannels; i++)
             channel[i]->task();
@@ -576,7 +576,24 @@ byte LEDModule::readRegister(byte registerAddress)
 
 void LEDModule::savePower()
 {
-    processBeforeRestart();
+    processBeforeRestart(); // ALL_LED_OFF -> alle Ausgänge sofort aus
+    _powerFault = true;     // Latch: verhindert Neubestromen über channel->task()
+}
+
+// Fehler-Latch setzen/lösen. Bei Entwarnung wird das ALL_LED_OFF-Bit gelöscht,
+// die Ausgänge kehren zu ihren im PCA9685 gespeicherten Registerwerten zurück.
+void LEDModule::setPowerFault(bool state)
+{
+    if (_powerFault == state)
+        return;
+    _powerFault = state;
+    if (!state)
+    {
+        Wire1.beginTransmission(I2C_PCA9685_DEVICE_ADDRESS);
+        Wire1.write(0xFD); // ALL_LED_OFF_H
+        Wire1.write(0x00); // Bit 4 löschen -> Ausgänge wieder freigeben
+        Wire1.endTransmission();
+    }
 }
 
 bool LEDModule::initI2cConnection()

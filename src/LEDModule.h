@@ -34,6 +34,7 @@ public:
 
     void processBeforeRestart();
     void savePower();
+    void setPowerFault(bool state);
 
     bool getPcaI2cConnectionState();
     uint8_t getUsedChannels();
@@ -59,6 +60,7 @@ private:
     uint32_t _timerCheckI2cConnection = 0;
     uint32_t _timerCheckHclChannel = 0;
     bool doResetI2c = false;
+    bool _powerFault = false; // gesetzt bei Hardware-Alarm (Überstrom u.Ä.), sperrt das Neubestromen der Kanäle
 
     // hcl channels
     uint8_t hclBrightness = 0;

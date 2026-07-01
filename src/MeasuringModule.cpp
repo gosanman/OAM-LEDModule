@@ -124,8 +124,9 @@ void MeasuringModule::getSingleMeasurement()
             totalEnergy_Wh += (busVoltage_V * current_A * elapsedTime_s) / 3600.0;
             lastUpdateTime = currentTime;
         } else if (_ina.getChipType() == INA228_TYPE) {
-            totalEnergy_Wh += _ina.getEnergy() - lastEnergy_Wh;
-            lastEnergy_Wh = _ina.getEnergy();
+            double energy = _ina.getEnergy(); // nur einmal lesen (Register akkumuliert kontinuierlich)
+            totalEnergy_Wh += energy - lastEnergy_Wh;
+            lastEnergy_Wh = energy;
         }
     }
     // run Temp Measurment if sensor present
@@ -156,40 +157,28 @@ void MeasuringModule::getAlertValues()
         return;
     
     uint8_t flags = _ina.getAlertFlags();
-    if (flags == 0)
+    if (flags == 0) {
+        openknxLEDModule.setPowerFault(false); // Entwarnung: kein Alert mehr -> Ausgänge freigeben
         return;
+    }
     
-    // Check each alert flag and log which one triggered
-    if (flags & (1 << 0)) {
-        logErrorP("Alert: Power Over-Limit");
-        openknx.console.writeDiagenoseKo("AL PWR OVR");
-        openknxLEDModule.savePower();
+    // Alle Alert-Typen tabellarisch prüfen (Bit -> Log-/Diagnosetext)
+    static const struct { uint8_t bit; const char *logMsg; const char *diagnose; } alerts[] = {
+        {0, "Alert: Power Over-Limit",                 "AL PWR OVR"},
+        {1, "Alert: Bus Undervoltage",                 "AL BUS UND"},
+        {2, "Alert: Bus Overvoltage",                  "AL BUS OVR"},
+        {3, "Alert: Shunt Undervoltage / Overcurrent", "AL SHNT UND"},
+        {4, "Alert: Shunt Overvoltage / Overcurrent",  "AL OVER CUR"},
+        {5, "Alert: Temperature Overlimit",            "AL TEMP OVR"},
+    };
+
+    for (const auto &a : alerts) {
+        if (flags & (1 << a.bit)) {
+            logErrorP("%s", a.logMsg);
+            openknx.console.writeDiagenoseKo("%s", a.diagnose);
+        }
     }
-    if (flags & (1 << 1)) {
-        logErrorP("Alert: Bus Undervoltage");
-        openknx.console.writeDiagenoseKo("AL BUS UND");
-        openknxLEDModule.savePower();
-    }
-    if (flags & (1 << 2)) {
-        logErrorP("Alert: Bus Overvoltage");
-        openknx.console.writeDiagenoseKo("AL BUS OVR");
-        openknxLEDModule.savePower();
-    }
-    if (flags & (1 << 3)) {
-        logErrorP("Alert: Shunt Undervoltage / Overcurrent");
-        openknx.console.writeDiagenoseKo("AL SHNT UND");
-        openknxLEDModule.savePower();
-    }
-    if (flags & (1 << 4)) {
-        logErrorP("Alert: Shunt Overvoltage / Overcurrent");
-        openknx.console.writeDiagenoseKo("AL OVER CUR");
-        openknxLEDModule.savePower();
-    }
-    if (flags & (1 << 5)) {
-        logErrorP("Alert: Temperature Overlimit");
-        openknx.console.writeDiagenoseKo("AL TEMP OVR");
-        openknxLEDModule.savePower();
-    }
+    openknxLEDModule.savePower(); // einmal abschalten/latchen, sobald irgendein Alert ansteht
 }
 
 void MeasuringModule::checkAlarmDefinitions() {
@@ -275,6 +264,7 @@ bool MeasuringModule::processCommand(const std::string cmd, bool diagnoseKo)
     } else if (cmd == "ccenergy") {
         _ina.resetEnergy();
         totalEnergy_Wh = 0.00;
+        lastEnergy_Wh = 0.00; // Baseline mit HW-Akkumulator zurücksetzen (sonst negatives Delta beim nächsten Read)
         openknx.flash.save(true); // force save
         if (diagnoseKo) { openknx.console.writeDiagenoseKo("E cleared"); }
         openknx.logger.logWithPrefixAndValues("Energy", "Clear counter finish");        
@@ -355,7 +345,11 @@ bool MeasuringModule::initI2cConnectionIna()
         return false;
     }
     // Set default values for sensor
-    _ina.configureAlert(ALERT_OVER_CURRENT, OVER_CURRENT, true, true);     // Abgesichert mit 6 A = 6000 mA
+    _ina.configureAlert(ALERT_OVER_CURRENT, OVER_CURRENT, true, true);     // HW-Schutz fest auf 6 A (ETS-Schnellwertalarm ist separat)
+    // INA228: HW-Energieregister läuft seit Power-on – Baseline angleichen,
+    // damit die erste Messung keinen Altbestand auf den Flash-Wert addiert.
+    if (_ina.getChipType() == INA228_TYPE)
+        lastEnergy_Wh = _ina.getEnergy();
     logInfoP("Init messurment I2C connection INA%i sucessful", _ina.getChipType());
     doResetI2cIna = false;
     inaI2cConnection = true;
