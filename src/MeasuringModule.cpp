@@ -286,9 +286,6 @@ bool MeasuringModule::processCommand(const std::string cmd, bool diagnoseKo)
         return false;
         }
         return true;
-    } else if (cmd == "limits") {
-        //openknx.logger.logWithPrefixAndValues("Alert Limit", "%i mV", _ina.getAlertLimit());
-        return true;
     }
     return false;
 }

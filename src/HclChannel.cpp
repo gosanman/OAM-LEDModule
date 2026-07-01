@@ -53,44 +53,34 @@ void HclChannel::loop(uint16_t &out_k, uint8_t &out_b)
     uint16_t response_k = minT;
     uint8_t response_b = minB;
 
+    // Zeitfenster je nach Konfigurationstyp bestimmen ...
+    uint16_t startMin = 0;
+    uint16_t stopMin = 0;
     if (_type == PT_hclType_sun)
     {
         OpenKNX::TimeOnly sunRise = openknx.sun.sunRiseLocalTime();
         OpenKNX::TimeOnly sunSet = openknx.sun.sunSetLocalTime();
-
-        uint16_t startMin = applyOffset(sunRise.hour * 60 + sunRise.minute, ParamHCL_offsetRiseType, ParamHCL_offsetRiseMin);
-        uint16_t stopMin = applyOffset(sunSet.hour * 60 + sunSet.minute, ParamHCL_offsetSetType, ParamHCL_offsetSetMin);
-
-        uint16_t elapsedMin = 0;
-        uint16_t totalMin = 0;
-        if (inTimeWindow(currentMin, startMin, stopMin, elapsedMin, totalMin))
-        {
-            response_k = getCircadianValue(elapsedMin, totalMin, minT, maxT, 0.70f, 0.70f);
-            response_b = static_cast<uint8_t>(getCircadianValue(elapsedMin, totalMin, minB, maxB, 0.90f, 1.45f));
-            logDebugP("Sonnenprofil: elapsed=%i total=%i -> %i K / %i %%", elapsedMin, totalMin, response_k, response_b);
-        }
-        else
-        {
-            logDebugP("Ausserhalb Sonnenfenster (%i:%i -> %i:%i), nutze Minimum", startMin / 60, startMin % 60, stopMin / 60, stopMin % 60);
-        }
+        startMin = applyOffset(sunRise.hour * 60 + sunRise.minute, ParamHCL_offsetRiseType, ParamHCL_offsetRiseMin);
+        stopMin = applyOffset(sunSet.hour * 60 + sunSet.minute, ParamHCL_offsetSetType, ParamHCL_offsetSetMin);
     }
     else if (_type == PT_hclType_time)
     {
-        uint16_t startMin = normalizeMinute(ParamHCL_startTimeHour * 60 + ParamHCL_startTimeMinute);
-        uint16_t stopMin = normalizeMinute(ParamHCL_endTimeHour * 60 + ParamHCL_endTimeMinute);
+        startMin = normalizeMinute(ParamHCL_startTimeHour * 60 + ParamHCL_startTimeMinute);
+        stopMin = normalizeMinute(ParamHCL_endTimeHour * 60 + ParamHCL_endTimeMinute);
+    }
 
-        uint16_t elapsedMin = 0;
-        uint16_t totalMin = 0;
-        if (inTimeWindow(currentMin, startMin, stopMin, elapsedMin, totalMin))
-        {
-            response_k = getCircadianValue(elapsedMin, totalMin, minT, maxT, 0.70f, 0.70f);
-            response_b = static_cast<uint8_t>(getCircadianValue(elapsedMin, totalMin, minB, maxB, 0.90f, 1.45f));
-            logDebugP("Zeitprofil: elapsed=%i total=%i -> %i K / %i %%", elapsedMin, totalMin, response_k, response_b);
-        }
-        else
-        {
-            logDebugP("Ausserhalb Zeitspanne %i:%i - %i:%i", ParamHCL_startTimeHour, ParamHCL_startTimeMinute, ParamHCL_endTimeHour, ParamHCL_endTimeMinute);
-        }
+    // ... und gemeinsam auswerten
+    uint16_t elapsedMin = 0;
+    uint16_t totalMin = 0;
+    if (inTimeWindow(currentMin, startMin, stopMin, elapsedMin, totalMin))
+    {
+        response_k = getCircadianValue(elapsedMin, totalMin, minT, maxT, 0.70f, 0.70f);
+        response_b = static_cast<uint8_t>(getCircadianValue(elapsedMin, totalMin, minB, maxB, 0.90f, 1.45f));
+        logDebugP("HCL-Profil: elapsed=%i total=%i -> %i K / %i %%", elapsedMin, totalMin, response_k, response_b);
+    }
+    else
+    {
+        logDebugP("Ausserhalb HCL-Fenster (%i:%i -> %i:%i), nutze Minimum", startMin / 60, startMin % 60, stopMin / 60, stopMin % 60);
     }
 
     setStatus(response_k, response_b);

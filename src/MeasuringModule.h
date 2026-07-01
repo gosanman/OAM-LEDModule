@@ -79,12 +79,8 @@ private:
     unsigned long currentTime = 0;
     unsigned long lastUpdateTime = 0;
 
-    float shuntVoltage_mV = 0.0;
-    float loadVoltage_V = 0.0;
     float busVoltage_V = 0.0;
-    float current_mA = 0.0;
     float current_A = 0.0;
-    float power_mW = 0.0;
     float power_W = 0.0;
     float totalEnergy_Wh = 0.0;
     float lastEnergy_Wh = 0.0;
