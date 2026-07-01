@@ -143,6 +143,11 @@ void DimChannel_EK::switchOnHelper()
 
 void DimChannel_EK::switchOffHelper()
 {
+    // aktuellen An-Wert nur sichern, wenn der Kanal an ist und nicht bereits
+    // ausgeschaltet wird - sonst ueberschreibt wiederholtes AUS (oder ein AUS
+    // waehrend der Abdimmrampe) den echten letzten Helligkeitswert
+    if (_currentTask == DimTaskEK::EK_DIM_SOFT_OFF || _currentValueEK == 0)
+        return;
     if (isNight) {
         _lastNightValue = _currentValueEK;
     } else {

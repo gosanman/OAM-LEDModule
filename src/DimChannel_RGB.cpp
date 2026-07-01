@@ -234,14 +234,16 @@ void DimChannel_RGB::koHandleDimmRelRGB(GroupObject &ko, uint8_t index)
     if (step == 0) {
         logDebugP("Dim Relativ ColorIndex: %i - Stop", index);
         startTask(DimTaskRGB::RGB_DIM_STOP);
-    } else if (direction == 1) {
-        logDebugP("Dim Relativ ColorIndex: %i - Up", index);
-        _newValueRGB[index] = _valueMax;
+    } else {
+        // nur den adressierten Kanal bewegen: die anderen beiden auf ihren
+        // aktuellen Wert als Ziel setzen, sonst zieht handleDimGeneric (das
+        // alle drei proportional dimmt) sie Richtung veralteter _newValueRGB
+        _newValueRGB[0] = _currentValueRGB[0];
+        _newValueRGB[1] = _currentValueRGB[1];
+        _newValueRGB[2] = _currentValueRGB[2];
+        _newValueRGB[index] = (direction == 1) ? _valueMax : _valueMin;
+        logDebugP("Dim Relativ ColorIndex: %i - %s", index, (direction == 1) ? "Up" : "Down");
         startTask(DimTaskRGB::RGB_DIM_RGB_REL);
-    } else if (direction == 0) {
-        logDebugP("Dim Relativ ColorIndex: %i - Down", index);
-        _newValueRGB[index] = _valueMin;
-        startTask(DimTaskRGB::RGB_DIM_RGB_REL);    
     }
 }
 
