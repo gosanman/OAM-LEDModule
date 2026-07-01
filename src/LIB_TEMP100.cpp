@@ -16,7 +16,7 @@ void TMP100_WE::reset_TMP100(){
 
 void TMP100_WE::setResolution(TMP100_RESOLUTION_MODE resolution){
     deviceResolutionMode = resolution;
-    uint8_t currentConfReg = readRegister(TMP100_CONF_REG);
+    uint8_t currentConfReg = readRegister(TMP100_CONF_REG, 1);
     currentConfReg &= ~(0x60);
     currentConfReg |= deviceResolutionMode;
     writeRegister(TMP100_CONF_REG, currentConfReg);
@@ -32,28 +32,32 @@ float TMP100_WE::getTemperature(){
     private functions
 *************************************************/
 
-void TMP100_WE::writeRegister(uint8_t reg, uint16_t val){
+void TMP100_WE::writeRegister(uint8_t reg, uint8_t val){
+  // Das TMP100-Konfigregister ist 1 Byte breit -> nur ein Datenbyte senden
   _wire->beginTransmission(i2cAddress);
-  uint8_t lVal = val & 255;
-  uint8_t hVal = val >> 8;
   _wire->write(reg);
-  _wire->write(hVal);
-  _wire->write(lVal);
+  _wire->write(val);
   _wire->endTransmission();
 }
-  
-uint16_t TMP100_WE::readRegister(uint8_t reg){
-  uint8_t MSByte = 0, LSByte = 0;
+
+uint16_t TMP100_WE::readRegister(uint8_t reg, uint8_t bytes){
   uint16_t regValue = 0;
   _wire->beginTransmission(i2cAddress);
   _wire->write(reg);
   _wire->endTransmission(false);
-  _wire->requestFrom(static_cast<uint8_t>(i2cAddress),static_cast<uint8_t>(2));
-  if(_wire->available()){
-    MSByte = _wire->read();
-    LSByte = _wire->read();
+  _wire->requestFrom(static_cast<uint8_t>(i2cAddress), bytes);
+  if(bytes >= 2){
+    uint8_t MSByte = 0, LSByte = 0;
+    if(_wire->available() >= 2){
+      MSByte = _wire->read();
+      LSByte = _wire->read();
+    }
+    regValue = (MSByte<<8) + LSByte;
+  } else {
+    if(_wire->available()){
+      regValue = _wire->read();
+    }
   }
-  regValue = (MSByte<<8) + LSByte;
   return regValue;
 }
     

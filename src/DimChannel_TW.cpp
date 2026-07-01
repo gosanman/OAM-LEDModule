@@ -359,7 +359,11 @@ void DimChannel_TW::sendDimValue()
     }
     */
     // Lineare Interpolation
-    float t = (float)(_currentValueTW[1] - m_colortempww) / (m_colortempcw - m_colortempww);
+    float t;
+    if (m_colortempcw == m_colortempww) // WW und KW identisch konfiguriert -> Division durch 0 vermeiden
+        t = 0.0f;
+    else
+        t = (float)(_currentValueTW[1] - m_colortempww) / (m_colortempcw - m_colortempww);
     if (t < 0) t = 0;
     if (t > 1) t = 1;
     uint8_t percentWW = (uint8_t)((1.0f - t) * _currentValueTW[0]);

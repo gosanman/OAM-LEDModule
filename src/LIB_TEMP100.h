@@ -32,8 +32,8 @@ class TMP100_WE
     protected:
         TwoWire *_wire;
         int i2cAddress;
-        void writeRegister(uint8_t reg, uint16_t val);
-        uint16_t readRegister(uint8_t reg);
+        void writeRegister(uint8_t reg, uint8_t val);        // Config-Register ist 1 Byte
+        uint16_t readRegister(uint8_t reg, uint8_t bytes = 2); // Temp = 2 Byte, Config = 1 Byte
         TMP100_RESOLUTION_MODE deviceResolutionMode;
 };
 
