@@ -8,7 +8,7 @@ class HclChannel
 {
 public:
     void setup(uint8_t index);
-    void loop(uint16_t &out_k, uint8_t &out_b);
+    bool loop(uint16_t &out_k, uint8_t &out_b); // true, wenn gültige Werte geschrieben wurden
 
 private:
     std::string logPrefix();

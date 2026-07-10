@@ -39,10 +39,10 @@ void HclChannel::setup(uint8_t index)
     }
 }
 
-void HclChannel::loop(uint16_t &out_k, uint8_t &out_b)
+bool HclChannel::loop(uint16_t &out_k, uint8_t &out_b)
 {
     if (!_isConfigured || !openknx.sun.isSunCalculatioValid())
-        return;
+        return false; // keine gültigen Werte -> Aufrufer soll nichts broadcasten
 
     uint16_t minT = ParamHCL_colorTempMin;
     uint16_t maxT = ParamHCL_colorTempMax;
@@ -86,6 +86,7 @@ void HclChannel::loop(uint16_t &out_k, uint8_t &out_b)
     setStatus(response_k, response_b);
     out_k = response_k;
     out_b = response_b;
+    return true;
 }
 
 // Modern HCL profile:

@@ -210,6 +210,10 @@ void DimChannel_TW::switchOnHelper()
 
 void DimChannel_TW::switchOffHelper()
 {
+    // aktuellen An-Wert nur sichern, wenn der Kanal an ist und nicht bereits
+    // ausgeschaltet wird - sonst überschreibt wiederholtes AUS den letzten Wert mit 0
+    if (_currentTask == DimTaskTW::TW_DIM_SOFT_OFF || _currentValueTW[0] == 0)
+        return;
     if (isNight) {
         _lastNightValue[0] = _currentValueTW[0];
         _lastNightValue[1] = _currentValueTW[1];

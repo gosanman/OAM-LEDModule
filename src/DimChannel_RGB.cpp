@@ -308,9 +308,14 @@ void DimChannel_RGB::switchOnHelper()
 
 void DimChannel_RGB::switchOffHelper()
 {
+    // aktuelle An-Farbe nur sichern, wenn der Kanal an ist und nicht bereits
+    // ausgeschaltet wird - sonst überschreibt wiederholtes AUS die letzte Farbe mit Schwarz
+    if (_currentTask == DimTaskRGB::RGB_DIM_SOFT_OFF ||
+        (_currentValueRGB[0] == 0 && _currentValueRGB[1] == 0 && _currentValueRGB[2] == 0))
+        return;
     if (isNight) {
         _lastNightValue[0] = _currentValueRGB[0];
-        _lastNightValue[1] = _currentValueRGB[1];   
+        _lastNightValue[1] = _currentValueRGB[1];
         _lastNightValue[2] = _currentValueRGB[2];
     } else {
         _lastDayValue[0] = _currentValueRGB[0];

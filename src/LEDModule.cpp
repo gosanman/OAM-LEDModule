@@ -314,13 +314,16 @@ void LEDModule::loop()
     {
         for (int ch = 0; ch < MAXCHANNELSHCL; ch++)
         {
-            hclchannel[ch]->loop(hclKelvin, hclBrightness);
+            // nur broadcasten, wenn der HCL-Kanal gültige Werte geliefert hat
+            // (sonst würden 0-/Vorgänger-Werte eingeschaltete Kanäle dunkeldimmen)
+            if (!hclchannel[ch]->loop(hclKelvin, hclBrightness))
+                continue;
             logDebugP("Broadcast values from HCL%i", ch+1);
-            for (int i = 0; i < usedChannels; i++) 
+            for (int i = 0; i < usedChannels; i++)
             {
                 channel[i]->setHcl(ch, hclKelvin, hclBrightness);
             }
-        }    
+        }
         _timerCheckHclChannel = millis();
     }
 }
@@ -357,7 +360,7 @@ void LEDModule::setHwChannelValuePWM(byte channel, word start, word end, int cur
 void LEDModule::processInputKo(GroupObject &ko)
 {
     uint16_t koNum = ko.asap();
-    if (koNum < EK_KoOffset) return;        // ignore KO smaler than EK_KoOffset - no Common
+    if (koNum < EK_KoOffset && koNum != APP_KoDayNight) return; // ignore KOs below EK block, außer gemeinsame KOs (Tag/Nacht)
     logDebugP("Received KO %i", koNum);
 
     // EK Dimmer Class
