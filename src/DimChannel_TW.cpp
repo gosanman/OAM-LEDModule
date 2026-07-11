@@ -253,14 +253,14 @@ void DimChannel_TW::setHcl(uint8_t channel, uint16_t kelvin, uint8_t brightness)
     if (ParamTW_hclStart == PT_hclStart_during && _isOn) { // HCL active when channel is on
         logDebugP("HCL active - Channel: %i Kelvin: %i Brightness: %i", channel, kelvin, brightness);
         if (ParamTW_hclCheckTemperature == 1 && ParamTW_hclCheckBrightness == 1) {
-            _currentValueTW[0] = brightness;
+            _currentValueTW[0] = round(brightness * 2.55); // HCL-Helligkeit 0-100 -> interne 0-255
             _newValueTW[1] = kelvin;
             startTask(DimTaskTW::TW_DIM_K_SET);
         } else if (ParamTW_hclCheckTemperature == 1 && ParamTW_hclCheckBrightness == 0) {
             _newValueTW[1] = kelvin;
             startTask(DimTaskTW::TW_DIM_K_SET);
         } else if (ParamTW_hclCheckTemperature == 0 && ParamTW_hclCheckBrightness == 1) {
-            _newValueTW[0] = brightness;
+            _newValueTW[0] = round(brightness * 2.55); // HCL-Helligkeit 0-100 -> interne 0-255
             startTask(DimTaskTW::TW_DIM_B_SET);
         }
     } else {

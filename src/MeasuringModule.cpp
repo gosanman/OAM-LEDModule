@@ -325,8 +325,8 @@ bool MeasuringModule::processCommand(const std::string cmd, bool diagnoseKo)
     const std::string valueStr = cmd.substr(cmd.find(' ') + 1);
     char* end = nullptr;
     float value = std::strtof(valueStr.c_str(), &end);
-    // Prüfung: konvertiert und keine Reste im String
-    if (end != valueStr.c_str() && *end == '\0') {
+    // Prüfung: konvertiert, keine Reste im String, endlich und nicht negativ
+    if (end != valueStr.c_str() && *end == '\0' && isfinite(value) && value >= 0.0f) {
         totalEnergy_Wh = value;
         openknx.flash.save(true); // force save
         if (diagnoseKo) { openknx.console.writeDiagenoseKo("E set ok"); }
