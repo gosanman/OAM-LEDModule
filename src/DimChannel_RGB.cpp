@@ -162,18 +162,20 @@ void DimChannel_RGB::koHandleDimmAbsRGB(GroupObject &ko, uint8_t index)
 
 void DimChannel_RGB::koHandleDimmAbsHSV(GroupObject &ko, uint8_t index)
 {
-    if (index == 0) { // H
-        _currentValueHSV[index] = ko.value(DPT_Angle);   // KNX-Einheit: 0-360
-    } else { // S or V
-        _currentValueHSV[index] = ko.value(DPT_Scaling); // KNX-Einheit: 0-100
-    }
-    // _currentValueHSV in KNX-Einheiten (H 0-360, S/V 0-100), hsvToRGB erwartet je 0-255
-    // -> hier umrechnen (analog zum *2.55 im R/G/B-Pfad)
-    uint8_t h255 = (uint8_t)round(_currentValueHSV[0] * 255.0 / 360.0);
-    uint8_t s255 = (uint8_t)round(_currentValueHSV[1] * 2.55);
-    uint8_t v255 = (uint8_t)round(_currentValueHSV[2] * 2.55);
-    LEDHelper::hsvToRGB(h255, s255, v255, _newValueRGB[0], _newValueRGB[1], _newValueRGB[2]);
-    logDebugP("Dim Absolute HSV index: %i withe value: %i", index, _currentValueHSV[index]);
+    // Farbe kanonisch aus dem aktuellen RGB ableiten (H 0-360, S/V 0-100), nur die
+    // adressierte Komponente aus dem KO übernehmen und zurück nach RGB wandeln. So gibt es
+    // keinen persistenten _currentValueHSV-Zustand mit gemischten Einheiten mehr.
+    uint16_t h, s, v;
+    LEDHelper::rgbToHSV(_currentValueRGB[0], _currentValueRGB[1], _currentValueRGB[2], h, s, v);
+    if (index == 0)
+        h = ko.value(DPT_Angle);   // 0-360
+    else if (index == 1)
+        s = ko.value(DPT_Scaling); // 0-100
+    else
+        v = ko.value(DPT_Scaling); // 0-100
+    LEDHelper::hsvToRGB((uint8_t)round(h * 255.0 / 360.0), (uint8_t)round(s * 2.55), (uint8_t)round(v * 2.55),
+                        _newValueRGB[0], _newValueRGB[1], _newValueRGB[2]);
+    logDebugP("Dim Absolute HSV index: %i (H:%i S:%i V:%i)", index, h, s, v);
     startTask(DimTaskRGB::RGB_DIM_RGB_SET);
 }
 
@@ -395,7 +397,9 @@ void DimChannel_RGB::updateDimValue()
 {
     LEDHelper::rgbToHSV(_currentValueRGB[0], _currentValueRGB[1], _currentValueRGB[2], _currentValueHSV[0], _currentValueHSV[1], _currentValueHSV[2]);
     uint32_t rgb = (_currentValueRGB[0] << 16) | (_currentValueRGB[1] << 8) | _currentValueRGB[2];
-    uint32_t hsv = ((uint8_t)round((double)_currentValueHSV[0] * 255.0 / 360.0) << 16) | (_currentValueHSV[1] << 8) | _currentValueHSV[2];
+    // 24-Bit-HSV-Status durchgängig als 3x 0-255 packen (konsistent zum 0-255-Eingang von
+    // koHandleDimmAbsColorHSV); die Einzel-Status-KOs bleiben in KNX-Einheiten (0-360 / 0-100).
+    uint32_t hsv = ((uint32_t)round(_currentValueHSV[0] * 255.0 / 360.0) << 16) | ((uint32_t)round(_currentValueHSV[1] * 2.55) << 8) | (uint32_t)round(_currentValueHSV[2] * 2.55);
     _isOn = (_currentValueRGB[0] > 0 || _currentValueRGB[1] > 0 || _currentValueRGB[2] > 0);
     logDebugP("Send DimValue to KO - OnOff: %i RGB: #%.2X%.2X%.2X HSV: %i, %i, %i", _isOn, _currentValueRGB[0], _currentValueRGB[1], _currentValueRGB[2],
               _currentValueHSV[0], _currentValueHSV[1], _currentValueHSV[2]);
