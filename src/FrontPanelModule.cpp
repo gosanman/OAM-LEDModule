@@ -120,6 +120,7 @@ bool FrontPanelModule::processCommand(const std::string cmd, bool diagnoseKo)
             else
                 _display.write(i);
         }
+        _display.cp437(false); // Standard-Font wiederherstellen, sonst rendert das Grad-Zeichen (247) falsch
         _display.display();
         _lastButtonPressed = millis();
         _runScreenUpdate = true;
@@ -163,6 +164,13 @@ void FrontPanelModule::handleButtonPress(uint8_t button)
 {
     if (!isButtonDebounced(button))
         return;
+
+    // Aus dem abgeschalteten Zustand weckt jede Taste nur den Bildschirm (ohne Aktion)
+    if (currentscreen == SCREEN_OFF)
+    {
+        currentscreen = SCREEN_INFORMATION;
+        return;
+    }
 
     switch (button)
     {

@@ -405,6 +405,7 @@ void DimChannel_TW::resend()
 void DimChannel_TW::handleDimGeneric(uint16_t &currentValue, uint16_t targetValue, uint16_t minValue, uint16_t maxValue, bool isAbsolute)
 {
     if (currentValue == targetValue) {
+        sendDimValue(); // aktuellen Zustand (auch direkt gesetzte Kelvin) flushen, falls die Helligkeit gar nicht rampt
         startTask(DimTaskTW::TW_DIM_STOP);
         return;
     }
