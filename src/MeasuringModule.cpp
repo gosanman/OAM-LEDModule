@@ -124,12 +124,23 @@ void MeasuringModule::getSingleMeasurement()
         if (_ina.getChipType() == INA226_TYPE) {
             currentTime = millis();
             elapsedTime_s = (currentTime - lastUpdateTime) / 1000.0;
-            totalEnergy_Wh += (busVoltage_V * current_A * elapsedTime_s) / 3600.0;
+            // nur plausible Zeitscheiben integrieren - verhindert einen riesigen Sprung nach
+            // einem I2C-Ausfall, waehrend dessen lastUpdateTime eingefroren war
+            if (elapsedTime_s > 0.0 && elapsedTime_s < 30.0)
+                totalEnergy_Wh += (busVoltage_V * current_A * elapsedTime_s) / 3600.0;
             lastUpdateTime = currentTime;
         } else if (_ina.getChipType() == INA228_TYPE) {
             double energy = _ina.getEnergy(); // nur einmal lesen (Register akkumuliert kontinuierlich)
-            totalEnergy_Wh += energy - lastEnergy_Wh;
-            lastEnergy_Wh = energy;
+            if (energy == 0.0) {
+                // fehlgeschlagener Read (read40 liefert 0) -> Sample verwerfen, Baseline unveraendert
+            } else if (energy < lastEnergy_Wh) {
+                // 40-bit-ENERGY-Register uebergelaufen (oder extern zurueckgesetzt)
+                // -> Baseline neu ansetzen, negativen Sprung nicht in den Zaehler schreiben
+                lastEnergy_Wh = energy;
+            } else {
+                totalEnergy_Wh += energy - lastEnergy_Wh;
+                lastEnergy_Wh = energy;
+            }
         }
     }
     // run Temp Measurment if sensor present
@@ -395,6 +406,9 @@ bool MeasuringModule::initI2cConnectionIna()
     }
     // Set default values for sensor
     _ina.configureAlert(ALERT_OVER_CURRENT, OVER_CURRENT, true, true);     // HW-Schutz fest auf 6 A (ETS-Schnellwertalarm ist separat)
+    // INA226-Energieintegration nach (Neu-)Verbindung neu ansetzen, damit die erste
+    // Messung nicht die gesamte Ausfalldauer als eine Zeitscheibe integriert.
+    lastUpdateTime = millis();
     // INA228: HW-Energieregister läuft seit Power-on – Baseline angleichen,
     // damit die erste Messung keinen Altbestand auf den Flash-Wert addiert.
     if (_ina.getChipType() == INA228_TYPE)
@@ -456,21 +470,26 @@ void MeasuringModule::readFlash(const uint8_t *buffer, const uint16_t size)
     if (size == 0) return;
 
     uint8_t version = openknx.flash.readByte();
-    if (version != 1) // version unknown
+    if (version == 1) // Altformat: float
+    {
+        totalEnergy_Wh = openknx.flash.readFloat(); // Migration von float -> double
+    }
+    else if (version == 2) // aktuelles Format: double
+    {
+        totalEnergy_Wh = openknx.flash.readDouble();
+    }
+    else
     {
         logErrorP("Wrong version of flash data (%i)", version);
         return;
     }
-
-    float counter = openknx.flash.readFloat();
-    logDebugP("Restore totalEnergy_Wh with value: %f", counter);
-    totalEnergy_Wh = counter;
+    logDebugP("Restore totalEnergy_Wh with value: %f", totalEnergy_Wh);
 }
 
 void MeasuringModule::writeFlash()
 {
-    openknx.flash.writeByte(1); // Version
-    openknx.flash.writeFloat(totalEnergy_Wh);
+    openknx.flash.writeByte(2); // Version 2: double
+    openknx.flash.writeDouble(totalEnergy_Wh);
 }
 
 uint16_t MeasuringModule::flashSize()

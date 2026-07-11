@@ -84,8 +84,8 @@ private:
     float busVoltage_V = 0.0;
     float current_A = 0.0;
     float power_W = 0.0;
-    float totalEnergy_Wh = 0.0;
-    float lastEnergy_Wh = 0.0;
+    double totalEnergy_Wh = 0.0; // double: float-Mantisse friert bei hohen kWh-Summen ein
+    double lastEnergy_Wh = 0.0;
     
     float temperatur_C = 0.0;
 
