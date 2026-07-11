@@ -160,11 +160,10 @@ void DimChannel_EK::setDayNight(bool value)
     isNight = value;
 }
 
-std::vector<uint8_t> DimChannel_EK::getHWPorts()
+uint8_t DimChannel_EK::getHWPorts(uint8_t *ports)
 {
-    std::vector<uint8_t> ports;
-    ports.push_back(m_hwchannel);
-    return ports;
+    ports[0] = m_hwchannel;
+    return 1;
 }
 
 uint8_t DimChannel_EK::getChannelIndex()

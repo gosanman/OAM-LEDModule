@@ -42,7 +42,7 @@ public:
     bool getPcaI2cConnectionState();
     uint8_t getUsedChannels();
     const std::string getChannelName(uint8_t channelIndex);
-    std::vector<uint8_t> getChannelHWPort(uint8_t channelIndex);
+    uint8_t getChannelHWPort(uint8_t channelIndex, uint8_t *ports);
     void toggleChannelHWPort(uint8_t channelIndex);
     uint8_t getChannelIndex(uint8_t channelIndex);
 

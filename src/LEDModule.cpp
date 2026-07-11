@@ -506,9 +506,9 @@ bool LEDModule::processCommand(const std::string cmd, bool diagnoseKo)
         {
             openknx.logger.logWithPrefixAndValues("LED", "Channel %d", i);
             openknx.logger.logWithPrefixAndValues("LED", "Name: %s%d", getChannelName(i).c_str(), getChannelIndex(i) + 1);
-            openknx.logger.logWithPrefixAndValues("LED", "HWPorts: %d", getChannelHWPort(i).size());
-            std::vector<uint8_t> ports = getChannelHWPort(i);
-            uint8_t numberOfPorts = ports.size();
+            uint8_t ports[3];
+            uint8_t numberOfPorts = getChannelHWPort(i, ports);
+            openknx.logger.logWithPrefixAndValues("LED", "HWPorts: %d", numberOfPorts);
             if (numberOfPorts == 1)
             {
                 openknx.logger.logWithPrefixAndValues("LED", "EK%d -> %c", getChannelIndex(i) + 1, HWPortsMapping[ports[0]]);
@@ -703,13 +703,11 @@ const std::string LEDModule::getChannelName(uint8_t channelIndex)
     return "";
 }
 
-std::vector<uint8_t> LEDModule::getChannelHWPort(uint8_t channelIndex)
+uint8_t LEDModule::getChannelHWPort(uint8_t channelIndex, uint8_t *ports)
 {
     if (channelIndex < usedChannels)
-    {
-        return channel[channelIndex]->getHWPorts();
-    }
-    return {0, 0, 0};
+        return channel[channelIndex]->getHWPorts(ports);
+    return 0;
 }
 
 void LEDModule::toggleChannelHWPort(uint8_t channel)

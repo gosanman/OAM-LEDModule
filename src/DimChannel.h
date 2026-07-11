@@ -12,7 +12,7 @@ public:
     DimChannel(uint8_t index);
     virtual ~DimChannel();
     virtual const std::string name() = 0;
-    virtual std::vector<uint8_t> getHWPorts() = 0;
+    virtual uint8_t getHWPorts(uint8_t *ports) = 0; // füllt ports[0..2], liefert Anzahl (1-3); kein Heap
     virtual uint8_t getChannelIndex() = 0;
 
     // dimmchannel

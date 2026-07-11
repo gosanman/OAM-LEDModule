@@ -408,8 +408,8 @@ void FrontPanelModule::showConnectionScreen(uint8_t index)
     _display.setCursor(40, 16);
     _display.print(openknxLEDModule.getChannelName(index).c_str());
     _display.print(openknxLEDModule.getChannelIndex(index) + 1);
-    std::vector<uint8_t> ports = openknxLEDModule.getChannelHWPort(index);
-    uint8_t numberOfPorts = ports.size();
+    uint8_t ports[3];
+    uint8_t numberOfPorts = openknxLEDModule.getChannelHWPort(index, ports);
     if (numberOfPorts == 1)
     {
         _display.setCursor(78, 2);
@@ -480,8 +480,9 @@ void FrontPanelModule::showWarningScreen()
 void FrontPanelModule::toggleLedChannel(uint8_t index)
 {
     logDebugP("Toggle Channel: %i", index);
-    std::vector<uint8_t> ports = openknxLEDModule.getChannelHWPort(index);
-    for (uint8_t i = 0; i < ports.size(); i++)
+    uint8_t ports[3];
+    uint8_t numberOfPorts = openknxLEDModule.getChannelHWPort(index, ports);
+    for (uint8_t i = 0; i < numberOfPorts; i++)
     {
         openknxLEDModule.toggleChannelHWPort(ports[i]);
     }

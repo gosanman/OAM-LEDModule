@@ -330,13 +330,12 @@ void DimChannel_RGB::setDayNight(bool value)
     isNight = value;
 }
 
-std::vector<uint8_t> DimChannel_RGB::getHWPorts()
+uint8_t DimChannel_RGB::getHWPorts(uint8_t *ports)
 {
-    std::vector<uint8_t> ports;
-    ports.push_back(m_hwchannel_r);
-    ports.push_back(m_hwchannel_g);
-    ports.push_back(m_hwchannel_b);
-    return ports;
+    ports[0] = m_hwchannel_r;
+    ports[1] = m_hwchannel_g;
+    ports[2] = m_hwchannel_b;
+    return 3;
 }
 
 uint8_t DimChannel_RGB::getChannelIndex()

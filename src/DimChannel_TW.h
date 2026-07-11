@@ -40,7 +40,7 @@ public:
     void task() override;
 
     void setDayNight(bool isNight) override;
-    std::vector<uint8_t> getHWPorts() override;
+    uint8_t getHWPorts(uint8_t *ports) override;
     uint8_t getChannelIndex() override;
     uint8_t getChannelType() override;
     void setHcl(uint8_t channel, uint16_t kelvin, uint8_t brightness) override;
