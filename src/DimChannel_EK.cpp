@@ -184,7 +184,7 @@ void DimChannel_EK::setHcl(uint8_t channel, uint16_t kelvin, uint8_t brightness)
     if (ParamEK_hclStart == PT_hclStart_during) { // HCL active when channel is on
         if (ParamEK_hclCheckBrightness == 1 && _isOn) {
             logDebugP("HCL active - Channel: %i Kelvin: %i Brightness: %i", channel, kelvin, brightness);
-            _newValueEK = round((uint)(brightness * 2.55));
+            _newValueEK = round(brightness * 2.55); // 0-100 -> 0-255 (round auf den float, nicht cast-vor-round)
             startTask(DimTaskEK::EK_DIM_B_SET);
         } else {
             _currentHclValue[0] = brightness;

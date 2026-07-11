@@ -678,6 +678,7 @@ bool LEDModule::checkI2cConnection()
         logErrorP("PCA9685 PWM not available via I2C - State: %i and MODE1: 0x%.2X - MODE2: 0x%.2X", result, mode1Value, mode2Value);
         openknx.console.writeDiagenoseKo("ER PWM %i %.2X %.2X", result, mode1Value, mode2Value);
         doResetI2c = true;
+        pcaI2cConnection = false; // Verbindung als weg markieren -> loop1 sperrt Kanal-Tasks, Frontpanel zeigt Fehler
         return false;
     }
     return true;
@@ -787,7 +788,10 @@ bool LEDModule::processFunctionProperty(uint8_t objectIndex, uint8_t propertyId,
         handleFunctionPropertySwitch(data, resultData, resultLength);
         return true;
     case 2:
-        // To-Do
+        // noch nicht implementiert: definierte, leere Antwort setzen, damit der
+        // KNX-BAU nicht bis zu 255 Byte uninitialisierten resultData zurücksendet
+        resultData[0] = 0;
+        resultLength = 1;
         return true;
     }
     return false;
