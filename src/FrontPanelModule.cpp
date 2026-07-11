@@ -75,16 +75,18 @@ void FrontPanelModule::loop1()
 
     if (delayCheck(_lastScreenUpdate, SCREEN_UPDATE_INTERVAL) && _runScreenUpdate)
     {
-        if (!openknxMeasuringModule.getTempI2cConnectionState() ||
+        _lastScreenUpdate = millis(); // 250-ms-Throttle auch für den Warn-Pfad einhalten
+        // Temp-Sensor nur als Fehler werten, wenn er laut Parametrierung bestückt ist
+        bool tempError = ParamAPP_TempSensorPresent && !openknxMeasuringModule.getTempI2cConnectionState();
+        if (tempError ||
             !openknxMeasuringModule.getInaI2cConnectionState() ||
             !openknxLEDModule.getPcaI2cConnectionState())
         {
             showWarningScreen();
         }
-        else 
+        else
         {
-        updateCurrentScreen();
-        _lastScreenUpdate = millis();
+            updateCurrentScreen();
         }
     }
 }
