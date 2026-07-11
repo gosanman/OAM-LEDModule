@@ -22,6 +22,7 @@ public:
     virtual void setDayNight(bool value);
     virtual uint8_t getChannelType();
     virtual void setHcl(uint8_t channel, uint16_t kelvin, uint8_t brightness);
+    virtual void resend() {} // aktuellen Ausgabewert neu in die HW schreiben (z.B. nach Fehler-Freigabe)
 
 private:
 };

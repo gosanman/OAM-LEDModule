@@ -397,6 +397,11 @@ void DimChannel_TW::sendDimValue()
     LEDModule::_instance->setHwChannelValuePWM(m_hwchannel_cw, startCW, endCW, m_curve);
 }
 
+void DimChannel_TW::resend()
+{
+    sendDimValue();
+}
+
 void DimChannel_TW::handleDimGeneric(uint16_t &currentValue, uint16_t targetValue, uint16_t minValue, uint16_t maxValue, bool isAbsolute)
 {
     if (currentValue == targetValue) {

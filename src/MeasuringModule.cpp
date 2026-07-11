@@ -81,7 +81,10 @@ void MeasuringModule::loop1() {
     // do nothing when not parameterized
     if (!knx.configured())
         return;
-    
+
+    // Über-strom-Reaktivierung + Strom-Verify (jede Iteration, damit das 400-ms-Fenster greift)
+    handleReactivation();
+
     // always run measurment for alarm features
     if (delayCheck(_lastMeasurementGet, MEASUREMENT_ALARM_CHECK)) {
         getSingleMeasurement();
@@ -157,10 +160,10 @@ void MeasuringModule::getAlertValues()
         return;
     
     uint8_t flags = _ina.getAlertFlags();
-    if (flags == 0) {
-        openknxLEDModule.setPowerFault(false); // Entwarnung: kein Alert mehr -> Ausgänge freigeben
-        return;
-    }
+    if (flags == 0)
+        return; // kein Alert -> KEINE automatische Freigabe. Der Latch bleibt bis zur
+                // strom-geprüften Reaktivierung (Schaltbefehl / 'resetfault'), weil das
+                // Lesen der Flags den HW-Latch löscht und 'kein Strom' kein Fehler-weg-Signal ist.
     
     // Alle Alert-Typen tabellarisch prüfen (Bit -> Log-/Diagnosetext)
     static const struct { uint8_t bit; const char *logMsg; const char *diagnose; } alerts[] = {
@@ -178,7 +181,56 @@ void MeasuringModule::getAlertValues()
             openknx.console.writeDiagenoseKo("%s", a.diagnose);
         }
     }
-    openknxLEDModule.savePower(); // einmal abschalten/latchen, sobald irgendein Alert ansteht
+    triggerFault(); // abschalten und latchen, sobald irgendein Alert ansteht
+}
+
+// Trip: Ausgänge aus + harter Latch, Trip-Zeit für den Cooldown merken.
+void MeasuringModule::triggerFault()
+{
+    openknxLEDModule.savePower();
+    _lastTripTime = millis();
+    _verifyActive = false; // ein evtl. laufender Reaktivierungs-Verify ist hinfällig
+}
+
+// Läuft in loop1 (Core 1): holt die Reaktivierungs-Anforderung ab und prüft nach dem
+// Wiedereinschalten den ECHTEN Strom - ein verlässliches "Fehler weg"-Signal, anders als
+// das beim Lesen gelöschte Alert-Flag.
+void MeasuringModule::handleReactivation()
+{
+    if (!inaI2cConnection)
+        return;
+
+    // Anforderung (Kanalbefehl / 'resetfault') von Core 0 abholen. Jede Anforderung wird
+    // konsumiert; ausgeführt wird nur, wenn kein Verify läuft und der Cooldown um ist.
+    if (openknxLEDModule.consumeReactivationRequest())
+    {
+        if (openknxLEDModule.isPowerFault() && !_verifyActive &&
+            (millis() - _lastTripTime) >= REACTIVATE_COOLDOWN)
+        {
+            _ina.getAlertFlags();                   // veralteten HW-Latch verwerfen
+            openknxLEDModule.clearFaultAndResend(); // Ausgänge aus Software-Zustand neu bestromen
+            _verifyStart = millis();
+            _verifyActive = true;
+            logInfoP("Over-current reactivation: outputs on, verifying current in %i ms", REACTIVATE_VERIFY_DELAY);
+        }
+    }
+
+    // Verify-Fenster abgelaufen -> echten Strom messen und ggf. wieder latchen.
+    if (_verifyActive && delayCheck(_verifyStart, REACTIVATE_VERIFY_DELAY))
+    {
+        _verifyActive = false;
+        float current = _ina.getCurrent();
+        if (current >= OVER_CURRENT)
+        {
+            logErrorP("Over-current persists (%.2f A) - latching off again", current);
+            openknx.console.writeDiagenoseKo("AL OVER CUR");
+            triggerFault();
+        }
+        else
+        {
+            logInfoP("Over-current cleared (%.2f A) - outputs stay on", current);
+        }
+    }
 }
 
 void MeasuringModule::checkAlarmDefinitions() {

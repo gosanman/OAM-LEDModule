@@ -33,8 +33,11 @@ public:
     bool processCommand(const std::string cmd, bool diagnoseKo);
 
     void processBeforeRestart();
-    void savePower();
-    void setPowerFault(bool state);
+    void savePower();                     // Trip: Ausgänge aus + Latch setzen
+    void clearFaultAndResend();           // Latch lösen und Kanäle aus Software-Zustand neu schreiben
+    void requestReactivation();           // von Core 0 (KO/Konsole): Reaktivierung anfordern
+    bool consumeReactivationRequest();    // von Core 1 (loop1): Anforderung abholen
+    bool isPowerFault();
 
     bool getPcaI2cConnectionState();
     uint8_t getUsedChannels();
@@ -60,7 +63,8 @@ private:
     uint32_t _timerCheckI2cConnection = 0;
     uint32_t _timerCheckHclChannel = 0;
     bool doResetI2c = false;
-    bool _powerFault = false; // gesetzt bei Hardware-Alarm (Überstrom u.Ä.), sperrt das Neubestromen der Kanäle
+    bool _powerFault = false;            // gesetzt bei Hardware-Alarm (Überstrom u.Ä.), sperrt das Neubestromen der Kanäle
+    bool _reactivationRequested = false; // Core 0 fordert Reaktivierung an, Core 1 (loop1) führt sie aus
 
     // hcl channels
     uint8_t hclBrightness = 0;

@@ -267,6 +267,11 @@ void DimChannel_EK::sendDimValue()
     LEDModule::_instance->setHwChannelValue(m_hwchannel, _currentValueEK, m_curve);
 }
 
+void DimChannel_EK::resend()
+{
+    sendDimValue();
+}
+
 void DimChannel_EK::handleDimGeneric(uint8_t &currentValue, uint8_t targetValue, uint8_t minValue, uint8_t maxValue, bool isAbsolute)
 {
     if (currentValue == targetValue) {

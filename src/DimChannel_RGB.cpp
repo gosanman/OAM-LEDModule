@@ -456,6 +456,11 @@ void DimChannel_RGB::sendDimValue()
     LEDModule::_instance->setHwChannelValue(m_hwchannel_b, m_gammaT[_currentValueRGB[2]], m_curve);
 }
 
+void DimChannel_RGB::resend()
+{
+    sendDimValue();
+}
+
 void DimChannel_RGB::handleDimGeneric(uint8_t *currentValues, uint8_t *targetValues, uint8_t minValue, uint8_t maxValue, bool isAbsolute)
 {
     if (!_dimmingInit) {

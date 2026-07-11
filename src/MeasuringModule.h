@@ -20,6 +20,8 @@
 #define MEASUREMENT_ALARM_CHECK     5000    // ms
 #define MEASUREMENT_CHECK_I2C       10000   // ms
 #define MEASUREMENT_INA_OVERFLOW    6000    // ms
+#define REACTIVATE_COOLDOWN         3000    // ms - Sperrzeit nach einem Trip, bevor eine Reaktivierung zulässig ist
+#define REACTIVATE_VERIFY_DELAY     400     // ms - nach Wiedereinschalten den echten Strom prüfen
 
 class MeasuringModule : public OpenKNX::Module
 {
@@ -91,6 +93,13 @@ private:
     uint32_t _timerCheckI2cConnection = 0;
     bool doResetI2cTemp = false;
     bool doResetI2cIna = false;
+
+    // Über-strom-Latch / Reaktivierung
+    uint32_t _lastTripTime = 0;   // Zeitpunkt des letzten Trips (für Cooldown)
+    bool _verifyActive = false;   // ein Reaktivierungsversuch läuft, Strom wird gleich geprüft
+    uint32_t _verifyStart = 0;    // Startzeitpunkt des Verify-Fensters
+    void triggerFault();          // Ausgänge abschalten/latchen und Trip-Zeit merken
+    void handleReactivation();    // Reaktivierungs-Anforderung + Strom-Verify (läuft in loop1)
 
     void getSingleMeasurement();
     bool initI2cConnectionTemp();

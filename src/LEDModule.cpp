@@ -363,6 +363,11 @@ void LEDModule::processInputKo(GroupObject &ko)
     if (koNum < EK_KoOffset && koNum != APP_KoDayNight) return; // ignore KOs below EK block, außer gemeinsame KOs (Tag/Nacht)
     logDebugP("Received KO %i", koNum);
 
+    // Im Latch-Zustand löst ein Kanalbefehl (Schalten/Dimmen) einen strom-geprüften
+    // Reaktivierungsversuch aus; die eigentliche Ausführung erfolgt in loop1 (Core 1).
+    if (_powerFault && koNum >= EK_KoOffset)
+        requestReactivation();
+
     // EK Dimmer Class
     if (koNum >= EK_KoOffset && koNum < EK_KoOffset + EK_KoBlockSize * MAXCHANNELSEK)
     {
@@ -425,10 +430,26 @@ void LEDModule::showHelp()
     logInfo("chval <ch> <value>", "Switch Channel 0-%i to value 0-4095", LED_HW_CHANNEL_COUNT - 1);
     openknx.console.printHelpLine("show con", "Show connection plan on console");
     openknx.console.printHelpLine("i2c", "Scan I2C devices on Wire1");
+    openknx.console.printHelpLine("resetfault", "Reset latched over-current fault (current-checked)");
 }
 
 bool LEDModule::processCommand(const std::string cmd, bool diagnoseKo)
 {
+    if (cmd == "resetfault")
+    {
+        requestReactivation(); // strom-geprüfter Reaktivierungsversuch (Ausführung in loop1)
+        if (diagnoseKo)
+            openknx.console.writeDiagenoseKo("FAULT RST");
+        openknx.logger.logWithPrefixAndValues("LED", "Over-current fault reset requested (fault=%i)", isPowerFault());
+        return true;
+    }
+    // Direkt-PWM-Konsolenbefehle im Fehler-Latch sperren
+    if (_powerFault && !diagnoseKo &&
+        (cmd.rfind("chon ", 0) == 0 || cmd.rfind("choff ", 0) == 0 || cmd.rfind("chval ", 0) == 0 || cmd == "test_pwm"))
+    {
+        openknx.logger.logWithPrefixAndValues("LED", "Blocked - over-current fault latched (use 'resetfault')");
+        return true;
+    }
     if (!diagnoseKo && (cmd.rfind("chon ", 0) == 0 || cmd.rfind("choff ", 0) == 0))
     {
         _pwm.setPin(std::stoi(cmd.substr(cmd.find(' ') + 1)), std::stoi(cmd.rfind("chon", 0) == 0 ? "4095" : "0"));
@@ -583,23 +604,36 @@ byte LEDModule::readRegister(byte registerAddress)
 void LEDModule::savePower()
 {
     processBeforeRestart(); // ALL_LED_OFF -> alle Ausgänge sofort aus
-    _powerFault = true;     // Latch: verhindert Neubestromen über channel->task()
+    _powerFault = true;     // harter Latch: verhindert Neubestromen über channel->task() und Direktpfade
 }
 
-// Fehler-Latch setzen/lösen. Bei Entwarnung wird das ALL_LED_OFF-Bit gelöscht,
-// die Ausgänge kehren zu ihren im PCA9685 gespeicherten Registerwerten zurück.
-void LEDModule::setPowerFault(bool state)
+// Latch lösen und die Kanäle aus ihrem SOFTWARE-Zustand neu schreiben.
+// Kein Löschen des ALL_LED_OFF-Broadcast-Registers (das würde bei jedem Kanal die
+// oberen OFF-Bits verfälschen) - stattdessen liefert jeder Kanal seinen aktuellen
+// Wert erneut per sendDimValue() aus, was die LEDn-Register korrekt überschreibt.
+void LEDModule::clearFaultAndResend()
 {
-    if (_powerFault == state)
-        return;
-    _powerFault = state;
-    if (!state)
-    {
-        Wire1.beginTransmission(I2C_PCA9685_DEVICE_ADDRESS);
-        Wire1.write(0xFD); // ALL_LED_OFF_H
-        Wire1.write(0x00); // Bit 4 löschen -> Ausgänge wieder freigeben
-        Wire1.endTransmission();
-    }
+    _powerFault = false;
+    for (int i = 0; i < usedChannels; i++)
+        channel[i]->resend();
+}
+
+void LEDModule::requestReactivation()
+{
+    if (_powerFault)
+        _reactivationRequested = true;
+}
+
+bool LEDModule::consumeReactivationRequest()
+{
+    bool r = _reactivationRequested;
+    _reactivationRequested = false;
+    return r;
+}
+
+bool LEDModule::isPowerFault()
+{
+    return _powerFault;
 }
 
 bool LEDModule::initI2cConnection()
@@ -679,6 +713,7 @@ std::vector<uint8_t> LEDModule::getChannelHWPort(uint8_t channelIndex)
 
 void LEDModule::toggleChannelHWPort(uint8_t channel)
 {
+    if (_powerFault) return; // im Fehler-Latch keine Ausgänge direkt bestromen
     if (channel < usedChannels)
     {
         uint16_t _state = _pwm.getPWM(channel);
@@ -700,6 +735,7 @@ uint8_t LEDModule::getChannelIndex(uint8_t channelIndex)
 #ifdef FUNC1_BUTTON_PIN
 void LEDModule::handleFunc1(uint8_t setting)
 {
+    if (_powerFault) return; // im Fehler-Latch keine Ausgänge direkt bestromen
     switch (setting)
     {
     case PT_FuncClickAction_on:
@@ -761,6 +797,13 @@ void LEDModule::handleFunctionPropertySwitch(uint8_t *data, uint8_t *resultData,
 {
     logInfoP("Function property: LED action switch");
     logIndentUp();
+    if (_powerFault) // im Fehler-Latch keine Ausgänge direkt bestromen
+    {
+        resultData[0] = 0;
+        resultLength = 1;
+        logIndentDown();
+        return;
+    }
     _pwm.setPin(data[1], data[2] == 1 ? 4095 : 0);
     resultData[0] = 0;
     resultLength = 1;
