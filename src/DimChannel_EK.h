@@ -11,12 +11,9 @@ enum DimTaskEK {
     EK_DIM_SOFT_ON,
     EK_DIM_SOFT_OFF,
     EK_DIM_B_SET,
-    EK_DIM_K_SET,
     EK_DIM_B_UP,
-    EK_DIM_B_DOWN,
-    EK_DIM_K_UP,
-    EK_DIM_K_DOWN
-};
+    EK_DIM_B_DOWN
+}; // EK ist helligkeitsbasiert - keine Kelvin-Tasks (die gab es nur als toter Copy-Paste aus TW)
 
 // scene actions
 #define SC_EK_None              0

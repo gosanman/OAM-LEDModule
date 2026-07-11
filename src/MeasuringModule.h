@@ -9,10 +9,6 @@
 
 #include "LEDHelper.h"
 
-#define TIMEBASE_SECONDS        0
-#define TIMEBASE_MINUTES        1
-#define TIMEBASE_HOURS          2
-#define TIMEBASE_TENTH_SECONDS  3
 
 #define OVER_CURRENT    6.0 // 6A
 
@@ -110,7 +106,6 @@ private:
     void checkAlarmDefinitions();
     void checkAndTriggerAlarm(bool condition, bool &triggeredFlag, uint16_t alarmKo, const String &messageDiagnoseKo);
 
-    uint32_t getTimeWithPattern(uint16_t time, uint8_t base);
 
     INASensor _ina;
     TMP100_WE _tmp100;

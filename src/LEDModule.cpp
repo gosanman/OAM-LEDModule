@@ -371,7 +371,7 @@ void LEDModule::processInputKo(GroupObject &ko)
     // EK Dimmer Class
     if (koNum >= EK_KoOffset && koNum < EK_KoOffset + EK_KoBlockSize * MAXCHANNELSEK)
     {
-        int channelIndexEK = floor((koNum - EK_KoOffset) / EK_KoBlockSize);
+        int channelIndexEK = (koNum - EK_KoOffset) / EK_KoBlockSize; // ganzzahlige Division, kein float floor()
         logDebugP("For Channel EG %i", channelIndexEK);
         if (channelEK[channelIndexEK] == nullptr) return; // Slot in dieser Betriebsart nicht belegt
         channelEK[channelIndexEK]->processInputKo(ko);
@@ -380,7 +380,7 @@ void LEDModule::processInputKo(GroupObject &ko)
     // TW Dimmer Class
     if (koNum >= TW_KoOffset && koNum < TW_KoOffset + TW_KoBlockSize * MAXCHANNELSTW)
     {
-        int channelIndexTW = floor((koNum - TW_KoOffset) / TW_KoBlockSize);
+        int channelIndexTW = (koNum - TW_KoOffset) / TW_KoBlockSize;
         logDebugP("For Channel TW %i", channelIndexTW);
         if (channelTW[channelIndexTW] == nullptr) return; // Slot in dieser Betriebsart nicht belegt
         channelTW[channelIndexTW]->processInputKo(ko);
@@ -389,7 +389,7 @@ void LEDModule::processInputKo(GroupObject &ko)
     // RGB Dimmer Class
     if (koNum >= RGB_KoOffset && koNum < RGB_KoOffset + RGB_KoBlockSize * MAXCHANNELSRGB)
     {
-        int channelIndexRGB = floor((koNum - RGB_KoOffset) / RGB_KoBlockSize);
+        int channelIndexRGB = (koNum - RGB_KoOffset) / RGB_KoBlockSize;
         logDebugP("For Channel RGB %i", channelIndexRGB);
         if (channelRGB[channelIndexRGB] == nullptr) return; // Slot in dieser Betriebsart nicht belegt
         channelRGB[channelIndexRGB]->processInputKo(ko);

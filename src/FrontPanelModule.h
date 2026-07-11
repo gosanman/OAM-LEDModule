@@ -8,10 +8,6 @@
 #include "MeasuringModule.h"
 #include "LEDModule.h"
 
-#define TIMEBASE_SECONDS 		0
-#define TIMEBASE_MINUTES 		1
-#define TIMEBASE_HOURS 			2
-#define TIMEBASE_TENTH_SECONDS 	3
 
 // Button definitions
 #define BUTTON_LEFT 			1
