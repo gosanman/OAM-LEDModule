@@ -353,6 +353,13 @@ bool MeasuringModule::processCommand(const std::string cmd, bool diagnoseKo)
     return false;
 }
 
+float MeasuringModule::readCurrentNow()
+{
+    if (!inaI2cConnection)
+        return -1.0f;
+    return _ina.getCurrent();
+}
+
 float MeasuringModule::getMeasurementValue(const std::string &parameter)
 {
     if (parameter == "temp") {

@@ -4,6 +4,7 @@
 #include "DimChannel_TW.h"
 #include "DimChannel_RGB.h"
 #include "DimChannel.h"
+#include "MeasuringModule.h" // für readCurrentNow() im Testmodus
 
 LEDModule *LEDModule::_instance = nullptr;
 
@@ -339,8 +340,10 @@ void LEDModule::loop1()
         checkI2cConnection();
         _timerCheckI2cConnection = millis();
     }
-    // run task of all channels if pca connection ok and no power fault latched
-    if (pcaI2cConnection && !_powerFault)
+    // Testmodus-Zustandsmaschine (nicht blockierend)
+    testLoop();
+    // run task of all channels if pca connection ok, no power fault and no test running
+    if (pcaI2cConnection && !_powerFault && !_testActive)
     {
         for (int i = 0; i < usedChannels; i++)
             channel[i]->task();
@@ -431,6 +434,9 @@ void LEDModule::showHelp()
     openknx.console.printHelpLine("show con", "Show connection plan on console");
     openknx.console.printHelpLine("i2c", "Scan I2C devices on Wire1");
     openknx.console.printHelpLine("resetfault", "Reset latched over-current fault (current-checked)");
+    openknx.console.printHelpLine("test walk", "Channel walk-through test (auto), measures current per port");
+    openknx.console.printHelpLine("test ch <n>", "Test single HW port at 100 percent");
+    openknx.console.printHelpLine("test next/prev/stop", "Advance / previous port / end test mode");
 }
 
 bool LEDModule::processCommand(const std::string cmd, bool diagnoseKo)
@@ -443,11 +449,30 @@ bool LEDModule::processCommand(const std::string cmd, bool diagnoseKo)
         openknx.logger.logWithPrefixAndValues("LED", "Over-current fault reset requested (fault=%i)", isPowerFault());
         return true;
     }
-    // Direkt-PWM-Konsolenbefehle im Fehler-Latch sperren
-    if (_powerFault && !diagnoseKo &&
+    // Testmodus-Kommandos (Konsole und Diagnose-KO)
+    if (cmd == "test walk") { testStart(true); openknx.console.writeDiagenoseKo("T WALK"); return true; }
+    if (cmd == "test next") { testNext();      openknx.console.writeDiagenoseKo("T NEXT"); return true; }
+    if (cmd == "test prev") { testPrev();      openknx.console.writeDiagenoseKo("T PREV"); return true; }
+    if (cmd == "test stop") { testStop();      openknx.console.writeDiagenoseKo("T STOP"); return true; }
+    if (cmd.rfind("test ch ", 0) == 0)
+    {
+        const char *s = cmd.c_str() + 8;
+        char *end = nullptr;
+        long n = strtol(s, &end, 10); // sicher parsen (kein std::stoi -> keine Exception)
+        if (end != s && n >= 0 && n < LED_HW_CHANNEL_COUNT)
+        {
+            testGoTo((uint8_t)n);
+            openknx.console.writeDiagenoseKo("T CH %i", (int)n);
+        }
+        else
+            openknx.console.writeDiagenoseKo("T CH ERR");
+        return true;
+    }
+    // Direkt-PWM-Konsolenbefehle im Fehler-Latch oder Testmodus sperren
+    if ((_powerFault || _testActive) && !diagnoseKo &&
         (cmd.rfind("chon ", 0) == 0 || cmd.rfind("choff ", 0) == 0 || cmd.rfind("chval ", 0) == 0 || cmd == "test_pwm"))
     {
-        openknx.logger.logWithPrefixAndValues("LED", "Blocked - over-current fault latched (use 'resetfault')");
+        openknx.logger.logWithPrefixAndValues("LED", "Blocked - over-current fault or test mode active");
         return true;
     }
     if (!diagnoseKo && (cmd.rfind("chon ", 0) == 0 || cmd.rfind("choff ", 0) == 0))
@@ -611,11 +636,16 @@ void LEDModule::savePower()
 // Kein Löschen des ALL_LED_OFF-Broadcast-Registers (das würde bei jedem Kanal die
 // oberen OFF-Bits verfälschen) - stattdessen liefert jeder Kanal seinen aktuellen
 // Wert erneut per sendDimValue() aus, was die LEDn-Register korrekt überschreibt.
+void LEDModule::resendChannels()
+{
+    for (int i = 0; i < usedChannels; i++)
+        channel[i]->resend();
+}
+
 void LEDModule::clearFaultAndResend()
 {
     _powerFault = false;
-    for (int i = 0; i < usedChannels; i++)
-        channel[i]->resend();
+    resendChannels();
 }
 
 void LEDModule::requestReactivation()
@@ -634,6 +664,107 @@ bool LEDModule::consumeReactivationRequest()
 bool LEDModule::isPowerFault()
 {
     return _powerFault;
+}
+
+// ------------------------------ Testmodus ------------------------------
+// Anforderungen werden von Core 0 (Konsole/Diagnose) oder dem Display gesetzt und in
+// testLoop() auf Core 1 ausgeführt, damit alle I2C-Zugriffe auf einem Core bleiben.
+void LEDModule::testStart(bool autoAdvance) { _testReq = autoAdvance ? 2 : 1; }
+void LEDModule::testStop()                  { _testReq = 5; }
+void LEDModule::testNext()                  { _testReq = 3; }
+void LEDModule::testPrev()                  { _testReq = 4; }
+void LEDModule::testGoTo(uint8_t port)      { _testReqPort = port; _testReq = 6; }
+bool LEDModule::isTestActive()              { return _testActive; }
+uint8_t LEDModule::testPort()               { return _testPort; }
+float LEDModule::testCurrent()              { return _testCurrentA; }
+
+void LEDModule::testEnterPort(uint8_t port)
+{
+    for (uint8_t p = 0; p < LED_HW_CHANNEL_COUNT; p++)
+        _pwm.setPin(p, 0);
+    _testPort = (port < LED_HW_CHANNEL_COUNT) ? port : 0;
+    _pwm.setPin(_testPort, 4095); // 100 % (Volllast)
+    _testPhase = 0;
+    _testStepStart = millis();
+    _testCurrentA = -1.0f;
+}
+
+void LEDModule::testLoop()
+{
+    // Anforderung abholen (Core 0 / Display)
+    uint8_t req = _testReq;
+    _testReq = 0;
+    switch (req)
+    {
+    case 1: // start manuell
+    case 2: // start auto
+        _testActive = true;
+        _testAuto = (req == 2);
+        _testLastActivity = millis();
+        testEnterPort(0);
+        logInfoP("Test mode started (%s)", _testAuto ? "auto" : "manual");
+        break;
+    case 3: // next
+        if (_testActive) { _testLastActivity = millis(); testEnterPort((_testPort + 1) % LED_HW_CHANNEL_COUNT); }
+        break;
+    case 4: // prev
+        if (_testActive) { _testLastActivity = millis(); testEnterPort((_testPort + LED_HW_CHANNEL_COUNT - 1) % LED_HW_CHANNEL_COUNT); }
+        break;
+    case 5: // stop
+        if (_testActive)
+        {
+            _testActive = false;
+            for (uint8_t p = 0; p < LED_HW_CHANNEL_COUNT; p++) _pwm.setPin(p, 0);
+            resendChannels(); // Normalbetrieb wiederherstellen
+            logInfoP("Test mode stopped");
+        }
+        break;
+    case 6: // Einzeltest eines Ports (startet den Test)
+        if (_testReqPort >= 0 && _testReqPort < LED_HW_CHANNEL_COUNT)
+        {
+            _testActive = true;
+            _testAuto = false;
+            _testLastActivity = millis();
+            testEnterPort((uint8_t)_testReqPort);
+        }
+        _testReqPort = -1;
+        break;
+    }
+
+    if (!_testActive)
+        return;
+
+    // Sicherheit: bei Fehler-Latch Test sofort beenden (savePower hat bereits alles aus)
+    if (_powerFault)
+    {
+        _testActive = false;
+        logErrorP("Test mode aborted - over-current latched");
+        return;
+    }
+    // Auto-Ende nach Inaktivität
+    if (delayCheck(_testLastActivity, TEST_TIMEOUT_MS))
+    {
+        _testActive = false;
+        for (uint8_t p = 0; p < LED_HW_CHANNEL_COUNT; p++) _pwm.setPin(p, 0);
+        resendChannels();
+        logInfoP("Test mode timeout - back to normal");
+        return;
+    }
+
+    // Settle-Zeit abgelaufen -> echten Strom messen und melden
+    if (_testPhase == 0 && delayCheck(_testStepStart, TEST_SETTLE_MS))
+    {
+        _testCurrentA = openknxMeasuringModule.readCurrentNow();
+        _testPhase = 1;
+        logInfoP("Test port %c (%i): %.2f A", HWPortsMapping[_testPort], _testPort, _testCurrentA);
+        openknx.console.writeDiagenoseKo("T %c %.2fA", HWPortsMapping[_testPort], _testCurrentA);
+    }
+    // Auto-Weiterschalten nach Verweildauer
+    if (_testAuto && _testPhase == 1 && delayCheck(_testStepStart, TEST_DWELL_MS))
+    {
+        _testLastActivity = millis();
+        testEnterPort((_testPort + 1) % LED_HW_CHANNEL_COUNT);
+    }
 }
 
 bool LEDModule::initI2cConnection()

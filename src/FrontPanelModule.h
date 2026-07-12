@@ -33,7 +33,8 @@
 #define SCREEN_ENERGY		  8
 #define SCREEN_DATETIME	   	  9
 
-#define SUBSCREEN_CONNECTIONS    20            
+#define SUBSCREEN_CONNECTIONS    20
+#define SUBSCREEN_TEST           21
 
 // Timing parameters
 #define BUTTON_DEBOUNCE_TIME   	300   	// ms
@@ -327,6 +328,7 @@ private:
 	void updateCurrentScreen();
 	void startUpScreen();
 	void showConnectionScreen(uint8_t index);
+	void showTestScreen();
 	void showWarningScreen();
 	void toggleLedChannel(uint8_t index);
 

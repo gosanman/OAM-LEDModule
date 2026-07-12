@@ -184,16 +184,24 @@ void FrontPanelModule::handleButtonPress(uint8_t button)
         {
             currentconnectionscreen++;
         }
+        else if (currentscreen == SUBSCREEN_TEST)
+        {
+            openknxLEDModule.testNext();
+        }
         break;
 
     case BUTTON_LEFT:
-        if (currentscreen > 1 && currentscreen != SUBSCREEN_CONNECTIONS)
+        if (currentscreen > 1 && currentscreen <= SCREEN_MAX)
         {
             currentscreen--;
         }
         else if (currentscreen == SUBSCREEN_CONNECTIONS && currentconnectionscreen > SCREEN_OFF)
         {
             currentconnectionscreen--;
+        }
+        else if (currentscreen == SUBSCREEN_TEST)
+        {
+            openknxLEDModule.testPrev();
         }
         break;
 
@@ -208,9 +216,21 @@ void FrontPanelModule::handleButtonPress(uint8_t button)
             if (ParamAPP_FrontPanelControl)
                 toggleLedChannel(currentconnectionscreen);
         }
+        else if (currentscreen == SCREEN_STATUS && ParamAPP_FrontPanelControl)
+        {
+            // Testmodus vom Status-Screen aus starten (nur wenn Panel-Steuerung erlaubt)
+            currentscreen = SUBSCREEN_TEST;
+            openknxLEDModule.testGoTo(0);
+        }
+        else if (currentscreen == SUBSCREEN_TEST)
+        {
+            openknxLEDModule.testNext();
+        }
         break;
 
     case BUTTON_BACK:
+        if (currentscreen == SUBSCREEN_TEST)
+            openknxLEDModule.testStop(); // Test beenden -> Normalbetrieb wiederherstellen
         currentscreen = SCREEN_INFORMATION;
         break;
     }
@@ -372,6 +392,34 @@ void FrontPanelModule::updateCurrentScreen()
     { // Screen information
         showConnectionScreen(currentconnectionscreen);
     }
+    else if (currentscreen == SUBSCREEN_TEST)
+    { // Testmodus-Screen
+        showTestScreen();
+    }
+}
+
+void FrontPanelModule::showTestScreen()
+{
+    _display.clearDisplay();
+    _display.setTextColor(SSD1306_WHITE);
+    _display.setTextSize(1);
+    _display.setCursor(0, 0);
+    _display.print("TEST  Port ");
+    _display.print(HWPortsMapping[openknxLEDModule.testPort()]);
+    _display.setTextSize(2);
+    _display.setCursor(0, 11);
+    float c = openknxLEDModule.testCurrent();
+    if (c < 0.0f)
+        _display.print("--.- A"); // noch keine gültige Messung
+    else
+    {
+        _display.print(c, 2);
+        _display.print(" A");
+    }
+    _display.setTextSize(1);
+    _display.setCursor(0, 25);
+    _display.print("SEL=next  BACK=exit");
+    _display.display();
 }
 
 void FrontPanelModule::startUpScreen()

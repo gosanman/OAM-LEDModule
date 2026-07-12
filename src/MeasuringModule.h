@@ -10,7 +10,7 @@
 #include "LEDHelper.h"
 
 
-#define OVER_CURRENT    6.0 // 6A
+#define OVER_CURRENT    6.0 // 6A bei 24V = 144W
 
 // Timing parameters
 #define MEASUREMENT_ALARM_CHECK     5000    // ms
@@ -39,6 +39,7 @@ public:
     bool processCommand(const std::string cmd, bool diagnoseKo);
 
     float getMeasurementValue(const std::string &parameter);
+    float readCurrentNow(); // frische Strommessung für den Testmodus (-1 wenn INA nicht verbunden)
 
     bool getTempI2cConnectionState();
     bool getInaI2cConnectionState();

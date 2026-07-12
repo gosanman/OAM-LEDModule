@@ -12,6 +12,11 @@
 #define LED_CHECK_I2C           10000   // ms
 #define HCL_TIMER_BROADCAST     60000   // ms
 
+// Testmodus
+#define TEST_SETTLE_MS          500     // ms - nach Port-An warten, bis der INA-Strom stabil ist
+#define TEST_DWELL_MS           3000    // ms - Verweildauer je Port im Auto-Durchlauf
+#define TEST_TIMEOUT_MS         300000  // ms - Auto-Ende nach Inaktivität (5 min)
+
 class DimChannel_EK;
 class DimChannel_TW;
 class DimChannel_RGB;
@@ -39,6 +44,16 @@ public:
     bool consumeReactivationRequest();    // von Core 1 (loop1): Anforderung abholen
     bool isPowerFault();
 
+    // Testmodus (Anforderung von Core 0/Display; Ausführung in loop1 auf Core 1)
+    void testStart(bool autoAdvance);     // Kanal-Durchlauf starten
+    void testStop();
+    void testNext();
+    void testPrev();
+    void testGoTo(uint8_t port);          // Einzeltest eines HW-Ports (startet den Test)
+    bool isTestActive();
+    uint8_t testPort();                   // aktuell getesteter HW-Port
+    float testCurrent();                  // zuletzt gemessener Strom (A), -1 = ungültig
+
     bool getPcaI2cConnectionState();
     uint8_t getUsedChannels();
     const std::string getChannelName(uint8_t channelIndex);
@@ -65,6 +80,20 @@ private:
     bool doResetI2c = false;
     bool _powerFault = false;            // gesetzt bei Hardware-Alarm (Überstrom u.Ä.), sperrt das Neubestromen der Kanäle
     bool _reactivationRequested = false; // Core 0 fordert Reaktivierung an, Core 1 (loop1) führt sie aus
+
+    // Testmodus-Zustand (Ausführung in loop1/Core 1)
+    bool _testActive = false;
+    bool _testAuto = false;
+    uint8_t _testPort = 0;
+    uint8_t _testPhase = 0;              // 0 = settle (auf Strom warten), 1 = gemessen/anzeigen
+    uint32_t _testStepStart = 0;
+    uint32_t _testLastActivity = 0;
+    float _testCurrentA = -1.0f;
+    volatile uint8_t _testReq = 0;       // 0=keine,1=start,2=start-auto,3=next,4=prev,5=stop,6=goto
+    volatile int16_t _testReqPort = -1;
+    void testLoop();                     // Zustandsmaschine, aus loop1
+    void testEnterPort(uint8_t port);    // alle aus, Port an (100%), Messphase starten
+    void resendChannels();               // alle Kanäle aus Software-Zustand neu ausgeben
 
     // hcl channels
     uint8_t hclBrightness = 0;
