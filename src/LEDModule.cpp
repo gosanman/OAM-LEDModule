@@ -781,6 +781,7 @@ bool LEDModule::initI2cConnection()
 #endif
         return false;
     }
+    Wire1.setClock(I2C_CLOCK_HZ);   // _pwm.begin() hat Wire1 neu initialisiert und den Takt auf 100k zurueckgesetzt
     // Set default values for led
     _pwm.setPWMFreq(pwmFreqSelect); // 1600 is the maximum PWM frequency
     _pwm.setOutputMode(true);       // External N-type driver, set to output mode INVRT = 0 OUTDRV = 1, Totempole (Push-Pull) = true, open drain = false

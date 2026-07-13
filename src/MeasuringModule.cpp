@@ -388,6 +388,7 @@ bool MeasuringModule::initI2cConnectionTemp()
 #endif
         return false;
     }
+    Wire1.setClock(I2C_CLOCK_HZ); // _tmp100.init() hat Wire1 neu initialisiert und den Takt zurueckgesetzt
     // Set default values for sensor
     _tmp100.setResolution(RES025);
     logInfoP("Init messurment I2C connection for TEMP100 sucessful");
@@ -411,6 +412,7 @@ bool MeasuringModule::initI2cConnectionIna()
 #endif
         return false;
     }
+    Wire1.setClock(I2C_CLOCK_HZ); // _ina.begin() hat Wire1 neu initialisiert und den Takt auf 100k zurueckgesetzt
     // Set default values for sensor
     _ina.configureAlert(ALERT_OVER_CURRENT, OVER_CURRENT, true, true);     // HW-Schutz fest auf 6 A (ETS-Schnellwertalarm ist separat)
     // INA226-Energieintegration nach (Neu-)Verbindung neu ansetzen, damit die erste

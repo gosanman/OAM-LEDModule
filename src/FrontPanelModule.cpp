@@ -211,10 +211,9 @@ void FrontPanelModule::handleButtonPress(uint8_t button)
             currentscreen = SUBSCREEN_CONNECTIONS;
             currentconnectionscreen = 0;
         }
-        else if (currentscreen == SUBSCREEN_CONNECTIONS)
+        else if (currentscreen == SUBSCREEN_CONNECTIONS && ParamAPP_FrontPanelControl)
         {
-            if (ParamAPP_FrontPanelControl)
-                toggleLedChannel(currentconnectionscreen);
+            toggleLedChannel(currentconnectionscreen);
         }
         else if (currentscreen == SCREEN_STATUS && ParamAPP_FrontPanelControl)
         {
@@ -407,7 +406,7 @@ void FrontPanelModule::showTestScreen()
     _display.print("TEST  Port ");
     _display.print(HWPortsMapping[openknxLEDModule.testPort()]);
     _display.setTextSize(2);
-    _display.setCursor(0, 11);
+    _display.setCursor(0, 10);
     float c = openknxLEDModule.testCurrent();
     if (c < 0.0f)
         _display.print("--.- A"); // noch keine gültige Messung
@@ -543,6 +542,7 @@ bool FrontPanelModule::initI2cConnectionLcd()
         logErrorP("ERROR: initialization for SSD1306 failed...");
         return false;
     }
+    Wire1.setClock(I2C_CLOCK_HZ); // _display.begin() hat Wire1 neu initialisiert und den Takt auf 100k zurueckgesetzt
     // Clear the buffer.
     _display.clearDisplay();
     _display.display();

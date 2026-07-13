@@ -9,7 +9,7 @@ void setup() {
     Wire1.setSDA(WIRE1_SDA);
     Wire1.setSCL(WIRE1_SCL);
     Wire1.begin();
-    Wire1.setClock(100000);
+    Wire1.setClock(I2C_CLOCK_HZ); // wird von den device-begin() zurueckgesetzt -> in den Init-Funktionen erneut gesetzt
 
     const uint8_t firmwareRevision = 1;
     openknx.init(firmwareRevision);

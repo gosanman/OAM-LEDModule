@@ -141,3 +141,8 @@ enum ChannelType {
 #define I2C_INA22x_DEVICE_ADDRESS   0x41    // Address of INA22x current and power sensor chip
 #define I2C_TMP100_DEVICE_ADDRESS   0x48    // Address of TMP100 temperature sensor chip
 #define I2C_SSD1306_DEVICE_ADDRESS  0x3C    // Address of SSD1306 OLED display chip
+
+// Wire1-Takt. 400 kHz (Fast Mode) statt 100 kHz: ~3,3x schnellere PWM-Writes (gemessen 667 -> 204 us/write).
+// WICHTIG: Jedes device-begin() ruft intern Wire1.begin() und setzt den Takt auf 100 kHz zurueck.
+// Deshalb muss I2C_CLOCK_HZ nach JEDEM begin() (PCA/INA/TMP/SSD1306) erneut gesetzt werden.
+#define I2C_CLOCK_HZ                400000
