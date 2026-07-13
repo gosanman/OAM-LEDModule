@@ -15,7 +15,9 @@
 // Timing parameters
 #define MEASUREMENT_ALARM_CHECK     5000    // ms
 #define MEASUREMENT_CHECK_I2C       10000   // ms
-#define MEASUREMENT_INA_OVERFLOW    6000    // ms
+#define MEASUREMENT_INA_OVERFLOW    250     // ms - INA-Alert-Register pollen. ~250 ms entspricht etwa dem
+                                            // INA-Wandlungsfenster (CT_5/AVG_64 ~270 ms) -> schnellstmoegliche
+                                            // sinnvolle Ueberstrom-Abschaltung (vorher 6000 ms Worst-Case)
 #define REACTIVATE_COOLDOWN         3000    // ms - Sperrzeit nach einem Trip, bevor eine Reaktivierung zulässig ist
 #define REACTIVATE_VERIFY_DELAY     400     // ms - nach Wiedereinschalten den echten Strom prüfen
 

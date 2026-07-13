@@ -78,8 +78,8 @@ private:
     uint32_t _timerCheckI2cConnection = 0;
     uint32_t _timerCheckHclChannel = 0;
     bool doResetI2c = false;
-    bool _powerFault = false;            // gesetzt bei Hardware-Alarm (Überstrom u.Ä.), sperrt das Neubestromen der Kanäle
-    bool _reactivationRequested = false; // Core 0 fordert Reaktivierung an, Core 1 (loop1) führt sie aus
+    volatile bool _powerFault = false;            // gesetzt bei Hardware-Alarm (Überstrom u.Ä.), sperrt das Neubestromen der Kanäle; cross-core (Core 0 liest, Core 1 schreibt)
+    volatile bool _reactivationRequested = false; // Core 0 fordert Reaktivierung an, Core 1 (loop1) führt sie aus
 
     // Testmodus-Zustand (Ausführung in loop1/Core 1)
     bool _testActive = false;
