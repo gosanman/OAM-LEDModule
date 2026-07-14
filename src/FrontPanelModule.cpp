@@ -406,7 +406,7 @@ void FrontPanelModule::showTestScreen()
     _display.print("TEST  Port ");
     _display.print(HWPortsMapping[openknxLEDModule.testPort()]);
     _display.setTextSize(2);
-    _display.setCursor(0, 10);
+    _display.setCursor(0, 9);
     float c = openknxLEDModule.testCurrent();
     if (c < 0.0f)
         _display.print("--.- A"); // noch keine gültige Messung
