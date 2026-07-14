@@ -84,15 +84,17 @@ private:
     // Testmodus-Zustand (Ausführung in loop1/Core 1)
     volatile bool _testActive = false;   // cross-core: Core 1 schreibt (testLoop), Core 0 liest (processCommand)
     bool _testAuto = false;
-    uint8_t _testPort = 0;
+    volatile uint8_t _testPort = 0;      // cross-core: Core 1 schreibt, Core 0 liest (loop()-Diagnose-KO)
     uint8_t _testPhase = 0;              // 0 = settle (auf Strom warten), 1 = gemessen/anzeigen
     uint32_t _testStepStart = 0;
     uint32_t _testLastActivity = 0;
-    float _testCurrentA = -1.0f;
+    volatile float _testCurrentA = -1.0f; // cross-core: Core 1 schreibt, Core 0 liest (loop()-Diagnose-KO)
+    volatile bool _testResultPending = false; // Core 1 setzt bei neuer Messung, Core 0 gibt sie an die Diagnose-KO aus
     volatile uint8_t _testReq = 0;       // 0=keine,1=start,2=start-auto,3=next,4=prev,5=stop,6=goto
     volatile int16_t _testReqPort = -1;
     void testLoop();                     // Zustandsmaschine, aus loop1
     void testEnterPort(uint8_t port);    // alle aus, Port an (100%), Messphase starten
+    void allPortsOff();                  // alle PWM-Ausgaenge per ALL_LED_OFF-Broadcast (eine I2C-Transaktion) aus
     void resendChannels();               // alle Kanäle aus Software-Zustand neu ausgeben
 
     // hcl channels

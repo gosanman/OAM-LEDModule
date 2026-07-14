@@ -310,6 +310,13 @@ void LEDModule::loop()
     // do nothing when not parameterized
     if (!knx.configured())
         return;
+    // Testmodus-Messergebnis (auf Core 1 erhoben) hier auf Core 0 an die Diagnose-KO geben.
+    // writeDiagenoseKo() ruft intern knx.loop() - das darf nur auf Core 0 (dieser loop) laufen.
+    if (_testResultPending)
+    {
+        _testResultPending = false;
+        openknx.console.writeDiagenoseKo("T %c %.2fA", HWPortsMapping[_testPort], _testCurrentA);
+    }
     // run loop of all HCL channels
     if (delayCheck(_timerCheckHclChannel, HCL_TIMER_BROADCAST))
     {
@@ -449,11 +456,31 @@ bool LEDModule::processCommand(const std::string cmd, bool diagnoseKo)
         openknx.logger.logWithPrefixAndValues("LED", "Over-current fault reset requested (fault=%i)", isPowerFault());
         return true;
     }
-    // Testmodus-Kommandos (Konsole und Diagnose-KO)
-    if (cmd == "test walk") { testStart(true); openknx.console.writeDiagenoseKo("T WALK"); return true; }
-    if (cmd == "test next") { testNext();      openknx.console.writeDiagenoseKo("T NEXT"); return true; }
-    if (cmd == "test prev") { testPrev();      openknx.console.writeDiagenoseKo("T PREV"); return true; }
-    if (cmd == "test stop") { testStop();      openknx.console.writeDiagenoseKo("T STOP"); return true; }
+    // Testmodus-Kommandos (Konsole und Diagnose-KO). Diagnose-KO-Echo nur bei Diagnose-KO-Aufruf.
+    if (cmd == "test walk")
+    {
+        testStart(true);
+        if (diagnoseKo) openknx.console.writeDiagenoseKo("T WALK");
+        return true;
+    }
+    if (cmd == "test next")
+    {
+        testNext();
+        if (diagnoseKo) openknx.console.writeDiagenoseKo("T NEXT");
+        return true;
+    }
+    if (cmd == "test prev")
+    {
+        testPrev();
+        if (diagnoseKo) openknx.console.writeDiagenoseKo("T PREV");
+        return true;
+    }
+    if (cmd == "test stop")
+    {
+        testStop();
+        if (diagnoseKo) openknx.console.writeDiagenoseKo("T STOP");
+        return true;
+    }
     if (cmd.rfind("test ch ", 0) == 0)
     {
         const char *s = cmd.c_str() + 8;
@@ -462,9 +489,9 @@ bool LEDModule::processCommand(const std::string cmd, bool diagnoseKo)
         if (end != s && n >= 0 && n < LED_HW_CHANNEL_COUNT)
         {
             testGoTo((uint8_t)n);
-            openknx.console.writeDiagenoseKo("T CH %i", (int)n);
+            if (diagnoseKo) openknx.console.writeDiagenoseKo("T CH %i", (int)n);
         }
-        else
+        else if (diagnoseKo)
             openknx.console.writeDiagenoseKo("T CH ERR");
         return true;
     }
@@ -599,12 +626,19 @@ bool LEDModule::processCommand(const std::string cmd, bool diagnoseKo)
     return false;
 }
 
-void LEDModule::processBeforeRestart()
+// Alle PWM-Ausgaenge in EINER I2C-Transaktion abschalten (ALL_LED_OFF_H Bit 4 als Broadcast),
+// statt 12 Einzelregister zu schreiben. Danach kann ein einzelner Port per setPin() gesetzt werden.
+void LEDModule::allPortsOff()
 {
     Wire1.beginTransmission(I2C_PCA9685_DEVICE_ADDRESS);
     Wire1.write(0xFD); // Adresse des ALL_LED_OFF_H Registers
-    Wire1.write(0x10); // Setze das Bit 4 im ALL_LED_OFF_H Register
+    Wire1.write(0x10); // Bit 4 -> alle Kanaele sofort aus
     Wire1.endTransmission();
+}
+
+void LEDModule::processBeforeRestart()
+{
+    allPortsOff();
 }
 
 // Allgemeine Funktion zum Auslesen eines Registers
@@ -680,8 +714,7 @@ float LEDModule::testCurrent()              { return _testCurrentA; }
 
 void LEDModule::testEnterPort(uint8_t port)
 {
-    for (uint8_t p = 0; p < LED_HW_CHANNEL_COUNT; p++)
-        _pwm.setPin(p, 0);
+    allPortsOff();
     _testPort = (port < LED_HW_CHANNEL_COUNT) ? port : 0;
     _pwm.setPin(_testPort, 4095); // 100 % (Volllast)
     _testPhase = 0;
@@ -721,16 +754,24 @@ void LEDModule::testLoop()
         logInfoP("Test mode started (%s)", _testAuto ? "auto" : "manual");
         break;
     case 3: // next
-        if (_testActive) { _testLastActivity = millis(); testEnterPort((_testPort + 1) % LED_HW_CHANNEL_COUNT); }
+        if (_testActive)
+        {
+            _testLastActivity = millis();
+            testEnterPort((_testPort + 1) % LED_HW_CHANNEL_COUNT);
+        }
         break;
     case 4: // prev
-        if (_testActive) { _testLastActivity = millis(); testEnterPort((_testPort + LED_HW_CHANNEL_COUNT - 1) % LED_HW_CHANNEL_COUNT); }
+        if (_testActive)
+        {
+            _testLastActivity = millis();
+            testEnterPort((_testPort + LED_HW_CHANNEL_COUNT - 1) % LED_HW_CHANNEL_COUNT);
+        }
         break;
     case 5: // stop
         if (_testActive)
         {
             _testActive = false;
-            for (uint8_t p = 0; p < LED_HW_CHANNEL_COUNT; p++) _pwm.setPin(p, 0);
+            allPortsOff();
             resendChannels(); // Normalbetrieb wiederherstellen
             logInfoP("Test mode stopped");
         }
@@ -754,7 +795,7 @@ void LEDModule::testLoop()
     if (delayCheck(_testLastActivity, TEST_TIMEOUT_MS))
     {
         _testActive = false;
-        for (uint8_t p = 0; p < LED_HW_CHANNEL_COUNT; p++) _pwm.setPin(p, 0);
+        allPortsOff();
         resendChannels();
         logInfoP("Test mode timeout - back to normal");
         return;
@@ -766,7 +807,9 @@ void LEDModule::testLoop()
         _testCurrentA = openknxMeasuringModule.readCurrentNow();
         _testPhase = 1;
         logInfoP("Test port %c (%i): %.2f A", HWPortsMapping[_testPort], _testPort, _testCurrentA);
-        openknx.console.writeDiagenoseKo("T %c %.2fA", HWPortsMapping[_testPort], _testCurrentA);
+        // Diagnose-KO-Ausgabe auf Core 0 anstossen: writeDiagenoseKo() ruft intern knx.loop(),
+        // das darf nicht aus loop1/Core 1 laufen (Cross-Core-Zugriff auf den KNX-Stack).
+        _testResultPending = true;
     }
     // Auto-Weiterschalten nach Verweildauer. _testLastActivity hier bewusst NICHT erneuern,
     // sonst haelt der Auto-Durchlauf den Inaktivitaets-Timeout ewig zurueck; er soll
