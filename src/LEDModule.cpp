@@ -691,9 +691,25 @@ void LEDModule::testEnterPort(uint8_t port)
 
 void LEDModule::testLoop()
 {
-    // Anforderung abholen (Core 0 / Display)
+    // Bei Fehler-Latch ist der Testmodus komplett gesperrt: keine Anforderung verarbeiten und
+    // keinen Ausgang bestromen (savePower hat bereits alles aus). Anforderung verwerfen.
+    if (_powerFault)
+    {
+        if (_testActive)
+        {
+            _testActive = false;
+            logErrorP("Test mode aborted - over-current latched");
+        }
+        _testReq = 0;
+        _testReqPort = -1;
+        return;
+    }
+
+    // Anforderung abholen (Core 0 / Display); nur eine tatsaechlich gelesene Anforderung quittieren,
+    // damit ein zwischen Lesen und Quittieren von Core 0 gesetzter Request nicht verloren geht.
     uint8_t req = _testReq;
-    _testReq = 0;
+    if (req != 0)
+        _testReq = 0;
     switch (req)
     {
     case 1: // start manuell
@@ -734,14 +750,7 @@ void LEDModule::testLoop()
     if (!_testActive)
         return;
 
-    // Sicherheit: bei Fehler-Latch Test sofort beenden (savePower hat bereits alles aus)
-    if (_powerFault)
-    {
-        _testActive = false;
-        logErrorP("Test mode aborted - over-current latched");
-        return;
-    }
-    // Auto-Ende nach Inaktivität
+    // Auto-Ende nach Inaktivität (Fehler-Latch wird bereits am Kopf der Funktion abgefangen)
     if (delayCheck(_testLastActivity, TEST_TIMEOUT_MS))
     {
         _testActive = false;
@@ -759,12 +768,11 @@ void LEDModule::testLoop()
         logInfoP("Test port %c (%i): %.2f A", HWPortsMapping[_testPort], _testPort, _testCurrentA);
         openknx.console.writeDiagenoseKo("T %c %.2fA", HWPortsMapping[_testPort], _testCurrentA);
     }
-    // Auto-Weiterschalten nach Verweildauer
+    // Auto-Weiterschalten nach Verweildauer. _testLastActivity hier bewusst NICHT erneuern,
+    // sonst haelt der Auto-Durchlauf den Inaktivitaets-Timeout ewig zurueck; er soll
+    // TEST_TIMEOUT_MS nach der letzten Benutzer-Aktion greifen und den Auto-Test beenden.
     if (_testAuto && _testPhase == 1 && delayCheck(_testStepStart, TEST_DWELL_MS))
-    {
-        _testLastActivity = millis();
         testEnterPort((_testPort + 1) % LED_HW_CHANNEL_COUNT);
-    }
 }
 
 bool LEDModule::initI2cConnection()

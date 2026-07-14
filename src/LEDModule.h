@@ -82,7 +82,7 @@ private:
     volatile bool _reactivationRequested = false; // Core 0 fordert Reaktivierung an, Core 1 (loop1) führt sie aus
 
     // Testmodus-Zustand (Ausführung in loop1/Core 1)
-    bool _testActive = false;
+    volatile bool _testActive = false;   // cross-core: Core 1 schreibt (testLoop), Core 0 liest (processCommand)
     bool _testAuto = false;
     uint8_t _testPort = 0;
     uint8_t _testPhase = 0;              // 0 = settle (auf Strom warten), 1 = gemessen/anzeigen
