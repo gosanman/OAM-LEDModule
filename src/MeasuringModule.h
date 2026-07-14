@@ -109,6 +109,11 @@ private:
     void checkAlarmDefinitions();
     void checkAndTriggerAlarm(bool condition, bool &triggeredFlag, uint16_t alarmKo, const String &messageDiagnoseKo);
 
+    // Cross-core Diagnose-KO-Ausgabe: writeDiagenoseKo() ruft intern knx.loop() und darf nur auf
+    // Core 0 laufen. loop1/Core-1-Code postet daher hierhin; loop()/Core 0 gibt es aus.
+    void postDiagCore1(const char *fmt, ...); // von Core 1: kurze Meldung formatieren + vormerken
+    volatile bool _diagCore1Pending = false;  // Core 1 setzt, Core 0 (loop()) loescht nach Ausgabe
+    char _diagCore1Buf[16] = {};              // vorgemerkte Meldung (DPT16: max. 14 Zeichen)
 
     INASensor _ina;
     TMP100_WE _tmp100;

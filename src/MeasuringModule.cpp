@@ -1,4 +1,5 @@
 #include "MeasuringModule.h"
+#include <cstdarg> // va_list fuer postDiagCore1()
 
 MeasuringModule *MeasuringModule::_instance = nullptr;
 
@@ -70,11 +71,33 @@ void MeasuringModule::setup1() {
 
 }
 
-void MeasuringModule::loop() 
+void MeasuringModule::loop()
 {
     // do nothing when not parameterized
     if (!knx.configured())
         return;
+    // Von loop1/Core 1 vorgemerkte Diagnose-KO-Meldung hier auf Core 0 ausgeben.
+    // writeDiagenoseKo() ruft intern knx.loop() - das darf nur auf Core 0 laufen.
+    if (_diagCore1Pending)
+    {
+        char msg[sizeof(_diagCore1Buf)];
+        memcpy(msg, _diagCore1Buf, sizeof(msg)); // lokale Kopie: Core 1 koennte den Puffer gleich neu beschreiben
+        _diagCore1Pending = false;
+        openknx.console.writeDiagenoseKo("%s", msg);
+    }
+}
+
+// Von loop1/Core 1 aufrufen STATT writeDiagenoseKo(): formatiert die (kurze) Meldung in einen
+// Puffer und merkt sie vor. Die eigentliche KO-Ausgabe (samt knx.loop()) macht loop() auf Core 0.
+// Single-Slot, letzte Meldung gewinnt - fuer seltene Fehler-/Alert-Echos ausreichend.
+void MeasuringModule::postDiagCore1(const char *fmt, ...)
+{
+    va_list ap;
+    va_start(ap, fmt);
+    vsnprintf(_diagCore1Buf, sizeof(_diagCore1Buf), fmt, ap);
+    va_end(ap);
+    __sync_synchronize();     // Puffer-Schreiben vor dem Flag sichtbar machen (DMB)
+    _diagCore1Pending = true; // Core 0 (loop()) holt es ab
 }
 
 void MeasuringModule::loop1() {
@@ -189,7 +212,7 @@ void MeasuringModule::getAlertValues()
     for (const auto &a : alerts) {
         if (flags & (1 << a.bit)) {
             logErrorP("%s", a.logMsg);
-            openknx.console.writeDiagenoseKo("%s", a.diagnose);
+            postDiagCore1("%s", a.diagnose); // Core 1 -> Ausgabe auf Core 0 (kein knx.loop() hier)
         }
     }
     triggerFault(); // abschalten und latchen, sobald irgendein Alert ansteht
@@ -234,7 +257,7 @@ void MeasuringModule::handleReactivation()
         if (current >= OVER_CURRENT)
         {
             logErrorP("Over-current persists (%.2f A) - latching off again", current);
-            openknx.console.writeDiagenoseKo("AL OVER CUR");
+            postDiagCore1("AL OVER CUR"); // Core 1 -> Ausgabe auf Core 0
             triggerFault();
         }
         else
@@ -261,7 +284,7 @@ void MeasuringModule::checkAndTriggerAlarm(bool condition, bool &triggeredFlag, 
     if (condition) {
         if (!triggeredFlag) {
             knx.getGroupObject(alarmKo).value(true, DPT_Alarm);             // Trigger alarm
-            openknx.console.writeDiagenoseKo(messageDiagnoseKo.c_str());    // Send alarm to diagnose ko
+            postDiagCore1("%s", messageDiagnoseKo.c_str());                 // Core 1 -> Ausgabe auf Core 0
             triggeredFlag = true;                                           // Set flag
 #ifdef INFO3_LED_PIN
             openknx.info3Led.blinking(500);                                 // Blink info/alert LED
@@ -440,7 +463,7 @@ bool MeasuringModule::checkI2cConnectionTemp()
     byte resultTemp = Wire1.endTransmission();       //  0 : Success  1 : Data too long  2 : NACK on transmit of address  3 : NACK on transmit of data  4 : Other error  5 : Timeout
     if (resultTemp != 0) {
         logErrorP("TMP100 not available via I2C %d", resultTemp);
-        openknx.console.writeDiagenoseKo("ER I2C TMP %d", resultTemp);
+        postDiagCore1("ER I2C TMP %d", resultTemp); // Core 1 -> Ausgabe auf Core 0
         doResetI2cTemp = true;
         return false;
     }
@@ -456,7 +479,7 @@ bool MeasuringModule::checkI2cConnectionIna()
     byte resultIna = Wire1.endTransmission();       //  0 : Success  1 : Data too long  2 : NACK on transmit of address  3 : NACK on transmit of data  4 : Other error  5 : Timeout
     if (resultIna != 0) {
         logErrorP("INA%i not available via I2C %d", _ina.getChipType(), resultIna);
-        openknx.console.writeDiagenoseKo("ER I2C INA %d", resultIna);
+        postDiagCore1("ER I2C INA %d", resultIna); // Core 1 -> Ausgabe auf Core 0
         doResetI2cIna = true;
         return false;
     }
