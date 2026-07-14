@@ -446,7 +446,7 @@ void LEDModule::showHelp()
     openknx.console.printHelpLine("resetfault", "Reset latched over-current fault (current-checked)");
     openknx.console.printHelpLine("test walk", "Channel walk-through test (auto), measures current per port");
     openknx.console.printHelpLine("test ch <n>", "Test single HW port at 100 percent");
-    openknx.console.printHelpLine("test next/prev/stop", "Advance / previous port / end test mode");
+    openknx.console.printHelpLine("test next/prev/stop", "next port / previous port / end test mode");
 }
 
 bool LEDModule::processCommand(const std::string cmd, bool diagnoseKo)
