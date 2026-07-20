@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-model href="../../knxprod-support/knx_project_20/knx-editor.xsd" type="application/xml" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<KNX xmlns="http://knx.org/xml/project/20" xmlns:op="http://github.com/OpenKNX/OpenKNXproducer">
+
+  <op:config href="LEDModule.conf.xml" />
+
+  <op:ETS
+    OpenKnxId="0xA8"
+    ApplicationNumber="1"
+    ApplicationVersion="%LED_ApplicationVersion%"
+    ReplacesVersions="%LED_ReplacesVersions%"
+    ApplicationRevision="0"
+    FirmwareRevision="0"
+    ProductName="LED Dimmer"
+    BusCurrent="10"
+    OrderNumber="OpenKnxLEDDimmer"
+    BaggagesRootDir="A8/01"
+  />
+
+  <!-- App-eigenes Modul (LED-Geräteparameter, ParameterTypes) -->
+  <op:define prefix="LED" header="knxprod.h" share="LED.share.xml" NumChannels="0" KoSingleOffset="0" ModuleType="6" noConfigTransfer="true" />
+
+  <!-- Common/BASE aus OGM-Common (liefert Geräte-Basisparameter, Zeit, Speichern, Icons, Hilfe) -->
+  <op:define prefix="BASE" ModuleType="10"
+    share="../lib/OGM-Common/src/Common.share.xml">
+    <op:verify File="../lib/OGM-Common/library.json" ModuleVersion="%BASE_VerifyVersion%" />
+  </op:define>
+
+  <!-- ConfigTransfer (von BASE benötigt: Modul-Aktivierung/Übertragung) -->
+  <op:define prefix="UCT" ModuleType="99" noConfigTransfer="true"
+    share="../lib/OFM-ConfigTransfer/src/ConfigTransfer.share.xml">
+    <op:verify File="../lib/OFM-ConfigTransfer/library.json" ModuleVersion="%UCT_VerifyVersion%" />
+  </op:define>
+
+  <!-- LED-Kanal-Module (getreu aus dem .ae-manu) -->
+  <op:define prefix="EK" noConfigTransfer="true" header="knxprod.h" share="EK.share.xml" template="EK.templ.xml" NumChannels="%EK_NumChannels%" KoOffset="57" ModuleType="2" />
+  <op:define prefix="TW" noConfigTransfer="true" header="knxprod.h" share="TW.share.xml" template="TW.templ.xml" NumChannels="%TW_NumChannels%" KoOffset="393" ModuleType="3" />
+  <op:define prefix="RGB" noConfigTransfer="true" header="knxprod.h" share="RGB.share.xml" template="RGB.templ.xml" NumChannels="%RGB_NumChannels%" KoOffset="561" ModuleType="4" />
+  <op:define prefix="HCL" noConfigTransfer="true" header="knxprod.h" share="HCL.share.xml" template="HCL.templ.xml" NumChannels="%HCL_NumChannels%" KoOffset="673" ModuleType="5" />
+
+  <ManufacturerData>
+    <Manufacturer RefId="M-00FA">
+      <ApplicationPrograms>
+        <ApplicationProgram>
+          <generate>
+            <Dynamic>
+              <op:include prefix="BASE" href="../lib/OGM-Common/src/Common.share.xml" xpath="//ApplicationProgram/Dynamic/*" />
+              <op:include prefix="UCT" href="../lib/OFM-ConfigTransfer/src/ConfigTransfer.share.xml" xpath="//ApplicationProgram/Dynamic/*" />
+              <Channel Id="%AID%_CH-LED" Number="LED" Name="LED" Text="LED" Icon="led-variant-outline">
+                <op:include prefix="LED" href="LED.share.xml" xpath="//ApplicationProgram/Dynamic/ChannelIndependentBlock/*" />
+                <op:include prefix="EK" href="EK.templ.xml" xpath="//ApplicationProgram/Dynamic/*" type="template" />
+                <op:include prefix="TW" href="TW.templ.xml" xpath="//ApplicationProgram/Dynamic/*" type="template" />
+                <op:include prefix="RGB" href="RGB.templ.xml" xpath="//ApplicationProgram/Dynamic/*" type="template" />
+              </Channel>
+              <Channel Id="%AID%_CH-HCL" Number="HCL" Name="HCL" Text="HCL" Icon="sun-clock-outline">
+                <op:include prefix="HCL" href="HCL.templ.xml" xpath="//ApplicationProgram/Dynamic/*" type="template" />
+              </Channel>
+            </Dynamic>
+          </generate>
+        </ApplicationProgram>
+      </ApplicationPrograms>
+    </Manufacturer>
+  </ManufacturerData>
+</KNX>

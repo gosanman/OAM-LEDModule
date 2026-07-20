@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<KNX xmlns="http://knx.org/xml/project/20" xmlns:op="http://github.com/OpenKNX/OpenKNXproducer" CreatedBy="ae2producer" ToolVersion="0.2">
+  <ManufacturerData><Manufacturer RefId="M-00FA"><ApplicationPrograms><ApplicationProgram>
+    <Static>
+      <ParameterTypes>
+            <ParameterType Id="%AID%_PT-hclType" Name="hclType">
+              <TypeRestriction Base="Value" SizeInBit="2">
+                <Enumeration Text="Deaktiviert" Value="0" Id="%AID%_PT-hclType_EN-0" />
+                <Enumeration Text="Sonnen Auf-/Untergang" Value="1" Id="%AID%_PT-hclType_EN-1" />
+                <Enumeration Text="Feste Zeiten" Value="2" Id="%AID%_PT-hclType_EN-2" />
+              </TypeRestriction>
+            </ParameterType>
+            <ParameterType Id="%AID%_PT-Text40Byte" Name="Text40Byte">
+              <TypeText SizeInBit="320" />
+            </ParameterType>
+            <ParameterType Id="%AID%_PT-OnColorTemp" Name="OnColorTemp">
+              <TypeNumber Type="unsignedInt" minInclusive="600" maxInclusive="11000" Increment="50" SizeInBit="16" />
+            </ParameterType>
+            <ParameterType Id="%AID%_PT-hclPicSun" Name="hclPicSun">
+              <TypePicture RefId="M-00FA_BG-A8.5C01.5CPics-hclsun.2Epng" HorizontalAlignment="Middle" />
+            </ParameterType>
+            <ParameterType Id="%AID%_PT-hclOffset" Name="hclOffset">
+              <TypeRestriction Base="Value" SizeInBit="2">
+                <Enumeration Text="Deaktiviert" Value="0" Id="%AID%_PT-hclOffset_EN-0" />
+                <Enumeration Text="Später" Value="1" Id="%AID%_PT-hclOffset_EN-1" />
+                <Enumeration Text="Früher" Value="2" Id="%AID%_PT-hclOffset_EN-2" />
+              </TypeRestriction>
+            </ParameterType>
+            <ParameterType Id="%AID%_PT-hclDurationMin" Name="hclDurationMin">
+              <TypeTime Unit="Minutes" UIHint="Time_hhmm" minInclusive="0" maxInclusive="180" SizeInBit="8" />
+            </ParameterType>
+            <ParameterType Id="%AID%_PT-OnBrightness" Name="OnBrightness">
+              <TypeNumber Type="unsignedInt" minInclusive="0" maxInclusive="100" SizeInBit="7" />
+            </ParameterType>
+            <ParameterType Id="%AID%_PT-HourValue" Name="HourValue">
+              <TypeNumber Type="unsignedInt" minInclusive="0" maxInclusive="23" SizeInBit="8" />
+            </ParameterType>
+            <ParameterType Id="%AID%_PT-MinuteValue" Name="MinuteValue">
+              <TypeNumber Type="unsignedInt" minInclusive="0" maxInclusive="59" SizeInBit="8" />
+            </ParameterType>
+            <ParameterType Id="%AID%_PT-hclPicTime" Name="hclPicTime">
+              <TypePicture RefId="M-00FA_BG-A8.5C01.5CPics-hcltime.2Epng" HorizontalAlignment="Middle" />
+            </ParameterType>
+      </ParameterTypes>
+    </Static>
+  </ApplicationProgram></ApplicationPrograms></Manufacturer></ManufacturerData>
+</KNX>

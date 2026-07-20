@@ -32,24 +32,24 @@ const std::string LEDModule::version()
 void LEDModule::setup()
 {
     // save default values from PA
-    deviceSelect = ParamAPP_ControllerType;
-    pwmFreqSelect = ParamAPP_PwmFrequenz;
+    deviceSelect = ParamLED_ControllerType;
+    pwmFreqSelect = ParamLED_PwmFrequenz;
 
     switch (deviceSelect)
     {
     case 0: // BOARD_KNXLED_DK_06_V10 or V12 - LED-DK-06x24V
-        operatinModeSelect = ParamAPP_OperatingMode;
+        operatinModeSelect = ParamLED_OperatingMode;
         logInfoP("Device: %sx24V - 6-Kanal OpenKNX LED Dimmer", DEVICE_ID);
         break;
     case 1: // BOARD_KNXLED_DK_12_V10 or V12 - LED-DK-12x24V
-        operatinModeSelect = ParamAPP_OperatingMode - 10;
+        operatinModeSelect = ParamLED_OperatingMode - 10;
         logInfoP("Device: %sx24V - 12-Kanal OpenKNX LED Dimmer", DEVICE_ID);
         break;
     }
 
     // Debug
     logDebugP("CONFIG - Controller Device: %s (%i) - Operating Mode: %i - PWM freq: %i Hz - DayNight: %i",
-              DEVICE_ID, deviceSelect, operatinModeSelect, pwmFreqSelect, ParamAPP_DayNight);
+              DEVICE_ID, deviceSelect, operatinModeSelect, pwmFreqSelect, ParamLED_DayNight);
 
     // Init I2C connection and Lib
     _pwm = Adafruit_PWMServoDriver(I2C_PCA9685_DEVICE_ADDRESS, Wire1);
@@ -287,17 +287,17 @@ void LEDModule::setup()
     openknx.func1Button.onShortClick([=]
                                      { 
             logDebugP("Func1 Button - pressed short");
-            uint8_t sett = ParamAPP_Func1BtnClick;
+            uint8_t sett = ParamLED_Func1BtnClick;
             handleFunc1(sett); });
     openknx.func1Button.onLongClick([=]
                                     { 
             logDebugP("Func1 Button - pressed long");
-            uint8_t sett = ParamAPP_Func1BtnLongClick;
+            uint8_t sett = ParamLED_Func1BtnLongClick;
             handleFunc1(sett); });
     openknx.func1Button.onDoubleClick([=]
                                       {
             logDebugP("Func1 Button - pressed double");
-            uint8_t sett = ParamAPP_Func1BtnDblClick;
+            uint8_t sett = ParamLED_Func1BtnDblClick;
             handleFunc1(sett); });
 #endif
 }
@@ -373,7 +373,7 @@ void LEDModule::setHwChannelValuePWM(byte channel, word start, word end, int cur
 void LEDModule::processInputKo(GroupObject &ko)
 {
     uint16_t koNum = ko.asap();
-    if (koNum < EK_KoOffset && koNum != APP_KoDayNight) return; // ignore KOs below EK block, außer gemeinsame KOs (Tag/Nacht)
+    if (koNum < EK_KoOffset && koNum != LED_KoDayNight) return; // ignore KOs below EK block, außer gemeinsame KOs (Tag/Nacht)
     logDebugP("Received KO %i", koNum);
 
     // Im Latch-Zustand löst ein Kanalbefehl (Schalten/Dimmen) einen strom-geprüften
@@ -412,7 +412,7 @@ void LEDModule::processInputKo(GroupObject &ko)
     switch (koNum)
     {
     // Tag/Nacht Objekt
-    case APP_KoDayNight:
+    case LED_KoDayNight:
         koHandleDayNight(ko);
         break;
 
@@ -425,7 +425,7 @@ void LEDModule::processInputKo(GroupObject &ko)
 void LEDModule::koHandleDayNight(GroupObject &ko)
 {
     bool value = ko.value(DPT_Switch);
-    if (ParamAPP_DayNight)
+    if (ParamLED_DayNight)
         value = !value;
     logDebugP("Broadcast Day/Night %i to channels", value);
 

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<KNX xmlns="http://knx.org/xml/project/20" xmlns:op="http://github.com/OpenKNX/OpenKNXproducer" CreatedBy="ae2producer" ToolVersion="0.2">
+  <ManufacturerData><Manufacturer RefId="M-00FA"><ApplicationPrograms><ApplicationProgram>
+    <Static>
+      <ParameterTypes>
+            <ParameterType Id="%AID%_PT-Text40Byte" Name="Text40Byte">
+              <TypeText SizeInBit="320" />
+            </ParameterType>
+            <ParameterType Id="%AID%_PT-ColorTempWW" Name="ColorTempWW">
+              <TypeNumber Type="unsignedInt" minInclusive="1800" maxInclusive="3300" Increment="50" SizeInBit="12" />
+            </ParameterType>
+            <ParameterType Id="%AID%_PT-ColorTempKW" Name="ColorTempKW">
+              <TypeNumber Type="unsignedInt" minInclusive="4700" maxInclusive="7000" Increment="50" SizeInBit="13" />
+            </ParameterType>
+            <ParameterType Id="%AID%_PT-UseOnValue" Name="UseOnValue">
+              <TypeRestriction Base="Value" SizeInBit="1">
+                <Enumeration Text="letzter Wert" Value="0" Id="%AID%_PT-UseOnValue_EN-0" />
+                <Enumeration Text="fester Wert" Value="1" Id="%AID%_PT-UseOnValue_EN-1" />
+              </TypeRestriction>
+            </ParameterType>
+            <ParameterType Id="%AID%_PT-OnBrightness" Name="OnBrightness">
+              <TypeNumber Type="unsignedInt" minInclusive="0" maxInclusive="100" SizeInBit="7" />
+            </ParameterType>
+            <ParameterType Id="%AID%_PT-OnColorTemp" Name="OnColorTemp">
+              <TypeNumber Type="unsignedInt" minInclusive="600" maxInclusive="11000" Increment="50" SizeInBit="16" />
+            </ParameterType>
+            <ParameterType Id="%AID%_PT-DimTime" Name="DimTime">
+              <TypeNumber Type="unsignedInt" minInclusive="1" maxInclusive="100" SizeInBit="7" />
+            </ParameterType>
+            <ParameterType Id="%AID%_PT-DelayBaseDim" Name="DelayBaseDim">
+              <TypeRestriction Base="Value" SizeInBit="2">
+                <Enumeration Text="1/10 Sekunde(n)" Value="3" Id="%AID%_PT-DelayBaseDim_EN-3" />
+                <Enumeration Text="Sekunde(n)" Value="0" Id="%AID%_PT-DelayBaseDim_EN-0" />
+                <Enumeration Text="Minute(n)" Value="1" Id="%AID%_PT-DelayBaseDim_EN-1" />
+              </TypeRestriction>
+            </ParameterType>
+            <ParameterType Id="%AID%_PT-DimCurve" Name="DimCurve">
+              <TypeRestriction Base="Value" SizeInBit="3">
+                <Enumeration Text="A - Linear" Value="0" Id="%AID%_PT-DimCurve_EN-0" />
+                <Enumeration Text="B - 2,8" Value="1" Id="%AID%_PT-DimCurve_EN-1" />
+                <Enumeration Text="C - 3,8" Value="2" Id="%AID%_PT-DimCurve_EN-2" />
+                <Enumeration Text="D - CIE" Value="3" Id="%AID%_PT-DimCurve_EN-3" />
+                <Enumeration Text="E - DALI" Value="4" Id="%AID%_PT-DimCurve_EN-4" />
+              </TypeRestriction>
+            </ParameterType>
+            <ParameterType Id="%AID%_PT-dimcurvepic" Name="dimcurvepic">
+              <TypePicture RefId="M-00FA_BG-A8.5C01.5CPics-dimcurve.2Epng" HorizontalAlignment="Middle" />
+            </ParameterType>
+            <ParameterType Id="%AID%_PT-kelvinpic" Name="kelvinpic">
+              <TypePicture RefId="M-00FA_BG-A8.5C01.5CPics-kelvin.2Epng" HorizontalAlignment="Middle" />
+            </ParameterType>
+            <ParameterType Id="%AID%_PT-SceneNumber" Name="SceneNumber">
+              <TypeNumber Type="signedInt" minInclusive="1" maxInclusive="64" SizeInBit="8" />
+            </ParameterType>
+            <ParameterType Id="%AID%_PT-SceneActionTW" Name="SceneActionTW">
+              <TypeRestriction Base="Value" SizeInBit="8">
+                <Enumeration Text="nicht aktiv" Value="0" Id="%AID%_PT-SceneActionTW_EN-0" />
+                <Enumeration Text="Einschaltwert (Tag/Nacht)" Value="1" Id="%AID%_PT-SceneActionTW_EN-1" />
+                <Enumeration Text="Helligkeitswert" Value="2" Id="%AID%_PT-SceneActionTW_EN-2" />
+                <Enumeration Text="Farbtemperatur" Value="3" Id="%AID%_PT-SceneActionTW_EN-3" />
+                <Enumeration Text="Helligkeit und Temperatur" Value="4" Id="%AID%_PT-SceneActionTW_EN-4" />
+                <Enumeration Text="ausschalten" Value="9" Id="%AID%_PT-SceneActionTW_EN-9" />
+              </TypeRestriction>
+            </ParameterType>
+            <ParameterType Id="%AID%_PT-ValueDpt5" Name="ValueDpt5">
+              <TypeNumber SizeInBit="8" Type="unsignedInt" minInclusive="0" maxInclusive="255" />
+            </ParameterType>
+            <ParameterType Id="%AID%_PT-hclChannel" Name="hclChannel">
+              <TypeRestriction Base="Value" SizeInBit="2">
+                <Enumeration Text="HCL1" Value="1" Id="%AID%_PT-hclChannel_EN-1" />
+                <Enumeration Text="HCL2" Value="2" Id="%AID%_PT-hclChannel_EN-2" />
+                <Enumeration Text="HCL3" Value="3" Id="%AID%_PT-hclChannel_EN-3" />
+              </TypeRestriction>
+            </ParameterType>
+            <ParameterType Id="%AID%_PT-hclStart" Name="hclStart">
+              <TypeRestriction Base="Value" SizeInBit="1">
+                <Enumeration Text="Nur beim Einschalten" Value="0" Id="%AID%_PT-hclStart_EN-0" />
+                <Enumeration Text="Auch wenn eingeschaltet ist" Value="1" Id="%AID%_PT-hclStart_EN-1" />
+              </TypeRestriction>
+            </ParameterType>
+            <ParameterType Id="%AID%_PT-OnOffYesNo" Name="OnOffYesNo">
+              <TypeRestriction Base="Value" SizeInBit="1">
+              <Enumeration Text="Nein" Value="0" Id="%ENID%" />
+              <Enumeration Text="Ja" Value="1" Id="%ENID%" />
+            </TypeRestriction>
+            </ParameterType>
+            <ParameterType Id="%AID%_PT-checkbox" Name="checkbox">
+              <TypeNumber Type="unsignedInt" minInclusive="0" maxInclusive="1" UIHint="CheckBox" SizeInBit="1" />
+            </ParameterType>
+      </ParameterTypes>
+    </Static>
+  </ApplicationProgram></ApplicationPrograms></Manufacturer></ManufacturerData>
+</KNX>

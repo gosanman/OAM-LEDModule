@@ -12,7 +12,8 @@
                 "create",
                 "--Debug",
                 "-h",
-                "include/knxprod.h"
+                "include/knxprod.h",
+                "src/LEDModule.xml"
             ],
             "problemMatcher": [],
             "group": "test",
