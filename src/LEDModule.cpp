@@ -5,7 +5,6 @@
 #include "DimChannel_RGB.h"
 #include "DimChannel.h"
 #include "MeasuringModule.h" // für readCurrentNow() im Testmodus
-#include <cstdarg>           // va_list für postDiagCore1()
 
 LEDModule *LEDModule::_instance = nullptr;
 
@@ -313,13 +312,9 @@ void LEDModule::loop()
         return;
     // Von loop1/Core 1 vorgemerkte Diagnose-KO-Meldung hier auf Core 0 ausgeben (Testmodus, I2C-Reconnect).
     // writeDiagenoseKo() ruft intern knx.loop() - das darf nur auf Core 0 (dieser loop) laufen.
-    if (_diagCore1Pending)
-    {
-        char msg[sizeof(_diagCore1Buf)];
-        memcpy(msg, _diagCore1Buf, sizeof(msg)); // lokale Kopie: Core 1 koennte den Puffer gleich neu beschreiben
-        _diagCore1Pending = false;
-        openknx.console.writeDiagenoseKo("%s", msg);
-    }
+    char diagMsg[DiagCore1Mailbox::LEN];
+    if (_diag.take(diagMsg, sizeof(diagMsg)))
+        openknx.console.writeDiagenoseKo("%s", diagMsg);
     // run loop of all HCL channels
     if (delayCheck(_timerCheckHclChannel, HCL_TIMER_BROADCAST))
     {
@@ -679,19 +674,6 @@ void LEDModule::resendChannels()
         channel[i]->resend();
 }
 
-// Von loop1/Core 1 aufrufen STATT writeDiagenoseKo(): formatiert die (kurze) Meldung in einen
-// Puffer und merkt sie vor. Die eigentliche KO-Ausgabe (samt knx.loop()) macht loop() auf Core 0.
-// Single-Slot, letzte Meldung gewinnt - fuer seltene Test-/I2C-Echos ausreichend.
-void LEDModule::postDiagCore1(const char *fmt, ...)
-{
-    va_list ap;
-    va_start(ap, fmt);
-    vsnprintf(_diagCore1Buf, sizeof(_diagCore1Buf), fmt, ap);
-    va_end(ap);
-    __sync_synchronize();     // Puffer-Schreiben vor dem Flag sichtbar machen (DMB)
-    _diagCore1Pending = true; // Core 0 (loop()) holt es ab
-}
-
 void LEDModule::clearFaultAndResend()
 {
     _powerFault = false;
@@ -823,7 +805,7 @@ void LEDModule::testLoop()
         _testCurrentA = openknxMeasuringModule.readCurrentNow();
         _testPhase = 1;
         logInfoP("Test port %c (%i): %.2f A", HWPortsMapping[_testPort], _testPort, _testCurrentA);
-        postDiagCore1("T %c %.2fA", HWPortsMapping[_testPort], _testCurrentA); // Core 1 -> Ausgabe auf Core 0
+        _diag.post("T %c %.2fA", HWPortsMapping[_testPort], _testCurrentA); // Core 1 -> Ausgabe auf Core 0
     }
     // Auto-Weiterschalten nach Verweildauer. _testLastActivity hier bewusst NICHT erneuern,
     // sonst haelt der Auto-Durchlauf den Inaktivitaets-Timeout ewig zurueck; er soll
@@ -838,7 +820,7 @@ bool LEDModule::initI2cConnection()
     if (!_pwm.begin())
     {
         logErrorP("ERROR: initialization for PCA9685 failed...");
-        postDiagCore1("ER PWM INIT"); // aus loop1/checkI2cConnection auch auf Core 1 erreichbar
+        _diag.post("ER PWM INIT"); // aus loop1/checkI2cConnection auch auf Core 1 erreichbar
         doResetI2c = true;
         pcaI2cConnection = false;
 #ifdef INFO2_LED_PIN  
@@ -851,7 +833,7 @@ bool LEDModule::initI2cConnection()
     _pwm.setPWMFreq(pwmFreqSelect); // 1600 is the maximum PWM frequency
     _pwm.setOutputMode(true);       // External N-type driver, set to output mode INVRT = 0 OUTDRV = 1, Totempole (Push-Pull) = true, open drain = false
     logInfoP("Init pwm I2C connection for PCA9685 sucessful");
-    postDiagCore1("OK PWM INIT"); // aus loop1/checkI2cConnection auch auf Core 1 erreichbar
+    _diag.post("OK PWM INIT"); // aus loop1/checkI2cConnection auch auf Core 1 erreichbar
     doResetI2c = false;
     pcaI2cConnection = true;
 #ifdef INFO2_LED_PIN  
@@ -873,7 +855,7 @@ bool LEDModule::checkI2cConnection()
     if (result != 0 || mode1Value != 0x20 || (mode2Value & 0x04) != 0x04)
     {
         logErrorP("PCA9685 PWM not available via I2C - State: %i and MODE1: 0x%.2X - MODE2: 0x%.2X", result, mode1Value, mode2Value);
-        postDiagCore1("ER PWM %i %.2X %.2X", result, mode1Value, mode2Value); // aus loop1/Core 1 erreichbar
+        _diag.post("ER PWM %i %.2X %.2X", result, mode1Value, mode2Value); // aus loop1/Core 1 erreichbar
         doResetI2c = true;
         pcaI2cConnection = false; // Verbindung als weg markieren -> loop1 sperrt Kanal-Tasks, Frontpanel zeigt Fehler
         return false;

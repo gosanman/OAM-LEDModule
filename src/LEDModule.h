@@ -5,6 +5,7 @@
 #include <OpenKNX.h>
 #include "hardware.h"
 #include "HclChannel.h"
+#include "DiagCore1Mailbox.h"
 
 #include "LEDHelper.h"
 
@@ -98,9 +99,7 @@ private:
 
     // Cross-core Diagnose-KO-Ausgabe: writeDiagenoseKo() ruft intern knx.loop() und darf nur auf Core 0
     // laufen. loop1/Core-1-Code (Testmodus-Ergebnis, I2C-Reconnect) postet hierhin; loop()/Core 0 gibt es aus.
-    void postDiagCore1(const char *fmt, ...);
-    volatile bool _diagCore1Pending = false;
-    char _diagCore1Buf[16] = {};
+    DiagCore1Mailbox _diag;
 
     // hcl channels
     uint8_t hclBrightness = 0;
