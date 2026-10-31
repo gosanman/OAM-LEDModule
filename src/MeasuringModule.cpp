@@ -1,0 +1,508 @@
+#include "MeasuringModule.h"
+
+MeasuringModule *MeasuringModule::_instance = nullptr;
+
+MeasuringModule::MeasuringModule() 
+    : _ina(&Wire1, I2C_INA22x_DEVICE_ADDRESS)
+{
+    MeasuringModule::_instance = this;
+}
+
+MeasuringModule *MeasuringModule::instance() {
+    return MeasuringModule::_instance;
+}
+
+const std::string MeasuringModule::name() {
+    return "Measuring";
+}
+
+const std::string MeasuringModule::version() {
+    // Version aus library.json, vom OpenKNXproducer als APP_ModuleVersion (major << 4 | minor) in knxprod.h
+    return std::to_string(APP_ModuleVersion >> 4) + "." + std::to_string(APP_ModuleVersion & 0x0F);
+}
+
+void MeasuringModule::setup() 
+{
+    // save default values from PA
+    measurementSend = ParamAPP_SendMeasuredValues;
+    measurementInterval = LEDHelper::getTimeWithPattern(ParamAPP_MeasurementIntervalTime, ParamAPP_MeasurementIntervalBase);
+    tempSensorPresent = ParamAPP_TempSensorPresent;
+    shuntValue = ParamAPP_ShuntValue;
+    maxcurrent = (shuntValue == 10) ? 8.0 : 16.0; // 0,010Ω = max.  8A, 0,005Ω = max. 16A
+
+    // Alarm definitions
+    if (tempSensorPresent) {
+        checkTemp = ParamAPP_AlarmUseOverTemp;
+        if (checkTemp) {
+            overTemp = ParamAPP_AlarmOverTemp;
+        }
+    }
+    checkVoltage = ParamAPP_AlarmUseVoltage;
+    if (checkVoltage) {
+        overVoltage = ParamAPP_AlarmOverVoltage;
+        underVoltage = ParamAPP_AlarmUnderVoltage;
+    }
+    checkCurrent = ParamAPP_AlarmUseOverCurrent;
+    if (checkCurrent) {
+        overCurrent = ParamAPP_AlarmOverCurrent;
+    }
+ 
+    lastUpdateTime = millis(); 
+
+    // Init TMP100 Lib if present
+    if (tempSensorPresent) {
+        // Init I2C connection and Lib TMP100
+        _tmp100 = TMP100_WE(&Wire1, I2C_TMP100_DEVICE_ADDRESS);
+        initI2cConnectionTemp();
+    }
+
+    // Init INA I2C connection
+    initI2cConnectionIna();
+    
+    // Debug - All in one line
+    logDebugP("Send: %i, Int: %i sec | InaType: INA%i, Shunt: %.3f Ohm, MaxI: %.2f A | TempSens: %i | MonTemp: %i%s | MonV: %i%s, | MonI: %i%s",
+              measurementSend, measurementInterval / 1000, _ina.getChipType(), shuntValue / 1000, maxcurrent, tempSensorPresent,
+              checkTemp, (tempSensorPresent && checkTemp) ? (", MaxT: " + String(overTemp)).c_str() : "",
+              checkVoltage, checkVoltage ? (", OverV: " + String(overVoltage) + ", UnderV: " + String(underVoltage)).c_str() : "",
+              checkCurrent, checkCurrent ? (", MaxI: " + String(overCurrent)).c_str() : "");
+}
+
+void MeasuringModule::setup1() {
+
+}
+
+void MeasuringModule::loop()
+{
+    // do nothing when not parameterized
+    if (!knx.configured())
+        return;
+    // Von loop1/Core 1 vorgemerkte Diagnose-KO-Meldung hier auf Core 0 ausgeben.
+    // writeDiagenoseKo() ruft intern knx.loop() - das darf nur auf Core 0 laufen.
+    char diagMsg[DiagCore1Mailbox::LEN];
+    if (_diag.take(diagMsg, sizeof(diagMsg)))
+        openknx.console.writeDiagenoseKo("%s", diagMsg);
+}
+
+void MeasuringModule::loop1() {
+    // do nothing when not parameterized
+    if (!knx.configured())
+        return;
+
+    // Über-strom-Reaktivierung + Strom-Verify (jede Iteration, damit das 400-ms-Fenster greift)
+    handleReactivation();
+
+    // always run measurment for alarm features
+    if (delayCheck(_lastMeasurementGet, MEASUREMENT_ALARM_CHECK)) {
+        getSingleMeasurement();
+        checkAlarmDefinitions();
+        _lastMeasurementGet = millis();
+    }
+    // only run if measurment send allow
+    if (measurementSend) {
+        if (delayCheck(_lastMeasurementSend, measurementInterval)) {
+            sendSingleMeasurement();
+            _lastMeasurementSend = millis();
+        }
+    }
+    // check always alerts to protect hardware
+    if (delayCheck(_timerCheckOverflow, MEASUREMENT_INA_OVERFLOW)) {
+        getAlertValues();
+        _timerCheckOverflow = millis();
+    }  
+    // check if I2C connection possible, if not reset and init the connection
+    if (delayCheck(_timerCheckI2cConnection, MEASUREMENT_CHECK_I2C)) {
+        if (tempSensorPresent) { 
+            checkI2cConnectionTemp();
+        }
+        checkI2cConnectionIna();
+        _timerCheckI2cConnection = millis();
+    }
+}
+
+void MeasuringModule::getSingleMeasurement()
+{
+    if (inaI2cConnection) {
+        busVoltage_V = _ina.getVoltage();
+        current_A = _ina.getCurrent();
+        power_W = _ina.getPower();
+
+        // calculate total energy usage
+        if (_ina.getChipType() == INA226_TYPE) {
+            currentTime = millis();
+            elapsedTime_s = (currentTime - lastUpdateTime) / 1000.0;
+            // nur plausible Zeitscheiben integrieren - verhindert einen riesigen Sprung nach
+            // einem I2C-Ausfall, waehrend dessen lastUpdateTime eingefroren war
+            if (elapsedTime_s > 0.0 && elapsedTime_s < 30.0)
+                totalEnergy_Wh += (busVoltage_V * current_A * elapsedTime_s) / 3600.0;
+            lastUpdateTime = currentTime;
+        } else if (_ina.getChipType() == INA228_TYPE) {
+            double energy = _ina.getEnergy(); // nur einmal lesen (Register akkumuliert kontinuierlich)
+            if (energy == 0.0) {
+                // fehlgeschlagener Read (read40 liefert 0) -> Sample verwerfen, Baseline unveraendert
+            } else if (energy < lastEnergy_Wh) {
+                // 40-bit-ENERGY-Register uebergelaufen (oder extern zurueckgesetzt)
+                // -> Baseline neu ansetzen, negativen Sprung nicht in den Zaehler schreiben
+                lastEnergy_Wh = energy;
+            } else {
+                totalEnergy_Wh += energy - lastEnergy_Wh;
+                lastEnergy_Wh = energy;
+            }
+        }
+    }
+    // run Temp Measurment if sensor present
+    if (tempSensorPresent && tempI2cConnection) {
+        temperatur_C = _tmp100.getTemperature();
+    }
+}
+
+void MeasuringModule::sendSingleMeasurement()
+{
+    if (inaI2cConnection) {
+        KoAPP_VoltageV.value(round(busVoltage_V * 10) / 10, DPT_Value_Electric_Potential);  // rounded to one decimal places
+        KoAPP_CurrentA.value(round(current_A * 100) / 100, DPT_Value_Electric_Current);     // rounded to two decimal places
+        KoAPP_PowerW.value(round(power_W * 100) / 100, DPT_Value_Power);                    // rounded to two decimal places
+        KoAPP_ActivePowerWh.value(round(totalEnergy_Wh * 1000) / 1000, DPT_ActiveEnergy);   // rounded to three decimal places
+    }
+    if (tempSensorPresent && tempI2cConnection) {
+        KoAPP_TempC.value(temperatur_C, DPT_Value_Common_Temperature);
+    }
+}
+
+// Read alert flags from INA sensor and log any alerts.
+// Runs periodically to check for alert conditions.
+// Not configured via ETS, Hardwareimplementation to protect the hardware
+void MeasuringModule::getAlertValues()
+{
+    if (!inaI2cConnection) 
+        return;
+    
+    uint8_t flags = _ina.getAlertFlags();
+    if (flags == 0)
+        return; // kein Alert -> KEINE automatische Freigabe. Der Latch bleibt bis zur
+                // strom-geprüften Reaktivierung (Schaltbefehl / 'resetfault'), weil das
+                // Lesen der Flags den HW-Latch löscht und 'kein Strom' kein Fehler-weg-Signal ist.
+    
+    // Alle Alert-Typen tabellarisch prüfen (Bit -> Log-/Diagnosetext)
+    static const struct { uint8_t bit; const char *logMsg; const char *diagnose; } alerts[] = {
+        {0, "Alert: Power Over-Limit",                 "AL PWR OVR"},
+        {1, "Alert: Bus Undervoltage",                 "AL BUS UND"},
+        {2, "Alert: Bus Overvoltage",                  "AL BUS OVR"},
+        {3, "Alert: Shunt Undervoltage / Overcurrent", "AL SHNT UND"},
+        {4, "Alert: Shunt Overvoltage / Overcurrent",  "AL OVER CUR"},
+        {5, "Alert: Temperature Overlimit",            "AL TEMP OVR"},
+    };
+
+    for (const auto &a : alerts) {
+        if (flags & (1 << a.bit)) {
+            logErrorP("%s", a.logMsg);
+            _diag.post("%s", a.diagnose); // Core 1 -> Ausgabe auf Core 0 (kein knx.loop() hier)
+        }
+    }
+    triggerFault(); // abschalten und latchen, sobald irgendein Alert ansteht
+}
+
+// Trip: Ausgänge aus + harter Latch, Trip-Zeit für den Cooldown merken.
+void MeasuringModule::triggerFault()
+{
+    openknxLEDModule.tripPowerFault();
+    _lastTripTime = millis();
+    _verifyActive = false; // ein evtl. laufender Reaktivierungs-Verify ist hinfällig
+}
+
+// Läuft in loop1 (Core 1): holt die Reaktivierungs-Anforderung ab und prüft nach dem
+// Wiedereinschalten den ECHTEN Strom - ein verlässliches "Fehler weg"-Signal, anders als
+// das beim Lesen gelöschte Alert-Flag.
+void MeasuringModule::handleReactivation()
+{
+    if (!inaI2cConnection)
+        return;
+
+    // Anforderung (Kanalbefehl / 'resetfault') von Core 0 abholen. Jede Anforderung wird
+    // konsumiert; ausgeführt wird nur, wenn kein Verify läuft und der Cooldown um ist.
+    if (openknxLEDModule.consumeReactivationRequest())
+    {
+        if (openknxLEDModule.isPowerFault() && !_verifyActive &&
+            (millis() - _lastTripTime) >= REACTIVATE_COOLDOWN)
+        {
+            _ina.getAlertFlags();                   // veralteten HW-Latch verwerfen
+            openknxLEDModule.clearFaultAndResend(); // Ausgänge aus Software-Zustand neu bestromen
+            _verifyStart = millis();
+            _verifyActive = true;
+            logInfoP("Over-current reactivation: outputs on, verifying current in %i ms", REACTIVATE_VERIFY_DELAY);
+        }
+    }
+
+    // Verify-Fenster abgelaufen -> echten Strom messen und ggf. wieder latchen.
+    if (_verifyActive && delayCheck(_verifyStart, REACTIVATE_VERIFY_DELAY))
+    {
+        _verifyActive = false;
+        float current = _ina.getCurrent();
+        if (current >= OVER_CURRENT)
+        {
+            logErrorP("Over-current persists (%.2f A) - latching off again", current);
+            _diag.post("AL OVER CUR"); // Core 1 -> Ausgabe auf Core 0
+            triggerFault();
+        }
+        else
+        {
+            logInfoP("Over-current cleared (%.2f A) - outputs stay on", current);
+        }
+    }
+}
+
+void MeasuringModule::checkAlarmDefinitions() {
+    if (tempSensorPresent && checkTemp && tempI2cConnection) {
+        checkAndTriggerAlarm(temperatur_C > overTemp, overTempTriggered, APP_KoAlarmOverTemp, "OVER TEMP");
+    }
+    if (checkVoltage && inaI2cConnection) {
+        checkAndTriggerAlarm(busVoltage_V > overVoltage, overVoltageTriggered, APP_KoAlarmOverVoltage, "OVER VOLT");
+        checkAndTriggerAlarm(busVoltage_V < underVoltage, underVoltageTriggered, APP_KoAlarmUnderVoltage, "UNDER VOLT");
+    }
+    if (checkCurrent && inaI2cConnection) {
+        checkAndTriggerAlarm(current_A > overCurrent, overCurrentTriggered, APP_KoAlarmOverCurrent, "OVER CURRENT");
+    }
+}
+
+void MeasuringModule::checkAndTriggerAlarm(bool condition, bool &triggeredFlag, uint16_t alarmKo, const char *messageDiagnoseKo) {
+    if (condition) {
+        if (!triggeredFlag) {
+            knx.getGroupObject(alarmKo).value(true, DPT_Alarm);             // Trigger alarm
+            _diag.post("%s", messageDiagnoseKo);                         // Core 1 -> Ausgabe auf Core 0
+            triggeredFlag = true;                                           // Set flag
+#ifdef INFO3_LED_PIN
+            openknx.leds.getLed(OpenKNX::Led::LED_TYPE_INFO3)->blinking(500);                                 // Blink info/alert LED
+#endif
+        }
+    } else {
+        if (triggeredFlag) {
+            knx.getGroupObject(alarmKo).value(false, DPT_Alarm);    // Reset alarm
+            triggeredFlag = false;                                  // Reset flag if status is normal
+#ifdef INFO3_LED_PIN
+            openknx.leds.getLed(OpenKNX::Led::LED_TYPE_INFO3)->off();                                 // Turn off info/alert LED
+#endif
+        }
+    }
+}
+
+void MeasuringModule::showHelp()
+{
+    openknx.logger.color(CONSOLE_HEADLINE_COLOR);
+    openknx.logger.log("======================== Measuring Module ======================================");
+    openknx.logger.color(0);
+    openknx.console.printHelpLine("temp", "Display the internal temperature in °C");
+    openknx.console.printHelpLine("voltage", "Display the current voltage in volt");
+    openknx.console.printHelpLine("current", "Display the current current in ampere");
+    openknx.console.printHelpLine("power", "Display the current power in watt");
+    openknx.console.printHelpLine("energy", "Display the total energy in watt hour");
+    openknx.console.printHelpLine("all", "Display all values");
+}
+
+bool MeasuringModule::processCommand(const std::string cmd, bool diagnoseKo) 
+{
+    if (cmd == "temp") {
+        if (diagnoseKo) { openknx.console.writeDiagenoseKo("T %.2fC", temperatur_C); }
+        openknx.logger.logWithPrefixAndValues("Temperatur", "%.2f °C", temperatur_C);
+        return true;
+    } else if (cmd == "voltage") {
+        if (diagnoseKo) { openknx.console.writeDiagenoseKo("V %.1fV", busVoltage_V); }
+        openknx.logger.logWithPrefixAndValues("Voltage", "%.1f V", busVoltage_V);
+        return true;
+        } else if (cmd == "current") {
+        if (diagnoseKo) { openknx.console.writeDiagenoseKo("C %.2fA", current_A); }
+        openknx.logger.logWithPrefixAndValues("Current", "%.2f A", current_A);
+        return true;
+        } else if (cmd == "current debug") {
+        openknx.logger.logWithPrefixAndValues("Current", "%f A", current_A);
+        return true;
+        } else if (cmd == "power") {
+        if (diagnoseKo) { openknx.console.writeDiagenoseKo("P %.2fW", power_W); }
+        openknx.logger.logWithPrefixAndValues("Power", "%.2f W", power_W);
+        return true;
+    } else if (cmd == "energy") {
+        if (diagnoseKo) { openknx.console.writeDiagenoseKo("E %.2fWh", totalEnergy_Wh); }
+        openknx.logger.logWithPrefixAndValues("Energy", "%.4f Wh", totalEnergy_Wh);
+        return true;
+    } else if (cmd == "all") {
+        openknx.logger.logWithPrefixAndValues("Temperatur", "%.2f °C", temperatur_C);
+        openknx.logger.logWithPrefixAndValues("Voltage", "%.1f V", busVoltage_V);
+        openknx.logger.logWithPrefixAndValues("Current", "%.2f A", current_A);
+        openknx.logger.logWithPrefixAndValues("Power", "%.2f W", power_W);
+        openknx.logger.logWithPrefixAndValues("Energy", "%.4f Wh", totalEnergy_Wh);
+        openknx.logger.logWithPrefixAndValues("Die Temp INA", "%.2f °C", _ina.getTemperature());
+        return true;
+    } else if (cmd == "ccenergy") {
+        _ina.resetEnergy();
+        totalEnergy_Wh = 0.00;
+        lastEnergy_Wh = 0.00; // Baseline mit HW-Akkumulator zurücksetzen (sonst negatives Delta beim nächsten Read)
+        openknx.flash.save(true); // force save
+        if (diagnoseKo) { openknx.console.writeDiagenoseKo("E cleared"); }
+        openknx.logger.logWithPrefixAndValues("Energy", "Clear counter finish");        
+        return true;
+    } else if (cmd.rfind("set ", 0) == 0) {
+    const std::string valueStr = cmd.substr(cmd.find(' ') + 1);
+    char* end = nullptr;
+    float value = std::strtof(valueStr.c_str(), &end);
+    // Prüfung: konvertiert, keine Reste im String, endlich und nicht negativ
+    if (end != valueStr.c_str() && *end == '\0' && isfinite(value) && value >= 0.0f) {
+        totalEnergy_Wh = value;
+        openknx.flash.save(true); // force save
+        if (diagnoseKo) { openknx.console.writeDiagenoseKo("E set ok"); }
+        if (diagnoseKo) { openknx.console.writeDiagenoseKo("E %.2fWh", totalEnergy_Wh); }
+        openknx.logger.logWithPrefixAndValues("Energy", "Set %.4f Wh as new counter", totalEnergy_Wh);
+    } else {
+        if (diagnoseKo) { openknx.console.writeDiagenoseKo("E set fail"); }
+        openknx.logger.logWithPrefixAndValues("Energy", "Invalid argument for set command");
+        return false;
+        }
+        return true;
+    }
+    return false;
+}
+
+float MeasuringModule::readCurrentNow()
+{
+    if (!inaI2cConnection)
+        return -1.0f;
+    return _ina.getCurrent();
+}
+
+float MeasuringModule::getMeasurementValue(const std::string &parameter)
+{
+    if (parameter == "temp") {
+        return temperatur_C;
+    } else if (parameter == "voltage") {
+        return busVoltage_V;
+    } else if (parameter == "current") {
+        return current_A;
+    } else if (parameter == "power") {
+        return power_W;
+    } else if (parameter == "energy") {
+        return totalEnergy_Wh;
+    }
+    return 0.0;
+}
+
+bool MeasuringModule::initI2cConnectionTemp() 
+{
+    // Call dependend init for temp100 sensor
+    if (!_tmp100.init()) {
+        logErrorP("ERROR: initialization for TMP100 failed...");
+        doResetI2cTemp = true;
+        tempI2cConnection = false;
+        openknxLEDModule.updateErrorLed();
+        return false;
+    }
+    Wire1.setClock(I2C_CLOCK_HZ); // _tmp100.init() hat Wire1 neu initialisiert und den Takt zurueckgesetzt
+    // Set default values for sensor
+    _tmp100.setResolution(RES025);
+    logInfoP("Init messurment I2C connection for TEMP100 sucessful");
+    doResetI2cTemp = false;
+    tempI2cConnection = true;
+    openknxLEDModule.updateErrorLed();
+    return true;
+}
+
+bool MeasuringModule::initI2cConnectionIna() 
+{
+    // Call dependend init for ina sensor
+    if (!_ina.begin(shuntValue / 1000, maxcurrent, CT_5, AVG_64)) {
+        logErrorP("ERROR: initialization for INA%i failed...", _ina.getChipType());
+        doResetI2cIna = true;
+        inaI2cConnection = false;
+        openknxLEDModule.updateErrorLed();
+        return false;
+    }
+    Wire1.setClock(I2C_CLOCK_HZ); // _ina.begin() hat Wire1 neu initialisiert und den Takt auf 100k zurueckgesetzt
+    // Set default values for sensor
+    _ina.configureAlert(ALERT_OVER_CURRENT, OVER_CURRENT, true, true);     // HW-Schutz fest auf 6 A (ETS-Schnellwertalarm ist separat)
+    // INA226-Energieintegration nach (Neu-)Verbindung neu ansetzen, damit die erste
+    // Messung nicht die gesamte Ausfalldauer als eine Zeitscheibe integriert.
+    lastUpdateTime = millis();
+    // INA228: HW-Energieregister läuft seit Power-on – Baseline angleichen,
+    // damit die erste Messung keinen Altbestand auf den Flash-Wert addiert.
+    if (_ina.getChipType() == INA228_TYPE)
+        lastEnergy_Wh = _ina.getEnergy();
+    logInfoP("Init messurment I2C connection INA%i sucessful", _ina.getChipType());
+    doResetI2cIna = false;
+    inaI2cConnection = true;
+    openknxLEDModule.updateErrorLed();
+    return true;
+}
+
+bool MeasuringModule::checkI2cConnectionTemp() 
+{
+    if (doResetI2cTemp) { 
+        return initI2cConnectionTemp();
+    }
+    Wire1.beginTransmission(I2C_TMP100_DEVICE_ADDRESS);
+    byte resultTemp = Wire1.endTransmission();       //  0 : Success  1 : Data too long  2 : NACK on transmit of address  3 : NACK on transmit of data  4 : Other error  5 : Timeout
+    if (resultTemp != 0) {
+        logErrorP("TMP100 not available via I2C %d", resultTemp);
+        _diag.post("ER I2C TMP %d", resultTemp); // Core 1 -> Ausgabe auf Core 0
+        doResetI2cTemp = true;
+        return false;
+    }
+    return true;
+}
+
+bool MeasuringModule::checkI2cConnectionIna() 
+{
+    if (doResetI2cIna) { 
+        return initI2cConnectionIna();
+    }
+    Wire1.beginTransmission(I2C_INA22x_DEVICE_ADDRESS);
+    byte resultIna = Wire1.endTransmission();       //  0 : Success  1 : Data too long  2 : NACK on transmit of address  3 : NACK on transmit of data  4 : Other error  5 : Timeout
+    if (resultIna != 0) {
+        logErrorP("INA%i not available via I2C %d", _ina.getChipType(), resultIna);
+        _diag.post("ER I2C INA %d", resultIna); // Core 1 -> Ausgabe auf Core 0
+        doResetI2cIna = true;
+        return false;
+    }
+    return true;
+}
+
+bool MeasuringModule::getTempI2cConnectionState() 
+{
+    return tempI2cConnection;
+}
+
+bool MeasuringModule::getInaI2cConnectionState() 
+{
+    return inaI2cConnection;
+}
+
+void MeasuringModule::readFlash(const uint8_t *buffer, const uint16_t size)
+{
+    // first call - without data
+    if (size == 0) return;
+
+    uint8_t version = openknx.flash.readByte();
+    if (version == 1) // Altformat: float
+    {
+        totalEnergy_Wh = openknx.flash.readFloat(); // Migration von float -> double
+    }
+    else if (version == 2) // aktuelles Format: double
+    {
+        totalEnergy_Wh = openknx.flash.readDouble();
+    }
+    else
+    {
+        logErrorP("Wrong version of flash data (%i)", version);
+        return;
+    }
+    logDebugP("Restore totalEnergy_Wh with value: %f", totalEnergy_Wh);
+}
+
+void MeasuringModule::writeFlash()
+{
+    openknx.flash.writeByte(2); // Version 2: double
+    openknx.flash.writeDouble(totalEnergy_Wh);
+}
+
+uint16_t MeasuringModule::flashSize()
+{
+    // Version + Data (Channel * Inputs * (Dpt + Value))
+    return 1 + 8;
+}
+
+MeasuringModule openknxMeasuringModule;

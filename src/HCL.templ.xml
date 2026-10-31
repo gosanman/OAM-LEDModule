@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-model href="../../Organization/knxprod-support/knx_project_20/knx-editor.xsd" type="application/xml" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<KNX xmlns:op="http://github.com/OpenKNX/OpenKNXproducer" xmlns="http://knx.org/xml/project/20" CreatedBy="KNX MT" ToolVersion="5.1.255.16695">
+  <ManufacturerData>
+    <Manufacturer RefId="M-00FA">
+      <ApplicationPrograms>
+        <ApplicationProgram>
+          <Static>
+            <Parameters>
+              <!-- nur ETS -->
+              <Parameter Id="%AID%_P-%TT%%CC%002" Name="%C%Name"       ParameterType="%AID%_PT-Text40Byte" Text="Objektname" Value="" />
+              <Parameter Id="%AID%_P-%TT%%CC%005" Name="%C%HclPicSun"  ParameterType="%AID%_PT-PicHclSun"  Text="" Value="" Access="Read" />
+              <Parameter Id="%AID%_P-%TT%%CC%016" Name="%C%HclPicTime" ParameterType="%AID%_PT-PicHclTime" Text="" Value="" Access="Read" />
+              <!-- 13 Byte je Kanal, Layout identisch zu v0.4 -->
+              <Union SizeInBit="104">
+                <Memory CodeSegment="%MID%" Offset="0" BitOffset="0" />
+                <!-- frei: Byte 0 Bit 1-0, Byte 7 Bit 0, Byte 8 Bit 0 (briMin/briMax je 7 Bit) -->
+                <Parameter Id="%AID%_UP-%TT%%CC%001" Name="%C%Type"            Offset="0"  BitOffset="0" ParameterType="%AID%_PT-hclType"        Text="Ansteuerung über" Value="0" />
+                <Parameter Id="%AID%_UP-%TT%%CC%006" Name="%C%offsetRiseType"  Offset="0"  BitOffset="2" ParameterType="%AID%_PT-hclOffset"      Text="Verschiebe Sonnenaufgang" Value="0" />
+                <Parameter Id="%AID%_UP-%TT%%CC%008" Name="%C%offsetSetType"   Offset="0"  BitOffset="4" ParameterType="%AID%_PT-hclOffset"      Text="Verschiebe Sonnenuntergang" Value="0" />
+                <!-- Byte 1-12 -->
+                <Parameter Id="%AID%_UP-%TT%%CC%003" Name="%C%colorTempMin"    Offset="1"  BitOffset="0" ParameterType="%AID%_PT-OnColorTemp"    Text="Farbtemperatur Min" SuffixText="K" Value="2000" />
+                <Parameter Id="%AID%_UP-%TT%%CC%004" Name="%C%colorTempMax"    Offset="3"  BitOffset="0" ParameterType="%AID%_PT-OnColorTemp"    Text="Farbtemperatur Max" SuffixText="K" Value="5000" />
+                <Parameter Id="%AID%_UP-%TT%%CC%007" Name="%C%offsetRiseMin"   Offset="5"  BitOffset="0" ParameterType="%AID%_PT-hclDurationMin" Text="Verschiebung um" Value="0" />
+                <Parameter Id="%AID%_UP-%TT%%CC%009" Name="%C%offsetSetMin"    Offset="6"  BitOffset="0" ParameterType="%AID%_PT-hclDurationMin" Text="Verschiebung um" Value="0" />
+                <Parameter Id="%AID%_UP-%TT%%CC%010" Name="%C%briMin"          Offset="7"  BitOffset="0" ParameterType="%AID%_PT-OnBrightness"   Text="Helligkeit Min" SuffixText="%" Value="10" />
+                <Parameter Id="%AID%_UP-%TT%%CC%011" Name="%C%briMax"          Offset="8"  BitOffset="0" ParameterType="%AID%_PT-OnBrightness"   Text="Helligkeit Max" SuffixText="%" Value="100" />
+                <Parameter Id="%AID%_UP-%TT%%CC%012" Name="%C%startTimeHour"   Offset="9"  BitOffset="0" ParameterType="%AID%_PT-HourValue"      Text="" Value="6" />
+                <Parameter Id="%AID%_UP-%TT%%CC%013" Name="%C%startTimeMinute" Offset="10" BitOffset="0" ParameterType="%AID%_PT-MinuteValue"    Text="" Value="0" />
+                <Parameter Id="%AID%_UP-%TT%%CC%014" Name="%C%endTimeHour"     Offset="11" BitOffset="0" ParameterType="%AID%_PT-HourValue"      Text="" Value="22" />
+                <Parameter Id="%AID%_UP-%TT%%CC%015" Name="%C%endTimeMinute"   Offset="12" BitOffset="0" ParameterType="%AID%_PT-MinuteValue"    Text="" Value="0" />
+              </Union>
+            </Parameters>
+            <ParameterRefs>
+              <ParameterRef Id="%AID%_P-%TT%%CC%002_R-%TT%%CC%00201" RefId="%AID%_P-%TT%%CC%002" />
+              <ParameterRef Id="%AID%_P-%TT%%CC%005_R-%TT%%CC%00501" RefId="%AID%_P-%TT%%CC%005" />
+              <ParameterRef Id="%AID%_P-%TT%%CC%016_R-%TT%%CC%01601" RefId="%AID%_P-%TT%%CC%016" />
+              <ParameterRef Id="%AID%_UP-%TT%%CC%001_R-%TT%%CC%00101" RefId="%AID%_UP-%TT%%CC%001" />
+              <ParameterRef Id="%AID%_UP-%TT%%CC%003_R-%TT%%CC%00301" RefId="%AID%_UP-%TT%%CC%003" />
+              <ParameterRef Id="%AID%_UP-%TT%%CC%004_R-%TT%%CC%00401" RefId="%AID%_UP-%TT%%CC%004" />
+              <ParameterRef Id="%AID%_UP-%TT%%CC%006_R-%TT%%CC%00601" RefId="%AID%_UP-%TT%%CC%006" />
+              <ParameterRef Id="%AID%_UP-%TT%%CC%007_R-%TT%%CC%00701" RefId="%AID%_UP-%TT%%CC%007" />
+              <ParameterRef Id="%AID%_UP-%TT%%CC%008_R-%TT%%CC%00801" RefId="%AID%_UP-%TT%%CC%008" />
+              <ParameterRef Id="%AID%_UP-%TT%%CC%009_R-%TT%%CC%00901" RefId="%AID%_UP-%TT%%CC%009" />
+              <ParameterRef Id="%AID%_UP-%TT%%CC%010_R-%TT%%CC%01001" RefId="%AID%_UP-%TT%%CC%010" />
+              <ParameterRef Id="%AID%_UP-%TT%%CC%011_R-%TT%%CC%01101" RefId="%AID%_UP-%TT%%CC%011" />
+              <ParameterRef Id="%AID%_UP-%TT%%CC%012_R-%TT%%CC%01201" RefId="%AID%_UP-%TT%%CC%012" />
+              <ParameterRef Id="%AID%_UP-%TT%%CC%013_R-%TT%%CC%01301" RefId="%AID%_UP-%TT%%CC%013" />
+              <ParameterRef Id="%AID%_UP-%TT%%CC%014_R-%TT%%CC%01401" RefId="%AID%_UP-%TT%%CC%014" />
+              <ParameterRef Id="%AID%_UP-%TT%%CC%015_R-%TT%%CC%01501" RefId="%AID%_UP-%TT%%CC%015" />
+            </ParameterRefs>
+            <ComObjectTable>
+              <ComObject Id="%AID%_O-%TT%%CC%000" Name="%C%StatusColorTemp"  Number="%K0%" Text="HCL%C%: {{0:...}}" FunctionText="Status Farbtemperatur (Kelvin)" ObjectSize="2 Bytes" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-7-600" />
+              <ComObject Id="%AID%_O-%TT%%CC%001" Name="%C%StatusBrightness" Number="%K1%" Text="HCL%C%: {{0:...}}" FunctionText="Status Helligkeit"              ObjectSize="1 Byte"  ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-5-1" />
+            </ComObjectTable>
+            <ComObjectRefs>
+              <ComObjectRef Id="%AID%_O-%TT%%CC%000_R-%TT%%CC%00001" RefId="%AID%_O-%TT%%CC%000" TextParameterRefId="%AID%_P-%TT%%CC%002_R-%TT%%CC%00201" />
+              <ComObjectRef Id="%AID%_O-%TT%%CC%001_R-%TT%%CC%00101" RefId="%AID%_O-%TT%%CC%001" TextParameterRefId="%AID%_P-%TT%%CC%002_R-%TT%%CC%00201" />
+            </ComObjectRefs>
+          </Static>
+          <Dynamic>
+            <ChannelIndependentBlock>
+              <ParameterBlock Id="%AID%_PB-nnn" Name="HCL%C%" Text="HCL%C%: {{0:...}}" TextParameterRefId="%AID%_P-%TT%%CC%002_R-%TT%%CC%00201" Icon="sun-angle-outline" HelpContext="LED-PageHcl" ShowInComObjectTree="true">
+                <ParameterSeparator Id="%AID%_PS-nnn" Text="HCL%C% - Konfiguration" UIHint="Headline" />
+                <ParameterRefRef RefId="%AID%_P-%TT%%CC%002_R-%TT%%CC%00201" HelpContext="BASE-ChannelName" />
+                <ParameterRefRef RefId="%AID%_UP-%TT%%CC%001_R-%TT%%CC%00101" HelpContext="LED-HclType" />
+                <choose ParamRefId="%AID%_UP-%TT%%CC%001_R-%TT%%CC%00101">
+                  <when test="1">
+                    <ParameterSeparator Id="%AID%_PS-nnn" Text="Die aktuelle Farbtemperatur wird nach dem Sonnenauf- und -untergang berechnet." UIHint="Information" />
+                    <ParameterRefRef RefId="%AID%_P-%TT%%CC%005_R-%TT%%CC%00501" />
+                    <ParameterRefRef RefId="%AID%_UP-%TT%%CC%006_R-%TT%%CC%00601" HelpContext="LED-HclOffset" />
+                    <choose ParamRefId="%AID%_UP-%TT%%CC%006_R-%TT%%CC%00601">
+                      <when test="!=0">
+                        <ParameterRefRef RefId="%AID%_UP-%TT%%CC%007_R-%TT%%CC%00701" HelpContext="LED-HclOffset" />
+                      </when>
+                    </choose>
+                    <ParameterRefRef RefId="%AID%_UP-%TT%%CC%008_R-%TT%%CC%00801" HelpContext="LED-HclOffset" />
+                    <choose ParamRefId="%AID%_UP-%TT%%CC%008_R-%TT%%CC%00801">
+                      <when test="!=0">
+                        <ParameterRefRef RefId="%AID%_UP-%TT%%CC%009_R-%TT%%CC%00901" HelpContext="LED-HclOffset" />
+                      </when>
+                    </choose>
+                  </when>
+                  <when test="2">
+                    <ParameterSeparator Id="%AID%_PS-nnn" Text="Die aktuelle Farbtemperatur wird nach der definierten Start- und Endzeit berechnet." UIHint="Information" />
+                    <ParameterRefRef RefId="%AID%_P-%TT%%CC%016_R-%TT%%CC%01601" />
+                    <ParameterBlock Id="%AID%_PB-nnn" Name="HCL%C%Times" Inline="true" Layout="Grid">
+                      <Rows>
+                        <Row Id="%AID%_PB-nnn_R-1" Name="Row1" />
+                        <Row Id="%AID%_PB-nnn_R-2" Name="Row2" />
+                      </Rows>
+                      <Columns>
+                        <Column Id="%AID%_PB-nnn_C-1" Name="Col1" Width="45%" />
+                        <Column Id="%AID%_PB-nnn_C-2" Name="Col2" Width="10%" />
+                        <Column Id="%AID%_PB-nnn_C-3" Name="Col3" Width="2%" />
+                        <Column Id="%AID%_PB-nnn_C-4" Name="Col4" Width="10%" />
+                        <Column Id="%AID%_PB-nnn_C-5" Name="Col5" Width="14%" />
+                      </Columns>
+                      <ParameterSeparator Id="%AID%_PS-nnn" Text="Startzeit" Cell="1,1" />
+                      <ParameterRefRef RefId="%AID%_UP-%TT%%CC%012_R-%TT%%CC%01201" Cell="1,2" HelpContext="LED-HclTimes" />
+                      <ParameterSeparator Id="%AID%_PS-nnn" Text=":" Cell="1,3" />
+                      <ParameterRefRef RefId="%AID%_UP-%TT%%CC%013_R-%TT%%CC%01301" Cell="1,4" HelpContext="LED-HclTimes" />
+                      <ParameterSeparator Id="%AID%_PS-nnn" Text="hh:mm" Cell="1,5" />
+                      <ParameterSeparator Id="%AID%_PS-nnn" Text="Endzeit" Cell="2,1" />
+                      <ParameterRefRef RefId="%AID%_UP-%TT%%CC%014_R-%TT%%CC%01401" Cell="2,2" HelpContext="LED-HclTimes" />
+                      <ParameterSeparator Id="%AID%_PS-nnn" Text=":" Cell="2,3" />
+                      <ParameterRefRef RefId="%AID%_UP-%TT%%CC%015_R-%TT%%CC%01501" Cell="2,4" HelpContext="LED-HclTimes" />
+                      <ParameterSeparator Id="%AID%_PS-nnn" Text="hh:mm" Cell="2,5" />
+                    </ParameterBlock>
+                  </when>
+                </choose>
+                <choose ParamRefId="%AID%_UP-%TT%%CC%001_R-%TT%%CC%00101">
+                  <when test="!=0">
+                    <ParameterSeparator Id="%AID%_PS-nnn" Text="Bitte stelle die entsprechenden Parameter für diesen HCL-Kanal ein." />
+                    <ParameterRefRef RefId="%AID%_UP-%TT%%CC%010_R-%TT%%CC%01001" HelpContext="LED-HclBrightness" />
+                    <ParameterRefRef RefId="%AID%_UP-%TT%%CC%011_R-%TT%%CC%01101" HelpContext="LED-HclBrightness" />
+                    <ParameterRefRef RefId="%AID%_UP-%TT%%CC%003_R-%TT%%CC%00301" HelpContext="LED-HclColorTemp" />
+                    <ParameterRefRef RefId="%AID%_UP-%TT%%CC%004_R-%TT%%CC%00401" HelpContext="LED-HclColorTemp" />
+                    <ComObjectRefRef RefId="%AID%_O-%TT%%CC%001_R-%TT%%CC%00101" />
+                    <ComObjectRefRef RefId="%AID%_O-%TT%%CC%000_R-%TT%%CC%00001" />
+                  </when>
+                </choose>
+              </ParameterBlock>
+            </ChannelIndependentBlock>
+          </Dynamic>
+        </ApplicationProgram>
+      </ApplicationPrograms>
+    </Manufacturer>
+  </ManufacturerData>
+</KNX>

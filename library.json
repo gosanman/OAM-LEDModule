@@ -1,0 +1,5 @@
+{
+  "name": "OAM-LEDModule",
+  "version": "0.6.0",
+  "description": "OpenKNX LED-Dimmer (6/12 Kanal, EK/TW/RGB/HCL)"
+}

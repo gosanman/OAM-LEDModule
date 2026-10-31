@@ -1,0 +1,30 @@
+{
+ "name": "DK-6 V1.2 - RGB + TW (HCL) + EK",
+ "board": "DK_06_V12",
+ "values": {
+  "APP_Hardware": 3,
+  "APP_OperatingModeCh06": 4,
+  "APP_FrontPanelPresent": 1,
+  "APP_TempSensorPresent": 1,
+  "APP_AlarmUseOverCurrent": 1,
+  "APP_Func1BtnClick": 3,
+  "RGB_1Name": "Ambiente",
+  "TW_1Name": "Büro",
+  "EK_1Name": "Vitrine",
+  "HCL_1Name": "Tageslicht",
+  "HCL_1Type": 1,
+  "TW_1hclActive": 1,
+  "TW_1hclStart": 1
+ },
+ "hw": {
+  "portW": [
+   5,
+   5,
+   5,
+   18,
+   18,
+   10
+  ],
+  "time": "2026-10-30 10:00"
+ }
+}

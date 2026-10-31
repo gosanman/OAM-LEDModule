@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LED-Simulator</title>
+  <link rel="stylesheet" href="app.css">
+  <link rel="stylesheet" href="ets.css">
+</head>
+<body>
+  <header class="bar">
+    <div class="brand">
+      <strong>LED-Simulator</strong>
+      <span class="sub" id="device-sub">LED-Dimmer · echter Firmware-Code</span>
+    </div>
+
+    <div class="group" title="Simulationszeit seit Programmstart / Laufzeit seit dem letzten Neustart / Ortszeit des Geräts">
+      <span class="clock" id="clock">T+00:00:00</span>
+      <span class="uptime" id="uptime">—</span>
+      <span class="tod" id="tod" title="Ortszeit des Geräts (Hardware › Uhrzeit)"></span>
+    </div>
+
+    <div class="group" id="speed" aria-label="Geschwindigkeit">
+      <button data-speed="0" title="Anhalten">❚❚</button>
+      <button data-speed="1">1×</button>
+      <button data-speed="10">10×</button>
+      <button data-speed="60">60×</button>
+      <button data-speed="600">600×</button>
+      <span class="sep"></span>
+      <button data-step="100" title="Angehalten: 100 ms weiter">+0,1 s</button>
+      <button data-step="1000">+1 s</button>
+      <button data-step="60000">+1 min</button>
+    </div>
+
+    <div class="group" aria-label="Versorgung">
+      <button class="toggle" id="pwr-bus" title="KNX-Bus: versorgt Prozessor und Bausteine">KNX-Bus</button>
+      <button class="toggle" id="pwr-supply" title="24-V-Versorgung der LED-Ausgänge">LED 24 V</button>
+      <button id="btn-busdip" title="Kurzer Einbruch der Busspannung (SAVE, dann Wiederkehr)">Busdip</button>
+    </div>
+
+    <div class="group" aria-label="ETS">
+      <button class="primary" id="btn-program" title="Parameter wie die ETS herunterladen, mit Neustart">Programmieren</button>
+      <button id="btn-restart" title="Neustart des Geräts">Neustart</button>
+      <button id="btn-unload" title="Applikation entladen: Gerät wie neu">Entladen</button>
+    </div>
+
+    <div class="group" aria-label="Gerät">
+      <span class="led" id="led-0" title="Prog-LED"></span>
+      <span class="led" id="led-1" title="Info 1: Funktionstaste (alle an)"></span>
+      <span class="led" id="led-2" title="Info 2: I²C-Fehler"></span>
+      <span class="led" id="led-3" title="Info 3: Alarm"></span>
+      <span id="func1" class="group">
+        <button data-btn="short" title="Funktionstaste kurz">Taste kurz</button>
+        <button data-btn="long" title="Funktionstaste lang">lang</button>
+        <button data-btn="double" title="Funktionstaste doppelt">doppelt</button>
+      </span>
+    </div>
+
+    <div class="group" aria-label="Projekt">
+      <select id="board" title="Hardware-Variante (startet das Gerät neu, Parameter bleiben)"></select>
+      <select id="project" title="Projekt laden (startet das Gerät neu)"></select>
+      <button id="btn-save" title="Aktuelle Parameter und Hardware als Projekt speichern">Speichern unter …</button>
+    </div>
+
+    <div class="badges" id="badges"></div>
+  </header>
+
+  <main>
+    <section class="left">
+      <nav class="tabs" id="tabs">
+        <button data-tab="inputs" class="active">Bedienung</button>
+        <button data-tab="params">Parameter <span class="count" id="dirty-count"></span></button>
+        <button data-tab="kos">Objekte</button>
+        <button data-tab="bus">Telegramme</button>
+        <button data-tab="console">Konsole</button>
+        <button data-tab="hw">Hardware</button>
+        <button data-tab="checks">Prüfung <span class="count warn" id="warn-count"></span></button>
+      </nav>
+      <div class="tabbody" id="tab-inputs"></div>
+      <div class="tabbody hidden" id="tab-params"></div>
+      <div class="tabbody hidden" id="tab-kos"></div>
+      <div class="tabbody hidden" id="tab-bus">
+        <div class="tools">
+          <input id="bus-filter" placeholder="Filter: Nummer oder Name">
+          <label><input type="checkbox" id="bus-rx" checked> empfangen</label>
+          <label><input type="checkbox" id="bus-tx" checked> gesendet</label>
+          <button id="bus-clear">Leeren</button>
+        </div>
+        <div class="scroll"><table class="grid" id="bus-table"></table></div>
+      </div>
+      <div class="tabbody hidden" id="tab-console">
+        <div class="tools">
+          <input id="cmd" placeholder="Konsolenbefehl, z. B. show con" list="cmds">
+          <datalist id="cmds">
+            <option value="help"><option value="show con"><option value="i2c"><option value="resetfault">
+            <option value="test walk"><option value="test ch 1"><option value="test next"><option value="test stop">
+            <option value="all"><option value="temp"><option value="voltage"><option value="current"><option value="power"><option value="energy">
+          </datalist>
+          <label title="Befehl über das Diagnose-KO 7 schicken; die Antwort kommt in 14-Zeichen-Telegrammen"><input type="checkbox" id="cmd-diag"> über Diagnose-KO</label>
+          <button id="cmd-send" class="primary">Senden</button>
+          <button data-cmd="help">help</button>
+          <button data-cmd="show con">show con</button>
+          <button data-cmd="i2c">i2c</button>
+          <button data-cmd="all">all</button>
+          <button data-cmd="test walk">test walk</button>
+          <button data-cmd="resetfault">resetfault</button>
+          <button id="log-clear">Leeren</button>
+        </div>
+        <p class="hint">Dieselben Befehle wie an der seriellen Konsole des Geräts: <span class="mono">help</span> zeigt sie alle.</p>
+        <pre class="log" id="log"></pre>
+      </div>
+      <div class="tabbody hidden" id="tab-hw"></div>
+      <div class="tabbody hidden" id="tab-checks">
+        <p class="hint">Der Wächter prüft nach jedem Durchlauf: Überstrom über 6 A muss innerhalb von 1,5 s abgeschaltet werden, bei gesetztem Überstrom-Latch darf kein Ausgang leuchten, I²C-Zugriffe ohne Antwort werden gemeldet. Dazu kommen Neustarts, Downloads, Busdips und Fehler des Kerns.</p>
+        <div class="scroll"><table class="grid" id="checks-table"></table></div>
+      </div>
+    </section>
+
+    <section class="right">
+      <div class="lamps" id="lamps"></div>
+      <div class="outputs" id="outputs"></div>
+      <div class="card chart">
+        <div class="cardhead">
+          <h3>Verlauf der Ausgänge (Tastgrad)</h3>
+          <div class="seg" id="window">
+            <button data-win="10000">10 s</button>
+            <button data-win="60000" class="active">1 min</button>
+            <button data-win="600000">10 min</button>
+            <button data-win="3600000">1 h</button>
+          </div>
+        </div>
+        <canvas id="chart"></canvas>
+      </div>
+      <div class="card" id="meas"></div>
+      <div class="card hidden" id="panel">
+        <div class="cardhead"><h3>Bedienfeld</h3><span class="muted" id="panel-screen"></span></div>
+        <div class="oledbox"><canvas id="oled" width="128" height="32"></canvas></div>
+        <div class="pbtns">
+          <button data-panel="0" title="Zurück">■</button>
+          <button data-panel="1" title="Links">◀</button>
+          <button data-panel="2" title="Rechts">▶</button>
+          <button data-panel="3" title="Auswahl">●</button>
+        </div>
+      </div>
+      <div class="card small" id="module"></div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+  <script src="ets.js"></script>
+</body>
+</html>

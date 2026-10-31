@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-model href="../../Organization/knxprod-support/knx_project_20/knx-editor.xsd" type="application/xml" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<KNX xmlns="http://knx.org/xml/project/20" xmlns:op="http://github.com/OpenKNX/OpenKNXproducer">
+
+  <op:config href="LEDModule.conf.xml" />
+
+  <!-- ===================================================================================
+       OpenKNX LED-Dimmer - ETS-Produktdefinition (OpenKNXproducer)
+
+       Abgeloest wurde die mit dem kaenx Creator erzeugte Applikation v0.4 (0xA801, Version 4).
+       OpenKnxId und ApplicationNumber bleiben gleich, sonst loescht die Firmware beim
+       Update den Flash (u.a. den Energiezaehler).
+
+       Parameter-Praefixe (= Makro-Praefixe in knxprod.h, vom Code verwendet):
+         APP  geraeteweite Einstellungen (Kanal "LED")
+         EK   Einzelkanal        12 Kanaele (Obergrenze 12-Kanal-Geraet)
+         TW   Tunable White       6 Kanaele
+         RGB  RGB                 4 Kanaele
+         HCL  Human Centric       3 Kanaele (Kanal "HCL")
+
+       KO-Belegung (Kanal-KOs identisch zu v0.4):
+         BASE        1 ..   7
+         APP        31 ..  48   (absolut, siehe LED.share.xml)
+         EK         57 .. 392   12 x 28
+         TW        393 .. 560    6 x 28
+         RGB       561 .. 672    4 x 28
+         HCL       673 .. 678    3 x 2
+       Die Firmware setzt voraus, dass EK der unterste Kanal-KO-Block ist und dass die
+       relative KO-Belegung in EK/TW/RGB gleich ist (LEDModule::processInputKo).
+       =================================================================================== -->
+
+  <op:ETS ProductName="LED Dimmer"
+    OpenKnxId="0xA8"
+    ApplicationNumber="0x01"
+    ApplicationVersion="%ReleaseApplicationVersion%"
+    ReplacesVersions="%ReleaseReplacesVersions%"
+    ApplicationRevision="0"
+    ApplicationName="LEDDimmer"
+    BusCurrent="10"
+    BuildSuffix="-dev"
+    BuildSuffixText=" (Dev)"
+    MediumTypes="MT-0"
+    OrderNumber="OpenKnxLEDDimmer"
+    IsRailMounted="false" />
+
+  <op:define prefix="BASE" ModuleType="10"
+    share="../lib/OGM-Common/src/Common.share.xml">
+    <op:verify File="../lib/OGM-Common/library.json" ModuleVersion="%BASE_VerifyVersion%" />
+  </op:define>
+
+  <op:define prefix="UCT" ModuleType="99"
+    share="../lib/OFM-ConfigTransfer/src/ConfigTransfer.share.xml"
+    noConfigTransfer="true">
+    <op:verify File="../lib/OFM-ConfigTransfer/library.json" ModuleVersion="%UCT_VerifyVersion%" />
+  </op:define>
+
+  <!-- Geraeteweite Einstellungen, traegt Katalog, Hardware und den Kanal "LED".
+       op:verify (hier und bei HCL) liefert die Version fuer die Seite "Module" und
+       APP_/HCL_ModuleVersion im Header. Der Producer liest "version" aus library.json
+       nur, wenn danach noch ein Eintrag folgt (Komma nach der Versionszeile). -->
+  <op:define prefix="APP" ModuleType="20"
+    share="LED.share.xml">
+    <op:verify File="../library.json" ModuleVersion="%ReleaseApplicationVersion%" />
+  </op:define>
+
+  <op:define prefix="EK" ModuleType="21"
+    share="EK.share.xml"
+    template="EK.templ.xml"
+    NumChannels="12"
+    KoOffset="57" />
+
+  <op:define prefix="TW" ModuleType="22"
+    share="TW.share.xml"
+    template="TW.templ.xml"
+    NumChannels="6"
+    KoOffset="393" />
+
+  <op:define prefix="RGB" ModuleType="23"
+    share="RGB.share.xml"
+    template="RGB.templ.xml"
+    NumChannels="4"
+    KoOffset="561" />
+
+  <op:define prefix="HCL" ModuleType="24"
+    share="HCL.share.xml"
+    template="HCL.templ.xml"
+    NumChannels="3"
+    KoOffset="673">
+    <op:verify File="../library.json" ModuleVersion="%ReleaseApplicationVersion%" />
+  </op:define>
+
+  <!-- EK/TW/RGB haengen im Kanal "LED" (eingebunden aus LED.share.xml),
+       deshalb werden hier nur die Module mit eigenem Kanal aufgefuehrt. -->
+  <generate>
+    <Dynamic>
+      <op:include href="../lib/OGM-Common/src/Common.share.xml" xpath="//ApplicationProgram/Dynamic/*" prefix="BASE" />
+      <op:include href="LED.share.xml" xpath="//ApplicationProgram/Dynamic/*" prefix="APP" />
+      <op:include href="HCL.share.xml" xpath="//ApplicationProgram/Dynamic/*" prefix="HCL" />
+      <op:include href="../lib/OFM-ConfigTransfer/src/ConfigTransfer.share.xml" xpath="//ApplicationProgram/Dynamic/*" prefix="UCT" />
+    </Dynamic>
+  </generate>
+</KNX>

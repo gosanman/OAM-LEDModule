@@ -1,0 +1,24 @@
+{
+ "name": "APP-6 - 6x EK",
+ "board": "APP_06_V01",
+ "values": {
+  "APP_Hardware": 5,
+  "APP_OperatingModeCh06": 0,
+  "EK_1Name": "Küche",
+  "EK_2Name": "Esstisch",
+  "EK_3Name": "Flur",
+  "EK_4Name": "Bad",
+  "EK_5Name": "Garderobe",
+  "EK_6Name": "Außen"
+ },
+ "hw": {
+  "portW": [
+   24,
+   18,
+   12,
+   12,
+   6,
+   30
+  ]
+ }
+}

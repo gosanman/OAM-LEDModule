@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<KNX xmlns="http://knx.org/xml/project/20" xmlns:op="http://github.com/OpenKNX/OpenKNXproducer">
+
+  <!-- Versionsstaende der eingebundenen Module. Der Producer vergleicht sie gegen die
+       library.json des jeweiligen Repos (nur major.minor) und bricht bei Abweichung ab. -->
+  <op:config name="%BASE_VerifyVersion%" value="1.9" />
+  <op:config name="%UCT_VerifyVersion%" value="0.5" />
+
+  <!-- Applikationsversion. 0.4 war die letzte mit dem kaenx Creator erzeugte Version
+       (ApplicationVersion 4), sie und ihre Vorgaenger werden ersetzt.
+       0.6: Geraeteauswahl mit Hardware-Version (APP_Hardware) statt nur Geraeteklasse, Konfigurationstransfer
+       fuer hardwaregebundene Parameter gesperrt. -->
+  <op:config name="%ReleaseApplicationVersion%" value="0.6" />
+  <op:config name="%ReleaseReplacesVersions%" value="0.1 0.2 0.3 0.4 0.5" />
+  <op:config name="%ReleaseVersionText%" value="0.6.0" />
+
+  <!-- Vorgaben aus Common.share.xml wie in der kaenx-Version v04 -->
+  <op:config name="%BASE_StartupDelay%" value="1" />
+
+  <!-- Seite "Info LEDs" ausblenden: Info2 (Fehler) und Info3 (Alarm) schaltet die
+       Firmware direkt (LEDModule, MeasuringModule), eine zusaetzliche Zuordnung von
+       LED-Funktionen per ETS wuerde sich damit ueberlagern. -->
+  <op:config name="%BASE_ShowInfoLedPanel%" value="0" />
+
+  <!-- Common.script.js enthaelt noch "newline" fuer das in OGM-Common 1.9 entfernte
+       KommentarModule; die Funktion wird nirgends aufgerufen (WARN 003). -->
+  <op:nowarn id="3" regex="newline" />
+
+</KNX>

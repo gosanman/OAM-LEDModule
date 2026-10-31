@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-model href="../../Organization/knxprod-support/knx_project_20/knx-editor.xsd" type="application/xml" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<KNX xmlns:op="http://github.com/OpenKNX/OpenKNXproducer" xmlns="http://knx.org/xml/project/20" CreatedBy="KNX MT" ToolVersion="5.1.255.16695">
+  <ManufacturerData>
+    <Manufacturer RefId="M-00FA">
+      <ApplicationPrograms>
+        <ApplicationProgram>
+          <Static>
+            <ParameterTypes>
+              <ParameterType Id="%AID%_PT-hclType" Name="hclType" op:headerExport="enum">
+                <TypeRestriction Base="Value" SizeInBit="2">
+                  <Enumeration Text="Deaktiviert" Value="0" Id="%ENID%" op:headerName="none" />
+                  <Enumeration Text="Sonnen Auf-/Untergang" Value="1" Id="%ENID%" op:headerName="sun" />
+                  <Enumeration Text="Feste Zeiten" Value="2" Id="%ENID%" op:headerName="time" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="%AID%_PT-hclOffset" Name="hclOffset" op:headerExport="enum">
+                <TypeRestriction Base="Value" SizeInBit="2">
+                  <Enumeration Text="Deaktiviert" Value="0" Id="%ENID%" op:headerName="no" />
+                  <Enumeration Text="Später" Value="1" Id="%ENID%" op:headerName="plus" />
+                  <Enumeration Text="Früher" Value="2" Id="%ENID%" op:headerName="minus" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="%AID%_PT-hclDurationMin" Name="hclDurationMin">
+                <TypeTime SizeInBit="8" Unit="Minutes" minInclusive="0" maxInclusive="180" UIHint="Time_hhmm" />
+              </ParameterType>
+              <ParameterType Id="%AID%_PT-HourValue" Name="HourValue">
+                <TypeNumber SizeInBit="8" Type="unsignedInt" minInclusive="0" maxInclusive="23" />
+              </ParameterType>
+              <ParameterType Id="%AID%_PT-MinuteValue" Name="MinuteValue">
+                <TypeNumber SizeInBit="8" Type="unsignedInt" minInclusive="0" maxInclusive="59" />
+              </ParameterType>
+              <ParameterType Id="%AID%_PT-PicHclSun" Name="PicHclSun">
+                <TypePicture RefId="%FILE-hclsun%" HorizontalAlignment="Middle" />
+              </ParameterType>
+              <ParameterType Id="%AID%_PT-PicHclTime" Name="PicHclTime">
+                <TypePicture RefId="%FILE-hcltime%" HorizontalAlignment="Middle" />
+              </ParameterType>
+            </ParameterTypes>
+            <Parameters>
+            </Parameters>
+            <ParameterRefs>
+            </ParameterRefs>
+            <ComObjectTable>
+            </ComObjectTable>
+            <ComObjectRefs>
+            </ComObjectRefs>
+          </Static>
+          <Dynamic>
+            <Channel Id="%AID%_CH-%PREFIX%" Number="%PREFIX%" Name="HCL" Text="HCL" Icon="sun-clock-outline" HelpContext="LED-PageHcl">
+              <op:include href="HCL.templ.xml" xpath="//Dynamic/ChannelIndependentBlock/*" type="template" prefix="HCL" IsInner="true" />
+            </Channel>
+          </Dynamic>
+        </ApplicationProgram>
+      </ApplicationPrograms>
+      <Baggages>
+        <Baggage TargetPath="" Name="hclsun.png" Id="%FILE-hclsun%"><FileInfo TimeInfo="%DATETIME%" /></Baggage>
+        <Baggage TargetPath="" Name="hcltime.png" Id="%FILE-hcltime%"><FileInfo TimeInfo="%DATETIME%" /></Baggage>
+      </Baggages>
+    </Manufacturer>
+  </ManufacturerData>
+</KNX>

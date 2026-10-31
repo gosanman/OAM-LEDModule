@@ -1,0 +1,104 @@
+/* ETS-Ansicht der Parameter, im Stil der ETS 6. Bewusst immer hell - so sieht
+   das Parameterfenster in der ETS aus, auch wenn der Simulator dunkel ist. */
+.ets {
+  --e-bg: #ffffff; --e-tree: #f5f5f5; --e-ch: #ececec; --e-line: #d9d9d9; --e-text: #222;
+  --e-muted: #6b6b6b; --e-blue: #1d5fa6; --e-info: #eef4fb; --e-in: #c4c4c4; --e-sel: #efefef;
+  --e-chg: #fff3a6; --e-pend: #e3a008; --e-bad: #c62828;
+  --e-label: 241px; --e-value: 291px; --e-row: 30px;
+  display: grid; grid-template-rows: auto minmax(0, 1fr);
+  height: calc(100vh - 150px); min-height: 480px;
+  background: var(--e-bg); color: var(--e-text); border: 1px solid var(--e-line); border-radius: 6px; overflow: hidden;
+  font: 12.5px/1.35 "Segoe UI", system-ui, sans-serif; color-scheme: light;
+}
+#tab-params { padding: 0; min-height: 0; border: 0; background: transparent; }
+body.ets-wide main { grid-template-columns: 1fr; }
+body.ets-wide main > .right { display: none; }
+
+/* Kopfzeile: Pfad und Werkzeuge */
+.ets-bar { display: flex; align-items: center; gap: 6px; padding: 6px 10px; border-bottom: 1px solid var(--e-line); background: #fafafa; flex-wrap: wrap; }
+.ets-crumb { font-weight: 600; font-size: 13.5px; margin-right: auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ets-status { font-size: 12px; color: var(--e-muted); max-width: 40ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ets-status.ok { color: #1a7f37; } .ets-status.bad { color: var(--e-bad); }
+.ets .ets-tb { background: transparent; border: 1px solid transparent; color: var(--e-text); border-radius: 3px; padding: 3px 8px; font: inherit; cursor: pointer; }
+.ets .ets-tb:hover { background: #e9eef5; border-color: #c9d6e6; }
+.ets .ets-tb.on { background: #dce8f6; border-color: #9fbbe0; }
+.ets .ets-tb.prog { background: var(--e-blue); color: #fff; border-color: var(--e-blue); }
+.ets .ets-tb.prog.dirty { box-shadow: 0 0 0 2px #f2c14e; }
+
+.ets-main { display: grid; grid-template-columns: 240px minmax(0, 1fr); min-height: 0; }
+.ets-right { display: grid; grid-template-rows: minmax(0, 1fr) minmax(90px, 32%); min-height: 0; border-left: 1px solid var(--e-line); }
+.ets.nohelp .ets-right { grid-template-rows: minmax(0, 1fr); }
+
+/* Baum */
+.ets-tree { overflow: auto; background: var(--e-tree); padding-bottom: 12px; }
+.ets-node { display: flex; align-items: center; gap: 7px; min-height: 31px; padding: 0 8px; cursor: pointer; user-select: none; white-space: nowrap; }
+.ets-node:hover { background: #e9eef5; }
+.ets-ch { background: var(--e-ch); border-top: 1px solid var(--e-line); border-bottom: 1px solid var(--e-line); margin-top: 6px; min-height: 38px; }
+.ets-page.d1 { padding-left: 14px; } .ets-page.d2 { padding-left: 34px; } .ets-page.d3 { padding-left: 54px; } .ets-page.d4 { padding-left: 74px; }
+.ets-page.sel { background: var(--e-bg); color: var(--e-blue); font-weight: 600; box-shadow: inset 0 1px 0 var(--e-line), inset 0 -1px 0 var(--e-line); }
+.ets-page.chg .ets-lbl { background: var(--e-chg); }
+.ets-tog { width: 12px; text-align: center; color: var(--e-muted); font-size: 14px; }
+.ets-ico { width: 16px; height: 16px; flex: none; }
+.ets-lbl { overflow: hidden; text-overflow: ellipsis; }
+.ets-pend { width: 7px; height: 7px; border-radius: 50%; background: var(--e-pend); flex: none; margin-left: auto; }
+
+/* Seite */
+.ets-content { overflow: auto; padding: 12px 14px 24px; }
+.ets-pagebody { width: calc(var(--e-label) + var(--e-value)); }
+.ets-head { font-weight: 600; font-size: 13.5px; margin: 10px 0 6px; }
+.ets-pagebody > .ets-head:first-child { margin-top: 2px; }
+.ets-head.cell { margin: 0; font-size: 13.5px; align-self: end; padding-bottom: 2px; }
+.ets-hr { border: 0; border-top: 1px solid #bdbdbd; margin: 10px 0 12px; }
+.ets-sep { padding: 4px 0; min-height: 22px; }
+.ets-sep.cell { display: flex; align-items: center; padding: 0; }
+.ets-info, .ets-err { display: flex; gap: 10px; align-items: center; border: 1px solid var(--e-blue); background: var(--e-info); padding: 7px 10px; margin: 6px 0; white-space: pre-line; }
+.ets-err { border-color: var(--e-bad); background: #fdecec; }
+.ets-i { flex: none; width: 15px; height: 15px; border-radius: 50%; background: var(--e-blue); color: #fff; font: 700 10px/15px Georgia, serif; text-align: center; }
+.ets-err .ets-i { background: var(--e-bad); font-family: inherit; }
+
+.ets-p { display: grid; grid-template-columns: var(--e-label) var(--e-value); align-items: center; min-height: var(--e-row); padding: 1px 0; }
+.ets-p .ets-pl { padding-left: calc(var(--ind, 0) * 10px); padding-right: 8px; }
+.ets-p.ro .ets-pl { color: var(--e-muted); }
+.ets-p.chg { background: var(--e-chg); }
+.ets-p { position: relative; }
+.ets-p.pend::before { content: ""; position: absolute; left: -8px; top: 4px; bottom: 4px; width: 3px; border-radius: 2px; background: var(--e-pend); }
+.ets-p.cell { display: flex; min-height: 0; padding: 2px 6px 2px 0; }
+.ets-p.pic { padding: 4px 0; }
+.ets-p.pic.cell { display: block; padding: 0; }
+
+.ets input, .ets select { font: inherit; color: var(--e-text); }
+.ets-in { width: 100%; height: 23px; border: 1px solid var(--e-in); background: #fff; padding: 1px 6px; border-radius: 0; }
+.ets-in:disabled, .ets select:disabled { background: #f3f3f3; color: var(--e-muted); }
+.ets-in:focus, .ets select:focus { outline: 1px solid var(--e-blue); outline-offset: 0; border-color: var(--e-blue); }
+.ets-in.bad { border-color: var(--e-bad); background: #fdecec; }
+.ets-num { display: flex; align-items: center; gap: 6px; width: 100%; }
+.ets-num .ets-in { flex: 1; min-width: 0; }
+.ets-unit { color: var(--e-text); white-space: nowrap; }
+.ets-sel select { width: 100%; height: 23px; border: 1px solid #d3d3d3; background: var(--e-sel); padding: 0 4px; border-radius: 0; }
+.ets-radios { display: flex; flex-wrap: wrap; gap: 4px 16px; }
+.ets-radio { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+.ets-radio input, .ets-check input { accent-color: var(--e-blue); margin: 0; width: 14px; height: 14px; }
+.ets-check { display: inline-flex; align-items: center; }
+.ets-color { display: flex; gap: 6px; align-items: center; }
+.ets-color input[type=color] { width: 40px; height: 23px; padding: 0 2px; border: 1px solid var(--e-in); background: #fff; }
+.ets-color .ets-in { width: 90px; }
+.ets-pic { display: flex; }
+.ets-pic.middle { justify-content: center; } .ets-pic.right { justify-content: flex-end; } .ets-pic.left { justify-content: flex-start; }
+.ets-pic img { max-width: 100%; }
+
+.ets-grid { display: grid; align-items: center; row-gap: 4px; margin: 2px 0; }
+.ets-grid .ets-sel select, .ets-grid .ets-in { width: 100%; }
+
+.ets-btnrow { display: flex; justify-content: center; padding: 4px 0; }
+.ets .ets-btn { display: inline-flex; align-items: center; gap: 6px; background: #f3f3f3; border: 1px solid #c8c8c8; border-radius: 2px; padding: 4px 14px; font: inherit; color: var(--e-text); cursor: pointer; }
+.ets .ets-btn:hover { background: #e6eef8; border-color: #9fbbe0; }
+.ets-bico { width: 16px; height: 16px; }
+
+/* Kontexthilfe */
+.ets-help { overflow: auto; background: #f5f5f5; border-top: 3px solid #e3e3e3; padding: 6px 18px 14px; font-size: 12.5px; }
+.ets-help h2, .ets-help h3, .ets-help h4 { font-weight: 400; font-size: 16px; margin: 10px 0 12px; }
+.ets-help p { margin: 0 0 10px; }
+.ets-help ul { margin: 0 0 10px; padding-left: 20px; }
+.ets-help code { background: #e8e8e8; padding: 0 3px; border-radius: 2px; }
+.ets-help a { color: var(--e-blue); }
+.ets-nohelp { color: var(--e-muted); font-style: italic; padding: 14px 0; }

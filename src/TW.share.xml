@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-model href="../../Organization/knxprod-support/knx_project_20/knx-editor.xsd" type="application/xml" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<KNX xmlns:op="http://github.com/OpenKNX/OpenKNXproducer" xmlns="http://knx.org/xml/project/20" CreatedBy="KNX MT" ToolVersion="5.1.255.16695">
+  <ManufacturerData>
+    <Manufacturer RefId="M-00FA">
+      <ApplicationPrograms>
+        <ApplicationProgram>
+          <Static>
+            <ParameterTypes>
+              <ParameterType Id="%AID%_PT-ColorTempWW" Name="ColorTempWW">
+                <TypeNumber SizeInBit="12" Type="unsignedInt" minInclusive="1800" maxInclusive="3300" Increment="50" />
+              </ParameterType>
+              <ParameterType Id="%AID%_PT-ColorTempKW" Name="ColorTempKW">
+                <TypeNumber SizeInBit="13" Type="unsignedInt" minInclusive="4700" maxInclusive="7000" Increment="50" />
+              </ParameterType>
+              <ParameterType Id="%AID%_PT-SceneActionTW" Name="SceneActionTW">
+                <TypeRestriction Base="Value" SizeInBit="8">
+                  <Enumeration Text="nicht aktiv" Value="0" Id="%ENID%" />
+                  <Enumeration Text="Einschaltwert (Tag/Nacht)" Value="1" Id="%ENID%" />
+                  <Enumeration Text="Helligkeitswert" Value="2" Id="%ENID%" />
+                  <Enumeration Text="Farbtemperatur" Value="3" Id="%ENID%" />
+                  <Enumeration Text="Helligkeit und Temperatur" Value="4" Id="%ENID%" />
+                  <Enumeration Text="ausschalten" Value="9" Id="%ENID%" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="%AID%_PT-PicKelvin" Name="PicKelvin">
+                <TypePicture RefId="%FILE-kelvin%" HorizontalAlignment="Middle" />
+              </ParameterType>
+            </ParameterTypes>
+            <Parameters>
+            </Parameters>
+            <ParameterRefs>
+            </ParameterRefs>
+            <ComObjectTable>
+            </ComObjectTable>
+            <ComObjectRefs>
+            </ComObjectRefs>
+          </Static>
+          <Dynamic>
+            <!-- wird von LED.share.xml in den Kanal "LED" eingebunden -->
+            <ChannelIndependentBlock>
+              <op:include href="TW.templ.xml" xpath="//Dynamic/ChannelIndependentBlock/*" type="template" prefix="TW" IsInner="true" />
+            </ChannelIndependentBlock>
+          </Dynamic>
+        </ApplicationProgram>
+      </ApplicationPrograms>
+      <Baggages>
+        <Baggage TargetPath="" Name="kelvin.png" Id="%FILE-kelvin%"><FileInfo TimeInfo="%DATETIME%" /></Baggage>
+      </Baggages>
+    </Manufacturer>
+  </ManufacturerData>
+</KNX>

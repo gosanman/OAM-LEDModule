@@ -1,0 +1,781 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-model href="../../Organization/knxprod-support/knx_project_20/knx-editor.xsd" type="application/xml" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<KNX xmlns:op="http://github.com/OpenKNX/OpenKNXproducer" xmlns="http://knx.org/xml/project/20" CreatedBy="KNX MT" ToolVersion="5.1.255.16695">
+
+  <op:minOpenKNXproducerVersion value="4.3.9" />
+
+  <ManufacturerData>
+    <Manufacturer RefId="M-00FA">
+      <ApplicationPrograms>
+        <ApplicationProgram>
+          <Static>
+            <ParameterTypes>
+              <!-- ============ Geraet und Betriebsmodus ============ -->
+              <!-- Platinenkennung: Wert = LED_BOARD_ID in include/hardware.h. Die Firmware vergleicht
+                   beide beim Start und schaltet bei Abweichung keinen Ausgang. Werte nie wiederverwenden. -->
+              <ParameterType Id="%AID%_PT-Hardware" Name="Hardware">
+                <TypeRestriction Base="Value" SizeInBit="5">
+                  <Enumeration Text="– bitte Gerät wählen –" Value="0" Id="%ENID%" />
+                  <Enumeration Text="LED-DK-6x24V V1.0" Value="1" Id="%ENID%" />
+                  <Enumeration Text="LED-DK-12x24V V1.0" Value="2" Id="%ENID%" />
+                  <Enumeration Text="LED-DK-6x24V V1.2 (mit Bedienfeld)" Value="3" Id="%ENID%" />
+                  <Enumeration Text="LED-DK-12x24V V1.2 (mit Bedienfeld)" Value="4" Id="%ENID%" />
+                  <Enumeration Text="LED-APP-6x24V V0.1" Value="5" Id="%ENID%" />
+                </TypeRestriction>
+              </ParameterType>
+              <!-- Geraeteklasse, von der ETS per Assign aus PT-Hardware gesetzt (intern) -->
+              <ParameterType Id="%AID%_PT-ControllerType" Name="ControllerType">
+                <TypeRestriction Base="Value" SizeInBit="2">
+                  <Enumeration Text="LED-DK-6x24V (6-Kanal Dimmer)" Value="0" Id="%ENID%" />
+                  <Enumeration Text="LED-DK-12x24V (12-Kanal Dimmer)" Value="1" Id="%ENID%" />
+                  <Enumeration Text="LED-APP-6x24V (6-Kanal Dimmer)" Value="2" Id="%ENID%" />
+                  <Enumeration Text="LED-APP-12x24V (12-Kanal Dimmer)" Value="3" Id="%ENID%" />
+                </TypeRestriction>
+              </ParameterType>
+              <!-- Wert, den die Firmware auswertet (6-Kanal: 0..5, 12-Kanal: 10..15) -->
+              <ParameterType Id="%AID%_PT-OperatingMode" Name="OperatingMode">
+                <TypeRestriction Base="Value" SizeInBit="6">
+                  <Enumeration Text="6x EK" Value="0" Id="%ENID%" />
+                  <Enumeration Text="3x TW" Value="1" Id="%ENID%" />
+                  <Enumeration Text="2x TW + 2x EK" Value="2" Id="%ENID%" />
+                  <Enumeration Text="2x RGB" Value="3" Id="%ENID%" />
+                  <Enumeration Text="1x RGB + 1x TW + 1x EK" Value="4" Id="%ENID%" />
+                  <Enumeration Text="1x RGB + 3x EK" Value="5" Id="%ENID%" />
+                  <Enumeration Text="12x EK" Value="10" Id="%ENID%" />
+                  <Enumeration Text="6x TW" Value="11" Id="%ENID%" />
+                  <Enumeration Text="4x TW + 4x EK" Value="12" Id="%ENID%" />
+                  <Enumeration Text="4x RGB" Value="13" Id="%ENID%" />
+                  <Enumeration Text="2x RGB + 2x TW + 2x EK" Value="14" Id="%ENID%" />
+                  <Enumeration Text="1x RGB + 4x TW + 1x EK" Value="15" Id="%ENID%" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="%AID%_PT-OperatingModeCh06" Name="OperatingModeCh06">
+                <TypeRestriction Base="Value" SizeInBit="6">
+                  <Enumeration Text="6x EK" Value="0" Id="%ENID%" />
+                  <Enumeration Text="3x TW" Value="1" Id="%ENID%" />
+                  <Enumeration Text="2x TW + 2x EK" Value="2" Id="%ENID%" />
+                  <Enumeration Text="2x RGB" Value="3" Id="%ENID%" />
+                  <Enumeration Text="1x RGB + 1x TW + 1x EK" Value="4" Id="%ENID%" />
+                  <Enumeration Text="1x RGB + 3x EK" Value="5" Id="%ENID%" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="%AID%_PT-OperatingModeCh12" Name="OperatingModeCh12">
+                <TypeRestriction Base="Value" SizeInBit="6">
+                  <Enumeration Text="12x EK" Value="10" Id="%ENID%" />
+                  <Enumeration Text="6x TW" Value="11" Id="%ENID%" />
+                  <Enumeration Text="4x TW + 4x EK" Value="12" Id="%ENID%" />
+                  <Enumeration Text="4x RGB" Value="13" Id="%ENID%" />
+                  <Enumeration Text="2x RGB + 2x TW + 2x EK" Value="14" Id="%ENID%" />
+                  <Enumeration Text="1x RGB + 4x TW + 1x EK" Value="15" Id="%ENID%" />
+                </TypeRestriction>
+              </ParameterType>
+              <!-- Anzahl sichtbarer Kanaele je Kanaltyp, per Assign aus dem Betriebsmodus -->
+              <ParameterType Id="%AID%_PT-NumChannels" Name="NumChannels">
+                <TypeNumber SizeInBit="8" Type="unsignedInt" minInclusive="0" maxInclusive="12" />
+              </ParameterType>
+
+              <!-- ============ Einstellungen ============ -->
+              <ParameterType Id="%AID%_PT-PwmFrequenz" Name="PwmFrequenz">
+                <TypeRestriction Base="Value" SizeInBit="11">
+                  <Enumeration Text="211" Value="211" Id="%ENID%" />
+                  <Enumeration Text="488" Value="488" Id="%ENID%" />
+                  <Enumeration Text="600" Value="600" Id="%ENID%" />
+                  <Enumeration Text="832" Value="832" Id="%ENID%" />
+                  <Enumeration Text="1000" Value="1000" Id="%ENID%" />
+                  <Enumeration Text="1200" Value="1200" Id="%ENID%" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="%AID%_PT-DayNight" Name="DayNight">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="1=Tag / 0=Nacht" Value="1" Id="%ENID%" />
+                  <Enumeration Text="0=Tag / 1=Nacht" Value="0" Id="%ENID%" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="%AID%_PT-FuncClickAction" Name="FuncClickAction" op:headerExport="enum">
+                <TypeRestriction Base="Value" SizeInBit="4">
+                  <Enumeration Text="Deaktiviert" Value="0" Id="%ENID%" op:headerName="none" />
+                  <Enumeration Text="Alle Kanäle einschalten" Value="1" Id="%ENID%" op:headerName="on" />
+                  <Enumeration Text="Alle Kanäle ausschalten" Value="2" Id="%ENID%" op:headerName="off" />
+                  <Enumeration Text="Alle Kanäle umschalten" Value="3" Id="%ENID%" op:headerName="toggle" />
+                </TypeRestriction>
+              </ParameterType>
+
+              <!-- ============ Messungen und Alarme ============ -->
+              <ParameterType Id="%AID%_PT-ShuntValue" Name="ShuntValue">
+                <TypeRestriction Base="Value" SizeInBit="4">
+                  <Enumeration Text="0.005 Ohm" Value="5" Id="%ENID%" />
+                  <Enumeration Text="0.010 Ohm" Value="10" Id="%ENID%" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="%AID%_PT-AlarmVoltage" Name="AlarmVoltage">
+                <TypeFloat Encoding="DPT 9" minInclusive="10" maxInclusive="26" />
+              </ParameterType>
+              <ParameterType Id="%AID%_PT-AlarmTemp" Name="AlarmTemp">
+                <TypeFloat Encoding="DPT 9" minInclusive="30" maxInclusive="60" />
+              </ParameterType>
+              <ParameterType Id="%AID%_PT-AlarmCurrent" Name="AlarmCurrent">
+                <TypeFloat Encoding="DPT 9" minInclusive="1" maxInclusive="8" />
+              </ParameterType>
+
+              <!-- ============ Bedienfeld ============ -->
+              <ParameterType Id="%AID%_PT-DisplayTimeOut" Name="DisplayTimeOut">
+                <TypeNumber SizeInBit="10" Type="unsignedInt" minInclusive="10" maxInclusive="600" />
+              </ParameterType>
+
+              <!-- ============ Funktionstests ============ -->
+              <ParameterType Id="%AID%_PT-ChannelIDs" Name="ChannelIDs">
+                <TypeRestriction Base="Value" SizeInBit="4">
+                  <Enumeration Text="A" Value="0" Id="%ENID%" />
+                  <Enumeration Text="B" Value="1" Id="%ENID%" />
+                  <Enumeration Text="C" Value="2" Id="%ENID%" />
+                  <Enumeration Text="D" Value="3" Id="%ENID%" />
+                  <Enumeration Text="E" Value="4" Id="%ENID%" />
+                  <Enumeration Text="F" Value="5" Id="%ENID%" />
+                  <Enumeration Text="G" Value="6" Id="%ENID%" />
+                  <Enumeration Text="H" Value="7" Id="%ENID%" />
+                  <Enumeration Text="I" Value="8" Id="%ENID%" />
+                  <Enumeration Text="J" Value="9" Id="%ENID%" />
+                  <Enumeration Text="K" Value="10" Id="%ENID%" />
+                  <Enumeration Text="L" Value="11" Id="%ENID%" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="%AID%_PT-ChannelIDsCh06" Name="ChannelIDsCh06">
+                <TypeRestriction Base="Value" SizeInBit="4">
+                  <Enumeration Text="A" Value="0" Id="%ENID%" />
+                  <Enumeration Text="B" Value="1" Id="%ENID%" />
+                  <Enumeration Text="C" Value="2" Id="%ENID%" />
+                  <Enumeration Text="D" Value="3" Id="%ENID%" />
+                  <Enumeration Text="E" Value="4" Id="%ENID%" />
+                  <Enumeration Text="F" Value="5" Id="%ENID%" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="%AID%_PT-OnOffAction" Name="OnOffAction">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="Aus" Value="0" Id="%ENID%" />
+                  <Enumeration Text="An" Value="1" Id="%ENID%" />
+                </TypeRestriction>
+              </ParameterType>
+
+              <!-- ============ Gemeinsame Typen der Kanalmodule EK/TW/RGB ============ -->
+              <ParameterType Id="%AID%_PT-DimCurve" Name="DimCurve">
+                <TypeRestriction Base="Value" SizeInBit="3">
+                  <Enumeration Text="A - Linear" Value="0" Id="%ENID%" />
+                  <Enumeration Text="B - 2,8" Value="1" Id="%ENID%" />
+                  <Enumeration Text="C - 3,8" Value="2" Id="%ENID%" />
+                  <Enumeration Text="D - CIE" Value="3" Id="%ENID%" />
+                  <Enumeration Text="E - DALI" Value="4" Id="%ENID%" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="%AID%_PT-UseOnValue" Name="UseOnValue">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="letzter Wert" Value="0" Id="%ENID%" />
+                  <Enumeration Text="fester Wert" Value="1" Id="%ENID%" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="%AID%_PT-OnBrightness" Name="OnBrightness">
+                <TypeNumber SizeInBit="7" Type="unsignedInt" minInclusive="0" maxInclusive="100" />
+              </ParameterType>
+              <ParameterType Id="%AID%_PT-OnColorTemp" Name="OnColorTemp">
+                <TypeNumber SizeInBit="16" Type="unsignedInt" minInclusive="600" maxInclusive="11000" Increment="50" />
+              </ParameterType>
+              <ParameterType Id="%AID%_PT-DimTime" Name="DimTime">
+                <TypeNumber SizeInBit="7" Type="unsignedInt" minInclusive="1" maxInclusive="100" />
+              </ParameterType>
+              <!-- Zeitbasis wie paramDelay(): 3 = 1/10 s, 0 = s, 1 = min -->
+              <ParameterType Id="%AID%_PT-DelayBaseDim" Name="DelayBaseDim">
+                <TypeRestriction Base="Value" SizeInBit="2">
+                  <Enumeration Text="1/10 Sekunde(n)" Value="3" Id="%ENID%" />
+                  <Enumeration Text="Sekunde(n)" Value="0" Id="%ENID%" />
+                  <Enumeration Text="Minute(n)" Value="1" Id="%ENID%" />
+                </TypeRestriction>
+              </ParameterType>
+              <!-- Helligkeit einer Szene in Prozent (Firmware rechnet * 2,55) -->
+              <ParameterType Id="%AID%_PT-ScenePercent" Name="ScenePercent">
+                <TypeNumber SizeInBit="8" Type="unsignedInt" minInclusive="0" maxInclusive="100" />
+              </ParameterType>
+              <ParameterType Id="%AID%_PT-SceneNumber" Name="SceneNumber">
+                <TypeNumber SizeInBit="8" Type="signedInt" minInclusive="1" maxInclusive="64" />
+              </ParameterType>
+              <ParameterType Id="%AID%_PT-hclChannel" Name="hclChannel">
+                <TypeRestriction Base="Value" SizeInBit="2">
+                  <Enumeration Text="HCL1" Value="1" Id="%ENID%" />
+                  <Enumeration Text="HCL2" Value="2" Id="%ENID%" />
+                  <Enumeration Text="HCL3" Value="3" Id="%ENID%" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="%AID%_PT-hclStart" Name="hclStart" op:headerExport="enum">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="Nur beim Einschalten" Value="0" Id="%ENID%" op:headerName="start" />
+                  <Enumeration Text="Auch wenn eingeschaltet ist" Value="1" Id="%ENID%" op:headerName="during" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="%AID%_PT-PicDimCurve" Name="PicDimCurve">
+                <TypePicture RefId="%FILE-dimcurve%" HorizontalAlignment="Middle" />
+              </ParameterType>
+
+              <!-- ============ Anschlussplaene ============ -->
+              <ParameterType Id="%AID%_PT-PicChan06Mode0" Name="PicChan06Mode0"><TypePicture RefId="%FILE-chan06_0%" HorizontalAlignment="Middle" /></ParameterType>
+              <ParameterType Id="%AID%_PT-PicChan06Mode1" Name="PicChan06Mode1"><TypePicture RefId="%FILE-chan06_1%" HorizontalAlignment="Middle" /></ParameterType>
+              <ParameterType Id="%AID%_PT-PicChan06Mode2" Name="PicChan06Mode2"><TypePicture RefId="%FILE-chan06_2%" HorizontalAlignment="Middle" /></ParameterType>
+              <ParameterType Id="%AID%_PT-PicChan06Mode3" Name="PicChan06Mode3"><TypePicture RefId="%FILE-chan06_3%" HorizontalAlignment="Middle" /></ParameterType>
+              <ParameterType Id="%AID%_PT-PicChan06Mode4" Name="PicChan06Mode4"><TypePicture RefId="%FILE-chan06_4%" HorizontalAlignment="Middle" /></ParameterType>
+              <ParameterType Id="%AID%_PT-PicChan06Mode5" Name="PicChan06Mode5"><TypePicture RefId="%FILE-chan06_5%" HorizontalAlignment="Middle" /></ParameterType>
+              <ParameterType Id="%AID%_PT-PicChan06Neutral" Name="PicChan06Neutral"><TypePicture RefId="%FILE-chan06_neutral%" HorizontalAlignment="Middle" /></ParameterType>
+              <ParameterType Id="%AID%_PT-PicChan12Mode0" Name="PicChan12Mode0"><TypePicture RefId="%FILE-chan12_0%" HorizontalAlignment="Middle" /></ParameterType>
+              <ParameterType Id="%AID%_PT-PicChan12Mode1" Name="PicChan12Mode1"><TypePicture RefId="%FILE-chan12_1%" HorizontalAlignment="Middle" /></ParameterType>
+              <ParameterType Id="%AID%_PT-PicChan12Mode2" Name="PicChan12Mode2"><TypePicture RefId="%FILE-chan12_2%" HorizontalAlignment="Middle" /></ParameterType>
+              <ParameterType Id="%AID%_PT-PicChan12Mode3" Name="PicChan12Mode3"><TypePicture RefId="%FILE-chan12_3%" HorizontalAlignment="Middle" /></ParameterType>
+              <ParameterType Id="%AID%_PT-PicChan12Mode4" Name="PicChan12Mode4"><TypePicture RefId="%FILE-chan12_4%" HorizontalAlignment="Middle" /></ParameterType>
+              <ParameterType Id="%AID%_PT-PicChan12Mode5" Name="PicChan12Mode5"><TypePicture RefId="%FILE-chan12_5%" HorizontalAlignment="Middle" /></ParameterType>
+              <ParameterType Id="%AID%_PT-PicChan12Neutral" Name="PicChan12Neutral"><TypePicture RefId="%FILE-chan12_neutral%" HorizontalAlignment="Middle" /></ParameterType>
+              <ParameterType Id="%AID%_PT-PicAppChan06Mode0" Name="PicAppChan06Mode0"><TypePicture RefId="%FILE-app_chan06_0%" HorizontalAlignment="Middle" /></ParameterType>
+              <ParameterType Id="%AID%_PT-PicAppChan06Mode1" Name="PicAppChan06Mode1"><TypePicture RefId="%FILE-app_chan06_1%" HorizontalAlignment="Middle" /></ParameterType>
+              <ParameterType Id="%AID%_PT-PicAppChan06Mode2" Name="PicAppChan06Mode2"><TypePicture RefId="%FILE-app_chan06_2%" HorizontalAlignment="Middle" /></ParameterType>
+              <ParameterType Id="%AID%_PT-PicAppChan06Mode3" Name="PicAppChan06Mode3"><TypePicture RefId="%FILE-app_chan06_3%" HorizontalAlignment="Middle" /></ParameterType>
+              <ParameterType Id="%AID%_PT-PicAppChan06Mode4" Name="PicAppChan06Mode4"><TypePicture RefId="%FILE-app_chan06_4%" HorizontalAlignment="Middle" /></ParameterType>
+              <ParameterType Id="%AID%_PT-PicAppChan06Mode5" Name="PicAppChan06Mode5"><TypePicture RefId="%FILE-app_chan06_5%" HorizontalAlignment="Middle" /></ParameterType>
+              <ParameterType Id="%AID%_PT-PicAppChan06Neutral" Name="PicAppChan06Neutral"><TypePicture RefId="%FILE-app_chan06_neutral%" HorizontalAlignment="Middle" /></ParameterType>
+              <ParameterType Id="%AID%_PT-PicAppChan12Mode0" Name="PicAppChan12Mode0"><TypePicture RefId="%FILE-app_chan12_0%" HorizontalAlignment="Middle" /></ParameterType>
+              <ParameterType Id="%AID%_PT-PicAppChan12Mode1" Name="PicAppChan12Mode1"><TypePicture RefId="%FILE-app_chan12_1%" HorizontalAlignment="Middle" /></ParameterType>
+              <ParameterType Id="%AID%_PT-PicAppChan12Mode2" Name="PicAppChan12Mode2"><TypePicture RefId="%FILE-app_chan12_2%" HorizontalAlignment="Middle" /></ParameterType>
+              <ParameterType Id="%AID%_PT-PicAppChan12Mode3" Name="PicAppChan12Mode3"><TypePicture RefId="%FILE-app_chan12_3%" HorizontalAlignment="Middle" /></ParameterType>
+              <ParameterType Id="%AID%_PT-PicAppChan12Mode4" Name="PicAppChan12Mode4"><TypePicture RefId="%FILE-app_chan12_4%" HorizontalAlignment="Middle" /></ParameterType>
+              <ParameterType Id="%AID%_PT-PicAppChan12Mode5" Name="PicAppChan12Mode5"><TypePicture RefId="%FILE-app_chan12_5%" HorizontalAlignment="Middle" /></ParameterType>
+              <ParameterType Id="%AID%_PT-PicAppChan12Neutral" Name="PicAppChan12Neutral"><TypePicture RefId="%FILE-app_chan12_neutral%" HorizontalAlignment="Middle" /></ParameterType>
+            </ParameterTypes>
+
+            <Parameters>
+              <!-- Speicherlayout identisch zu v0.4 (19 Byte). Die Firmware liest
+                   MeasurementIntervalTime (Byte 4-5) und MeasurementIntervalBase (Byte 3)
+                   getrennt, deshalb liegen sie nicht im OpenKNX-ueblichen Wort zusammen. -->
+              <Union SizeInBit="152">
+                <Memory CodeSegment="%MID%" Offset="0" BitOffset="0" />
+                <!-- Byte 0 -->
+                <Parameter Id="%AID%_UP-%TT%00002" Name="ControllerType"          Offset="0"  BitOffset="0" ParameterType="%AID%_PT-ControllerType"   Text="Gerät (intern)" Value="0" Access="None" op:configTransfer="never" />
+                <Parameter Id="%AID%_UP-%TT%00001" Name="OperatingMode"           Offset="0"  BitOffset="2" ParameterType="%AID%_PT-OperatingMode"    Text="Betriebsmodus (intern)" Value="0" Access="None" />
+                <!-- Byte 1-2: PwmFrequenz 11 Bit, Hardware in den 5 Bit dahinter (frueher frei) -->
+                <Parameter Id="%AID%_UP-%TT%00003" Name="PwmFrequenz"             Offset="1"  BitOffset="0" ParameterType="%AID%_PT-PwmFrequenz"      Text="PWM Frequenz" SuffixText="Hz" Value="488" />
+                <Parameter Id="%AID%_UP-%TT%00066" Name="Hardware"                Offset="2"  BitOffset="3" ParameterType="%AID%_PT-Hardware"         Text="Gerät" Value="0" op:configTransfer="never" />
+                <!-- Byte 3 -->
+                <Parameter Id="%AID%_UP-%TT%00004" Name="SendMeasuredValues"      Offset="3"  BitOffset="0" ParameterType="%AID%_PT-OnOffYesNo"       Text="Messwerte zyklisch senden" Value="1" />
+                <Parameter Id="%AID%_UP-%TT%00005" Name="TempSensorPresent"       Offset="3"  BitOffset="1" ParameterType="%AID%_PT-OnOffYesNo"       Text="Temperatursensor verbaut" Value="0" op:configTransfer="never" />
+                <Parameter Id="%AID%_UP-%TT%00030" Name="MeasurementIntervalBase" Offset="3"  BitOffset="2" ParameterType="%AID%_PT-DelayBase"        Text="Zeitbasis" Value="1" />
+                <Parameter Id="%AID%_UP-%TT%00007" Name="ShuntValue"              Offset="3"  BitOffset="4" ParameterType="%AID%_PT-ShuntValue"       Text="Wert des verbauten Messwiderstands" Value="10" op:configTransfer="never" />
+                <!-- Byte 4-5, 2 Bit frei -->
+                <Parameter Id="%AID%_UP-%TT%00006" Name="MeasurementIntervalTime" Offset="4"  BitOffset="0" ParameterType="%AID%_PT-DelayTimeMin1"    Text="Zeit" Value="1" />
+                <!-- Byte 6 -->
+                <Parameter Id="%AID%_UP-%TT%00026" Name="DayNight"                Offset="6"  BitOffset="0" ParameterType="%AID%_PT-DayNight"         Text="Tag/Nacht Objekt" Value="1" />
+                <Parameter Id="%AID%_UP-%TT%00027" Name="Func1BtnClick"           Offset="6"  BitOffset="1" ParameterType="%AID%_PT-FuncClickAction"  Text="Aktion - Func1 Taste Klick" Value="0" />
+                <Parameter Id="%AID%_UP-%TT%00035" Name="AlarmUseVoltage"         Offset="6"  BitOffset="5" ParameterType="%AID%_PT-CheckBox"         Text="Spannungsbereich überwachen" Value="0" />
+                <Parameter Id="%AID%_UP-%TT%00036" Name="AlarmUseOverTemp"        Offset="6"  BitOffset="6" ParameterType="%AID%_PT-CheckBox"         Text="Übertemperatur überwachen" Value="0" />
+                <Parameter Id="%AID%_UP-%TT%00037" Name="AlarmUseOverCurrent"     Offset="6"  BitOffset="7" ParameterType="%AID%_PT-CheckBox"         Text="Überstrom überwachen" Value="0" />
+                <!-- Byte 7 -->
+                <Parameter Id="%AID%_UP-%TT%00028" Name="Func1BtnDblClick"        Offset="7"  BitOffset="0" ParameterType="%AID%_PT-FuncClickAction"  Text="Aktion - Func1 Taste Doppelklick" Value="0" />
+                <Parameter Id="%AID%_UP-%TT%00029" Name="Func1BtnLongClick"       Offset="7"  BitOffset="4" ParameterType="%AID%_PT-FuncClickAction"  Text="Aktion - Func1 Taste langer Klick" Value="0" />
+                <!-- Byte 8-15 -->
+                <Parameter Id="%AID%_UP-%TT%00038" Name="AlarmOverVoltage"        Offset="8"  BitOffset="0" ParameterType="%AID%_PT-AlarmVoltage"     Text="Grenzwert Überspannung" SuffixText="V" Value="25" />
+                <Parameter Id="%AID%_UP-%TT%00039" Name="AlarmUnderVoltage"       Offset="10" BitOffset="0" ParameterType="%AID%_PT-AlarmVoltage"     Text="Grenzwert Unterspannung" SuffixText="V" Value="23" />
+                <Parameter Id="%AID%_UP-%TT%00040" Name="AlarmOverTemp"           Offset="12" BitOffset="0" ParameterType="%AID%_PT-AlarmTemp"        Text="Grenzwert Übertemperatur" SuffixText="°C" Value="40" />
+                <Parameter Id="%AID%_UP-%TT%00041" Name="AlarmOverCurrent"        Offset="14" BitOffset="0" ParameterType="%AID%_PT-AlarmCurrent"     Text="Grenzwert Überstrom" SuffixText="A" Value="4" />
+                <!-- Byte 16-17, 6 Bit frei -->
+                <Parameter Id="%AID%_UP-%TT%00046" Name="DisplayTimeOut"          Offset="16" BitOffset="0" ParameterType="%AID%_PT-DisplayTimeOut"   Text="Anzeige ausschalten nach" SuffixText="Sekunden" Value="30" />
+                <!-- Byte 18, 6 Bit frei -->
+                <Parameter Id="%AID%_UP-%TT%00047" Name="FrontPanelPresent"       Offset="18" BitOffset="0" ParameterType="%AID%_PT-CheckBox"         Text="Bedienfeld verbaut" Value="0" op:configTransfer="never" />
+                <Parameter Id="%AID%_UP-%TT%00048" Name="FrontPanelControl"       Offset="18" BitOffset="1" ParameterType="%AID%_PT-OnOffYesNo"       Text="Steuerung über das Bedienfeld zulassen" Value="1" />
+              </Union>
+
+              <!-- Nur ETS, ohne Geraetespeicher -->
+              <Parameter Id="%AID%_P-%TT%00042" Name="OperatingModeCh06" ParameterType="%AID%_PT-OperatingModeCh06" Text="Betriebsmodus" Value="0" />
+              <Parameter Id="%AID%_P-%TT%00043" Name="OperatingModeCh12" ParameterType="%AID%_PT-OperatingModeCh12" Text="Betriebsmodus" Value="10" />
+              <Parameter Id="%AID%_P-%TT%00063" Name="NumEK"             ParameterType="%AID%_PT-NumChannels"       Text="Anzahl EK-Kanäle (intern)" Value="6" Access="None" />
+              <Parameter Id="%AID%_P-%TT%00064" Name="NumTW"             ParameterType="%AID%_PT-NumChannels"       Text="Anzahl TW-Kanäle (intern)" Value="0" Access="None" />
+              <Parameter Id="%AID%_P-%TT%00065" Name="NumRGB"            ParameterType="%AID%_PT-NumChannels"       Text="Anzahl RGB-Kanäle (intern)" Value="0" Access="None" />
+              <Parameter Id="%AID%_P-%TT%00031" Name="ChannelIDs"        ParameterType="%AID%_PT-ChannelIDs"        Text="Kanal (intern)" Value="0" Access="None" />
+              <Parameter Id="%AID%_P-%TT%00044" Name="ChannelIDsCh06"    ParameterType="%AID%_PT-ChannelIDsCh06"    Text="Kanal" Value="0" />
+              <Parameter Id="%AID%_P-%TT%00045" Name="ChannelIDsCh12"    ParameterType="%AID%_PT-ChannelIDs"        Text="Kanal" Value="0" />
+              <Parameter Id="%AID%_P-%TT%00032" Name="OnOffAction"       ParameterType="%AID%_PT-OnOffAction"       Text="Aktion" Value="0" />
+              <!-- Anschlussplaene -->
+              <Parameter Id="%AID%_P-%TT%00008" Name="PicChan06Mode0"          ParameterType="%AID%_PT-PicChan06Mode0"          Text="Anschlussplan" Value="" Access="Read" />
+              <Parameter Id="%AID%_P-%TT%00009" Name="PicChan06Mode1"          ParameterType="%AID%_PT-PicChan06Mode1"          Text="Anschlussplan" Value="" Access="Read" />
+              <Parameter Id="%AID%_P-%TT%00010" Name="PicChan06Mode2"          ParameterType="%AID%_PT-PicChan06Mode2"          Text="Anschlussplan" Value="" Access="Read" />
+              <Parameter Id="%AID%_P-%TT%00011" Name="PicChan06Mode3"          ParameterType="%AID%_PT-PicChan06Mode3"          Text="Anschlussplan" Value="" Access="Read" />
+              <Parameter Id="%AID%_P-%TT%00012" Name="PicChan06Mode4"          ParameterType="%AID%_PT-PicChan06Mode4"          Text="Anschlussplan" Value="" Access="Read" />
+              <Parameter Id="%AID%_P-%TT%00013" Name="PicChan06Mode5"          ParameterType="%AID%_PT-PicChan06Mode5"          Text="Anschlussplan" Value="" Access="Read" />
+              <Parameter Id="%AID%_P-%TT%00033" Name="PicChan06Neutral"    ParameterType="%AID%_PT-PicChan06Neutral"    Text="Anschlussplan" Value="" Access="Read" />
+              <Parameter Id="%AID%_P-%TT%00017" Name="PicChan12Mode0"          ParameterType="%AID%_PT-PicChan12Mode0"          Text="Anschlussplan" Value="" Access="Read" />
+              <Parameter Id="%AID%_P-%TT%00018" Name="PicChan12Mode1"          ParameterType="%AID%_PT-PicChan12Mode1"          Text="Anschlussplan" Value="" Access="Read" />
+              <Parameter Id="%AID%_P-%TT%00019" Name="PicChan12Mode2"          ParameterType="%AID%_PT-PicChan12Mode2"          Text="Anschlussplan" Value="" Access="Read" />
+              <Parameter Id="%AID%_P-%TT%00020" Name="PicChan12Mode3"          ParameterType="%AID%_PT-PicChan12Mode3"          Text="Anschlussplan" Value="" Access="Read" />
+              <Parameter Id="%AID%_P-%TT%00021" Name="PicChan12Mode4"          ParameterType="%AID%_PT-PicChan12Mode4"          Text="Anschlussplan" Value="" Access="Read" />
+              <Parameter Id="%AID%_P-%TT%00022" Name="PicChan12Mode5"          ParameterType="%AID%_PT-PicChan12Mode5"          Text="Anschlussplan" Value="" Access="Read" />
+              <Parameter Id="%AID%_P-%TT%00034" Name="PicChan12Neutral"    ParameterType="%AID%_PT-PicChan12Neutral"    Text="Anschlussplan" Value="" Access="Read" />
+              <Parameter Id="%AID%_P-%TT%00050" Name="PicAppChan06Mode0"       ParameterType="%AID%_PT-PicAppChan06Mode0"       Text="Anschlussplan" Value="" Access="Read" />
+              <Parameter Id="%AID%_P-%TT%00051" Name="PicAppChan06Mode1"       ParameterType="%AID%_PT-PicAppChan06Mode1"       Text="Anschlussplan" Value="" Access="Read" />
+              <Parameter Id="%AID%_P-%TT%00052" Name="PicAppChan06Mode2"       ParameterType="%AID%_PT-PicAppChan06Mode2"       Text="Anschlussplan" Value="" Access="Read" />
+              <Parameter Id="%AID%_P-%TT%00053" Name="PicAppChan06Mode3"       ParameterType="%AID%_PT-PicAppChan06Mode3"       Text="Anschlussplan" Value="" Access="Read" />
+              <Parameter Id="%AID%_P-%TT%00054" Name="PicAppChan06Mode4"       ParameterType="%AID%_PT-PicAppChan06Mode4"       Text="Anschlussplan" Value="" Access="Read" />
+              <Parameter Id="%AID%_P-%TT%00055" Name="PicAppChan06Mode5"       ParameterType="%AID%_PT-PicAppChan06Mode5"       Text="Anschlussplan" Value="" Access="Read" />
+              <Parameter Id="%AID%_P-%TT%00049" Name="PicAppChan06Neutral" ParameterType="%AID%_PT-PicAppChan06Neutral" Text="Anschlussplan" Value="" Access="Read" />
+              <Parameter Id="%AID%_P-%TT%00057" Name="PicAppChan12Mode0"       ParameterType="%AID%_PT-PicAppChan12Mode0"       Text="Anschlussplan" Value="" Access="Read" />
+              <Parameter Id="%AID%_P-%TT%00058" Name="PicAppChan12Mode1"       ParameterType="%AID%_PT-PicAppChan12Mode1"       Text="Anschlussplan" Value="" Access="Read" />
+              <Parameter Id="%AID%_P-%TT%00059" Name="PicAppChan12Mode2"       ParameterType="%AID%_PT-PicAppChan12Mode2"       Text="Anschlussplan" Value="" Access="Read" />
+              <Parameter Id="%AID%_P-%TT%00060" Name="PicAppChan12Mode3"       ParameterType="%AID%_PT-PicAppChan12Mode3"       Text="Anschlussplan" Value="" Access="Read" />
+              <Parameter Id="%AID%_P-%TT%00061" Name="PicAppChan12Mode4"       ParameterType="%AID%_PT-PicAppChan12Mode4"       Text="Anschlussplan" Value="" Access="Read" />
+              <Parameter Id="%AID%_P-%TT%00062" Name="PicAppChan12Mode5"       ParameterType="%AID%_PT-PicAppChan12Mode5"       Text="Anschlussplan" Value="" Access="Read" />
+              <Parameter Id="%AID%_P-%TT%00056" Name="PicAppChan12Neutral" ParameterType="%AID%_PT-PicAppChan12Neutral" Text="Anschlussplan" Value="" Access="Read" />
+            </Parameters>
+
+            <ParameterRefs>
+              <ParameterRef Id="%AID%_UP-%TT%00001_R-%TT%0000101" RefId="%AID%_UP-%TT%00001" />
+              <ParameterRef Id="%AID%_UP-%TT%00002_R-%TT%0000201" RefId="%AID%_UP-%TT%00002" />
+              <ParameterRef Id="%AID%_UP-%TT%00003_R-%TT%0000301" RefId="%AID%_UP-%TT%00003" />
+              <ParameterRef Id="%AID%_UP-%TT%00066_R-%TT%0006601" RefId="%AID%_UP-%TT%00066" />
+              <ParameterRef Id="%AID%_UP-%TT%00004_R-%TT%0000401" RefId="%AID%_UP-%TT%00004" />
+              <ParameterRef Id="%AID%_UP-%TT%00005_R-%TT%0000501" RefId="%AID%_UP-%TT%00005" />
+              <ParameterRef Id="%AID%_UP-%TT%00006_R-%TT%0000601" RefId="%AID%_UP-%TT%00006" />
+              <ParameterRef Id="%AID%_UP-%TT%00007_R-%TT%0000701" RefId="%AID%_UP-%TT%00007" />
+              <ParameterRef Id="%AID%_UP-%TT%00026_R-%TT%0002601" RefId="%AID%_UP-%TT%00026" />
+              <ParameterRef Id="%AID%_UP-%TT%00027_R-%TT%0002701" RefId="%AID%_UP-%TT%00027" />
+              <ParameterRef Id="%AID%_UP-%TT%00028_R-%TT%0002801" RefId="%AID%_UP-%TT%00028" />
+              <ParameterRef Id="%AID%_UP-%TT%00029_R-%TT%0002901" RefId="%AID%_UP-%TT%00029" />
+              <ParameterRef Id="%AID%_UP-%TT%00030_R-%TT%0003001" RefId="%AID%_UP-%TT%00030" />
+              <ParameterRef Id="%AID%_UP-%TT%00035_R-%TT%0003501" RefId="%AID%_UP-%TT%00035" />
+              <ParameterRef Id="%AID%_UP-%TT%00036_R-%TT%0003601" RefId="%AID%_UP-%TT%00036" />
+              <ParameterRef Id="%AID%_UP-%TT%00037_R-%TT%0003701" RefId="%AID%_UP-%TT%00037" />
+              <ParameterRef Id="%AID%_UP-%TT%00038_R-%TT%0003801" RefId="%AID%_UP-%TT%00038" />
+              <ParameterRef Id="%AID%_UP-%TT%00039_R-%TT%0003901" RefId="%AID%_UP-%TT%00039" />
+              <ParameterRef Id="%AID%_UP-%TT%00040_R-%TT%0004001" RefId="%AID%_UP-%TT%00040" />
+              <ParameterRef Id="%AID%_UP-%TT%00041_R-%TT%0004101" RefId="%AID%_UP-%TT%00041" />
+              <ParameterRef Id="%AID%_UP-%TT%00046_R-%TT%0004601" RefId="%AID%_UP-%TT%00046" />
+              <ParameterRef Id="%AID%_UP-%TT%00047_R-%TT%0004701" RefId="%AID%_UP-%TT%00047" />
+              <ParameterRef Id="%AID%_UP-%TT%00048_R-%TT%0004801" RefId="%AID%_UP-%TT%00048" />
+              <ParameterRef Id="%AID%_P-%TT%00042_R-%TT%0004201" RefId="%AID%_P-%TT%00042" />
+              <ParameterRef Id="%AID%_P-%TT%00043_R-%TT%0004301" RefId="%AID%_P-%TT%00043" />
+              <ParameterRef Id="%AID%_P-%TT%00063_R-%TT%0006301" RefId="%AID%_P-%TT%00063" />
+              <ParameterRef Id="%AID%_P-%TT%00064_R-%TT%0006401" RefId="%AID%_P-%TT%00064" />
+              <ParameterRef Id="%AID%_P-%TT%00065_R-%TT%0006501" RefId="%AID%_P-%TT%00065" />
+              <ParameterRef Id="%AID%_P-%TT%00031_R-%TT%0003101" RefId="%AID%_P-%TT%00031" />
+              <ParameterRef Id="%AID%_P-%TT%00044_R-%TT%0004401" RefId="%AID%_P-%TT%00044" />
+              <ParameterRef Id="%AID%_P-%TT%00045_R-%TT%0004501" RefId="%AID%_P-%TT%00045" />
+              <ParameterRef Id="%AID%_P-%TT%00032_R-%TT%0003201" RefId="%AID%_P-%TT%00032" />
+              <ParameterRef Id="%AID%_P-%TT%00008_R-%TT%0000801" RefId="%AID%_P-%TT%00008" />
+              <ParameterRef Id="%AID%_P-%TT%00009_R-%TT%0000901" RefId="%AID%_P-%TT%00009" />
+              <ParameterRef Id="%AID%_P-%TT%00010_R-%TT%0001001" RefId="%AID%_P-%TT%00010" />
+              <ParameterRef Id="%AID%_P-%TT%00011_R-%TT%0001101" RefId="%AID%_P-%TT%00011" />
+              <ParameterRef Id="%AID%_P-%TT%00012_R-%TT%0001201" RefId="%AID%_P-%TT%00012" />
+              <ParameterRef Id="%AID%_P-%TT%00013_R-%TT%0001301" RefId="%AID%_P-%TT%00013" />
+              <ParameterRef Id="%AID%_P-%TT%00033_R-%TT%0003301" RefId="%AID%_P-%TT%00033" />
+              <ParameterRef Id="%AID%_P-%TT%00017_R-%TT%0001701" RefId="%AID%_P-%TT%00017" />
+              <ParameterRef Id="%AID%_P-%TT%00018_R-%TT%0001801" RefId="%AID%_P-%TT%00018" />
+              <ParameterRef Id="%AID%_P-%TT%00019_R-%TT%0001901" RefId="%AID%_P-%TT%00019" />
+              <ParameterRef Id="%AID%_P-%TT%00020_R-%TT%0002001" RefId="%AID%_P-%TT%00020" />
+              <ParameterRef Id="%AID%_P-%TT%00021_R-%TT%0002101" RefId="%AID%_P-%TT%00021" />
+              <ParameterRef Id="%AID%_P-%TT%00022_R-%TT%0002201" RefId="%AID%_P-%TT%00022" />
+              <ParameterRef Id="%AID%_P-%TT%00034_R-%TT%0003401" RefId="%AID%_P-%TT%00034" />
+              <ParameterRef Id="%AID%_P-%TT%00050_R-%TT%0005001" RefId="%AID%_P-%TT%00050" />
+              <ParameterRef Id="%AID%_P-%TT%00051_R-%TT%0005101" RefId="%AID%_P-%TT%00051" />
+              <ParameterRef Id="%AID%_P-%TT%00052_R-%TT%0005201" RefId="%AID%_P-%TT%00052" />
+              <ParameterRef Id="%AID%_P-%TT%00053_R-%TT%0005301" RefId="%AID%_P-%TT%00053" />
+              <ParameterRef Id="%AID%_P-%TT%00054_R-%TT%0005401" RefId="%AID%_P-%TT%00054" />
+              <ParameterRef Id="%AID%_P-%TT%00055_R-%TT%0005501" RefId="%AID%_P-%TT%00055" />
+              <ParameterRef Id="%AID%_P-%TT%00049_R-%TT%0004901" RefId="%AID%_P-%TT%00049" />
+              <ParameterRef Id="%AID%_P-%TT%00057_R-%TT%0005701" RefId="%AID%_P-%TT%00057" />
+              <ParameterRef Id="%AID%_P-%TT%00058_R-%TT%0005801" RefId="%AID%_P-%TT%00058" />
+              <ParameterRef Id="%AID%_P-%TT%00059_R-%TT%0005901" RefId="%AID%_P-%TT%00059" />
+              <ParameterRef Id="%AID%_P-%TT%00060_R-%TT%0006001" RefId="%AID%_P-%TT%00060" />
+              <ParameterRef Id="%AID%_P-%TT%00061_R-%TT%0006101" RefId="%AID%_P-%TT%00061" />
+              <ParameterRef Id="%AID%_P-%TT%00062_R-%TT%0006201" RefId="%AID%_P-%TT%00062" />
+              <ParameterRef Id="%AID%_P-%TT%00056_R-%TT%0005601" RefId="%AID%_P-%TT%00056" />
+            </ParameterRefs>
+
+            <!-- Absolute KO-Nummern, unveraendert zu v0.4 -->
+            <ComObjectTable>
+              <ComObject Id="%AID%_O-%TT%00031" Name="VoltageV"          Number="31" Text="Spannung"               FunctionText="Messwert" ObjectSize="4 Bytes" ReadFlag="Enabled"  WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled"  UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-14-27" />
+              <ComObject Id="%AID%_O-%TT%00032" Name="VoltageVext"       Number="32" Text="Spannung Ext"           FunctionText="Messwert" ObjectSize="4 Bytes" ReadFlag="Enabled"  WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled"  UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-14-27" />
+              <ComObject Id="%AID%_O-%TT%00033" Name="CurrentA"          Number="33" Text="Strom"                  FunctionText="Messwert" ObjectSize="4 Bytes" ReadFlag="Enabled"  WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled"  UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-14-19" />
+              <ComObject Id="%AID%_O-%TT%00034" Name="CurrentAext"       Number="34" Text="Strom Ext"              FunctionText="Messwert" ObjectSize="4 Bytes" ReadFlag="Enabled"  WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled"  UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-14-19" />
+              <ComObject Id="%AID%_O-%TT%00035" Name="PowerW"            Number="35" Text="Wirkleistung"           FunctionText="Messwert" ObjectSize="4 Bytes" ReadFlag="Enabled"  WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled"  UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-14-56" />
+              <ComObject Id="%AID%_O-%TT%00036" Name="PowerWext"         Number="36" Text="Wirkleistung Ext"       FunctionText="Messwert" ObjectSize="4 Bytes" ReadFlag="Enabled"  WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled"  UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-14-56" />
+              <ComObject Id="%AID%_O-%TT%00037" Name="ActivePowerWh"     Number="37" Text="Wirkleistung (Wh)"      FunctionText="Zähler"   ObjectSize="4 Bytes" ReadFlag="Enabled"  WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled"  UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-13-10" />
+              <ComObject Id="%AID%_O-%TT%00038" Name="ActivePowerWhext"  Number="38" Text="Wirkleistung (Wh) Ext"  FunctionText="Zähler"   ObjectSize="4 Bytes" ReadFlag="Enabled"  WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled"  UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-13-10" />
+              <ComObject Id="%AID%_O-%TT%00039" Name="TempC"             Number="39" Text="Gerätetemperatur"       FunctionText="Messwert" ObjectSize="4 Bytes" ReadFlag="Enabled"  WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled"  UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-14-68" />
+              <ComObject Id="%AID%_O-%TT%00040" Name="DayNight"          Number="40" Text="Tag/Nacht"              FunctionText="Allgemein" ObjectSize="1 Bit"  ReadFlag="Disabled" WriteFlag="Enabled"  CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Enabled"  ReadOnInitFlag="Disabled" DatapointType="DPST-1-11" />
+              <ComObject Id="%AID%_O-%TT%00045" Name="AlarmOverVoltage"  Number="45" Text="Überspannung"           FunctionText="Alarm"    ObjectSize="1 Bit"   ReadFlag="Enabled"  WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled"  UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-5" />
+              <ComObject Id="%AID%_O-%TT%00046" Name="AlarmUnderVoltage" Number="46" Text="Unterspannung"          FunctionText="Alarm"    ObjectSize="1 Bit"   ReadFlag="Enabled"  WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled"  UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-5" />
+              <ComObject Id="%AID%_O-%TT%00047" Name="AlarmOverTemp"     Number="47" Text="Übertemperatur"         FunctionText="Alarm"    ObjectSize="1 Bit"   ReadFlag="Enabled"  WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled"  UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-5" />
+              <ComObject Id="%AID%_O-%TT%00048" Name="AlarmOverCurrent"  Number="48" Text="Überstrom"              FunctionText="Alarm"    ObjectSize="1 Bit"   ReadFlag="Enabled"  WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled"  UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-5" />
+            </ComObjectTable>
+            <ComObjectRefs>
+              <ComObjectRef Id="%AID%_O-%TT%00031_R-%TT%0003101" RefId="%AID%_O-%TT%00031" />
+              <ComObjectRef Id="%AID%_O-%TT%00032_R-%TT%0003201" RefId="%AID%_O-%TT%00032" />
+              <ComObjectRef Id="%AID%_O-%TT%00033_R-%TT%0003301" RefId="%AID%_O-%TT%00033" />
+              <ComObjectRef Id="%AID%_O-%TT%00034_R-%TT%0003401" RefId="%AID%_O-%TT%00034" />
+              <ComObjectRef Id="%AID%_O-%TT%00035_R-%TT%0003501" RefId="%AID%_O-%TT%00035" />
+              <ComObjectRef Id="%AID%_O-%TT%00036_R-%TT%0003601" RefId="%AID%_O-%TT%00036" />
+              <ComObjectRef Id="%AID%_O-%TT%00037_R-%TT%0003701" RefId="%AID%_O-%TT%00037" />
+              <ComObjectRef Id="%AID%_O-%TT%00038_R-%TT%0003801" RefId="%AID%_O-%TT%00038" />
+              <ComObjectRef Id="%AID%_O-%TT%00039_R-%TT%0003901" RefId="%AID%_O-%TT%00039" />
+              <ComObjectRef Id="%AID%_O-%TT%00040_R-%TT%0004001" RefId="%AID%_O-%TT%00040" />
+              <ComObjectRef Id="%AID%_O-%TT%00045_R-%TT%0004501" RefId="%AID%_O-%TT%00045" />
+              <ComObjectRef Id="%AID%_O-%TT%00046_R-%TT%0004601" RefId="%AID%_O-%TT%00046" />
+              <ComObjectRef Id="%AID%_O-%TT%00047_R-%TT%0004701" RefId="%AID%_O-%TT%00047" />
+              <ComObjectRef Id="%AID%_O-%TT%00048_R-%TT%0004801" RefId="%AID%_O-%TT%00048" />
+            </ComObjectRefs>
+            <Script>
+              <op:include href="LED.script.js" prefix="APP" type="script" />
+            </Script>
+          </Static>
+
+          <Dynamic>
+            <Channel Id="%AID%_CH-%PREFIX%" Number="%PREFIX%" Name="LED" Text="LED" Icon="led-variant-outline" HelpContext="Empty">
+
+              <!-- ======================= Allgemein ======================= -->
+              <ParameterBlock Id="%AID%_PB-nnn" Name="General" Text="Allgemein" Icon="cog-outline" HelpContext="LED-PageGeneral">
+                <ParameterSeparator Id="%AID%_PS-nnn" Text="LED Dimmer" UIHint="Headline" />
+                <ParameterSeparator Id="%AID%_PS-nnn" Text="Version: %ReleaseVersionText%" />
+                <ParameterSeparator Id="%AID%_PS-nnn" Text="" UIHint="HorizontalRuler" />
+                <ParameterSeparator Id="%AID%_PS-nnn" Text="Betriebsmodus" UIHint="Headline" />
+                <ParameterRefRef RefId="%AID%_UP-%TT%00066_R-%TT%0006601" HelpContext="LED-DeviceSelect" />
+                <!-- Platine -> Geraeteklasse (ControllerType), auf der die Seiten unten aufbauen.
+                     Ohne Auswahl bleibt die Geraeteklasse, wie sie ist, und die Firmware schaltet nichts. -->
+                <choose ParamRefId="%AID%_UP-%TT%00066_R-%TT%0006601">
+                  <when test="0">
+                    <ParameterSeparator Id="%AID%_PS-nnn" Text="Ohne Geräteauswahl schaltet das Gerät keinen Ausgang. Bitte das verbaute Gerät wählen." UIHint="Error" />
+                  </when>
+                  <when test="1 3">
+                    <Assign TargetParamRefRef="%AID%_UP-%TT%00002_R-%TT%0000201" Value="0" />
+                  </when>
+                  <when test="2 4">
+                    <Assign TargetParamRefRef="%AID%_UP-%TT%00002_R-%TT%0000201" Value="1" />
+                  </when>
+                  <when test="5">
+                    <Assign TargetParamRefRef="%AID%_UP-%TT%00002_R-%TT%0000201" Value="2" />
+                  </when>
+                </choose>
+                <!-- Sichtbare Auswahl je Geraeteklasse, uebernommen in den Firmware-Wert
+                     OperatingMode und in die Kanalanzahlen fuer die Sichtbarkeit der Kanalseiten.
+                     Die Anzahlen muessen zu LEDModule::setup() passen. -->
+                <choose ParamRefId="%AID%_UP-%TT%00002_R-%TT%0000201">
+                  <when test="0 2">
+                    <ParameterRefRef RefId="%AID%_P-%TT%00042_R-%TT%0004201" HelpContext="LED-OperatingMode" />
+                    <Assign TargetParamRefRef="%AID%_UP-%TT%00001_R-%TT%0000101" SourceParamRefRef="%AID%_P-%TT%00042_R-%TT%0004201" />
+                    <choose ParamRefId="%AID%_P-%TT%00042_R-%TT%0004201">
+                      <when test="0">
+                        <Assign TargetParamRefRef="%AID%_P-%TT%00063_R-%TT%0006301" Value="6" />
+                        <Assign TargetParamRefRef="%AID%_P-%TT%00064_R-%TT%0006401" Value="0" />
+                        <Assign TargetParamRefRef="%AID%_P-%TT%00065_R-%TT%0006501" Value="0" />
+                      </when>
+                      <when test="1">
+                        <Assign TargetParamRefRef="%AID%_P-%TT%00063_R-%TT%0006301" Value="0" />
+                        <Assign TargetParamRefRef="%AID%_P-%TT%00064_R-%TT%0006401" Value="3" />
+                        <Assign TargetParamRefRef="%AID%_P-%TT%00065_R-%TT%0006501" Value="0" />
+                      </when>
+                      <when test="2">
+                        <Assign TargetParamRefRef="%AID%_P-%TT%00063_R-%TT%0006301" Value="2" />
+                        <Assign TargetParamRefRef="%AID%_P-%TT%00064_R-%TT%0006401" Value="2" />
+                        <Assign TargetParamRefRef="%AID%_P-%TT%00065_R-%TT%0006501" Value="0" />
+                      </when>
+                      <when test="3">
+                        <Assign TargetParamRefRef="%AID%_P-%TT%00063_R-%TT%0006301" Value="0" />
+                        <Assign TargetParamRefRef="%AID%_P-%TT%00064_R-%TT%0006401" Value="0" />
+                        <Assign TargetParamRefRef="%AID%_P-%TT%00065_R-%TT%0006501" Value="2" />
+                      </when>
+                      <when test="4">
+                        <Assign TargetParamRefRef="%AID%_P-%TT%00063_R-%TT%0006301" Value="1" />
+                        <Assign TargetParamRefRef="%AID%_P-%TT%00064_R-%TT%0006401" Value="1" />
+                        <Assign TargetParamRefRef="%AID%_P-%TT%00065_R-%TT%0006501" Value="1" />
+                      </when>
+                      <when test="5">
+                        <Assign TargetParamRefRef="%AID%_P-%TT%00063_R-%TT%0006301" Value="3" />
+                        <Assign TargetParamRefRef="%AID%_P-%TT%00064_R-%TT%0006401" Value="0" />
+                        <Assign TargetParamRefRef="%AID%_P-%TT%00065_R-%TT%0006501" Value="1" />
+                      </when>
+                    </choose>
+                  </when>
+                  <when test="1 3">
+                    <ParameterRefRef RefId="%AID%_P-%TT%00043_R-%TT%0004301" HelpContext="LED-OperatingMode" />
+                    <Assign TargetParamRefRef="%AID%_UP-%TT%00001_R-%TT%0000101" SourceParamRefRef="%AID%_P-%TT%00043_R-%TT%0004301" />
+                    <choose ParamRefId="%AID%_P-%TT%00043_R-%TT%0004301">
+                      <when test="10">
+                        <Assign TargetParamRefRef="%AID%_P-%TT%00063_R-%TT%0006301" Value="12" />
+                        <Assign TargetParamRefRef="%AID%_P-%TT%00064_R-%TT%0006401" Value="0" />
+                        <Assign TargetParamRefRef="%AID%_P-%TT%00065_R-%TT%0006501" Value="0" />
+                      </when>
+                      <when test="11">
+                        <Assign TargetParamRefRef="%AID%_P-%TT%00063_R-%TT%0006301" Value="0" />
+                        <Assign TargetParamRefRef="%AID%_P-%TT%00064_R-%TT%0006401" Value="6" />
+                        <Assign TargetParamRefRef="%AID%_P-%TT%00065_R-%TT%0006501" Value="0" />
+                      </when>
+                      <when test="12">
+                        <Assign TargetParamRefRef="%AID%_P-%TT%00063_R-%TT%0006301" Value="4" />
+                        <Assign TargetParamRefRef="%AID%_P-%TT%00064_R-%TT%0006401" Value="4" />
+                        <Assign TargetParamRefRef="%AID%_P-%TT%00065_R-%TT%0006501" Value="0" />
+                      </when>
+                      <when test="13">
+                        <Assign TargetParamRefRef="%AID%_P-%TT%00063_R-%TT%0006301" Value="0" />
+                        <Assign TargetParamRefRef="%AID%_P-%TT%00064_R-%TT%0006401" Value="0" />
+                        <Assign TargetParamRefRef="%AID%_P-%TT%00065_R-%TT%0006501" Value="4" />
+                      </when>
+                      <when test="14">
+                        <Assign TargetParamRefRef="%AID%_P-%TT%00063_R-%TT%0006301" Value="2" />
+                        <Assign TargetParamRefRef="%AID%_P-%TT%00064_R-%TT%0006401" Value="2" />
+                        <Assign TargetParamRefRef="%AID%_P-%TT%00065_R-%TT%0006501" Value="2" />
+                      </when>
+                      <when test="15">
+                        <Assign TargetParamRefRef="%AID%_P-%TT%00063_R-%TT%0006301" Value="1" />
+                        <Assign TargetParamRefRef="%AID%_P-%TT%00064_R-%TT%0006401" Value="4" />
+                        <Assign TargetParamRefRef="%AID%_P-%TT%00065_R-%TT%0006501" Value="1" />
+                      </when>
+                    </choose>
+                  </when>
+                </choose>
+                <!-- versteckte Hilfsparameter: je genau eine ParameterRefRef, sonst wertet die ETS
+                     keinen choose auf ihnen aus -->
+                <ParameterRefRef RefId="%AID%_UP-%TT%00002_R-%TT%0000201" />
+                <ParameterRefRef RefId="%AID%_UP-%TT%00001_R-%TT%0000101" />
+                <ParameterRefRef RefId="%AID%_P-%TT%00063_R-%TT%0006301" />
+                <ParameterRefRef RefId="%AID%_P-%TT%00064_R-%TT%0006401" />
+                <ParameterRefRef RefId="%AID%_P-%TT%00065_R-%TT%0006501" />
+                <ParameterSeparator Id="%AID%_PS-nnn" Text="Bitte schließe die LEDs entsprechend dem Anschlussplan an." UIHint="Information" />
+                <choose ParamRefId="%AID%_UP-%TT%00002_R-%TT%0000201">
+                  <when test="0">
+                    <choose ParamRefId="%AID%_UP-%TT%00001_R-%TT%0000101">
+                      <when test="0"><ParameterRefRef RefId="%AID%_P-%TT%00008_R-%TT%0000801" /></when>
+                      <when test="1"><ParameterRefRef RefId="%AID%_P-%TT%00009_R-%TT%0000901" /></when>
+                      <when test="2"><ParameterRefRef RefId="%AID%_P-%TT%00010_R-%TT%0001001" /></when>
+                      <when test="3"><ParameterRefRef RefId="%AID%_P-%TT%00011_R-%TT%0001101" /></when>
+                      <when test="4"><ParameterRefRef RefId="%AID%_P-%TT%00012_R-%TT%0001201" /></when>
+                      <when test="5"><ParameterRefRef RefId="%AID%_P-%TT%00013_R-%TT%0001301" /></when>
+                    </choose>
+                  </when>
+                  <when test="1">
+                    <choose ParamRefId="%AID%_UP-%TT%00001_R-%TT%0000101">
+                      <when test="10"><ParameterRefRef RefId="%AID%_P-%TT%00017_R-%TT%0001701" /></when>
+                      <when test="11"><ParameterRefRef RefId="%AID%_P-%TT%00018_R-%TT%0001801" /></when>
+                      <when test="12"><ParameterRefRef RefId="%AID%_P-%TT%00019_R-%TT%0001901" /></when>
+                      <when test="13"><ParameterRefRef RefId="%AID%_P-%TT%00020_R-%TT%0002001" /></when>
+                      <when test="14"><ParameterRefRef RefId="%AID%_P-%TT%00021_R-%TT%0002101" /></when>
+                      <when test="15"><ParameterRefRef RefId="%AID%_P-%TT%00022_R-%TT%0002201" /></when>
+                    </choose>
+                  </when>
+                  <when test="2">
+                    <choose ParamRefId="%AID%_UP-%TT%00001_R-%TT%0000101">
+                      <when test="0"><ParameterRefRef RefId="%AID%_P-%TT%00050_R-%TT%0005001" /></when>
+                      <when test="1"><ParameterRefRef RefId="%AID%_P-%TT%00051_R-%TT%0005101" /></when>
+                      <when test="2"><ParameterRefRef RefId="%AID%_P-%TT%00052_R-%TT%0005201" /></when>
+                      <when test="3"><ParameterRefRef RefId="%AID%_P-%TT%00053_R-%TT%0005301" /></when>
+                      <when test="4"><ParameterRefRef RefId="%AID%_P-%TT%00054_R-%TT%0005401" /></when>
+                      <when test="5"><ParameterRefRef RefId="%AID%_P-%TT%00055_R-%TT%0005501" /></when>
+                    </choose>
+                  </when>
+                  <when test="3">
+                    <choose ParamRefId="%AID%_UP-%TT%00001_R-%TT%0000101">
+                      <when test="10"><ParameterRefRef RefId="%AID%_P-%TT%00057_R-%TT%0005701" /></when>
+                      <when test="11"><ParameterRefRef RefId="%AID%_P-%TT%00058_R-%TT%0005801" /></when>
+                      <when test="12"><ParameterRefRef RefId="%AID%_P-%TT%00059_R-%TT%0005901" /></when>
+                      <when test="13"><ParameterRefRef RefId="%AID%_P-%TT%00060_R-%TT%0006001" /></when>
+                      <when test="14"><ParameterRefRef RefId="%AID%_P-%TT%00061_R-%TT%0006101" /></when>
+                      <when test="15"><ParameterRefRef RefId="%AID%_P-%TT%00062_R-%TT%0006201" /></when>
+                    </choose>
+                  </when>
+                </choose>
+              </ParameterBlock>
+
+              <!-- ======================= Einstellungen ======================= -->
+              <ParameterBlock Id="%AID%_PB-nnn" Name="Configuration" Text="Einstellungen" Icon="tune" HelpContext="LED-PageConfiguration">
+                <ParameterSeparator Id="%AID%_PS-nnn" Text="Globale Einstellungen" UIHint="Headline" />
+                <ParameterRefRef RefId="%AID%_UP-%TT%00003_R-%TT%0000301" HelpContext="LED-PwmFrequenz" />
+                <ParameterRefRef RefId="%AID%_UP-%TT%00026_R-%TT%0002601" HelpContext="LED-DayNight" />
+                <ComObjectRefRef RefId="%AID%_O-%TT%00040_R-%TT%0004001" />
+                <ParameterSeparator Id="%AID%_PS-nnn" Text="" UIHint="HorizontalRuler" />
+                <ParameterSeparator Id="%AID%_PS-nnn" Text="Funktionstaste konfigurieren" UIHint="Headline" />
+                <!-- Funktionstaste nur auf Platinen mit FUNC1_BUTTON_PIN (alle ausser LED-DK-6x24V V1.0) -->
+                <choose ParamRefId="%AID%_UP-%TT%00066_R-%TT%0006601">
+                  <when test="1">
+                    <ParameterSeparator Id="%AID%_PS-nnn" Text="Die LED-DK-6x24V V1.0 hat keine Funktionstaste." UIHint="Information" />
+                  </when>
+                  <when test="0 2 3 4 5">
+                    <ParameterRefRef RefId="%AID%_UP-%TT%00027_R-%TT%0002701" HelpContext="LED-Func1Action" />
+                    <ParameterRefRef RefId="%AID%_UP-%TT%00028_R-%TT%0002801" HelpContext="LED-Func1Action" />
+                    <ParameterRefRef RefId="%AID%_UP-%TT%00029_R-%TT%0002901" HelpContext="LED-Func1Action" />
+                  </when>
+                </choose>
+              </ParameterBlock>
+
+              <!-- ======================= Messungen ======================= -->
+              <ParameterBlock Id="%AID%_PB-nnn" Name="Measurements" Text="Messungen" Icon="gauge" HelpContext="LED-PageMeasurements" ShowInComObjectTree="true">
+                <ParameterSeparator Id="%AID%_PS-nnn" Text="Messwerte konfigurieren" UIHint="Headline" />
+                <ParameterRefRef RefId="%AID%_UP-%TT%00007_R-%TT%0000701" HelpContext="LED-ShuntValue" />
+                <ParameterRefRef RefId="%AID%_UP-%TT%00004_R-%TT%0000401" HelpContext="LED-SendMeasuredValues" />
+                <choose ParamRefId="%AID%_UP-%TT%00004_R-%TT%0000401">
+                  <when test="1">
+                    <ParameterBlock Id="%AID%_PB-nnn" Name="MeasurementInterval" Inline="true" Layout="Grid">
+                      <Rows>
+                        <Row Id="%AID%_PB-nnn_R-1" Name="Row1" />
+                      </Rows>
+                      <Columns>
+                        <Column Id="%AID%_PB-nnn_C-1" Name="Col1" Width="45%" />
+                        <Column Id="%AID%_PB-nnn_C-2" Name="Col2" Width="15%" />
+                        <Column Id="%AID%_PB-nnn_C-3" Name="Col3" Width="20%" />
+                      </Columns>
+                      <ParameterSeparator Id="%AID%_PS-nnn" Text="Messwerte senden alle" Cell="1,1" />
+                      <ParameterRefRef RefId="%AID%_UP-%TT%00006_R-%TT%0000601" Cell="1,2" HelpContext="LED-MeasurementInterval" />
+                      <ParameterRefRef RefId="%AID%_UP-%TT%00030_R-%TT%0003001" Cell="1,3" HelpContext="LED-MeasurementInterval" />
+                    </ParameterBlock>
+                    <ComObjectRefRef RefId="%AID%_O-%TT%00031_R-%TT%0003101" />
+                    <ComObjectRefRef RefId="%AID%_O-%TT%00033_R-%TT%0003301" />
+                    <ComObjectRefRef RefId="%AID%_O-%TT%00035_R-%TT%0003501" />
+                    <ComObjectRefRef RefId="%AID%_O-%TT%00037_R-%TT%0003701" />
+                    <choose ParamRefId="%AID%_UP-%TT%00002_R-%TT%0000201">
+                      <when test="3">
+                        <ComObjectRefRef RefId="%AID%_O-%TT%00032_R-%TT%0003201" />
+                        <ComObjectRefRef RefId="%AID%_O-%TT%00034_R-%TT%0003401" />
+                        <ComObjectRefRef RefId="%AID%_O-%TT%00036_R-%TT%0003601" />
+                        <ComObjectRefRef RefId="%AID%_O-%TT%00038_R-%TT%0003801" />
+                      </when>
+                    </choose>
+                  </when>
+                </choose>
+                <ParameterSeparator Id="%AID%_PS-nnn" Text="" UIHint="HorizontalRuler" />
+                <ParameterRefRef RefId="%AID%_UP-%TT%00005_R-%TT%0000501" HelpContext="LED-TempSensorPresent" />
+                <choose ParamRefId="%AID%_UP-%TT%00005_R-%TT%0000501">
+                  <when test="1">
+                    <ComObjectRefRef RefId="%AID%_O-%TT%00039_R-%TT%0003901" />
+                  </when>
+                </choose>
+              </ParameterBlock>
+
+              <!-- ======================= Alarme ======================= -->
+              <ParameterBlock Id="%AID%_PB-nnn" Name="Alarm" Text="Alarme" Icon="alert-box-outline" HelpContext="LED-PageAlarm" ShowInComObjectTree="true">
+                <ParameterSeparator Id="%AID%_PS-nnn" Text="Geräteschutz und Alarmfunktionen" UIHint="Headline" />
+                <ParameterSeparator Id="%AID%_PS-nnn" Text="Hier können Schwellwerte für den Geräteschutz konfiguriert werden. Bei Aktivierung wird ein entsprechendes Alarm-KO angezeigt und entsprechend der konfigurierten Schwellwerte ausgelöst." />
+                <ParameterSeparator Id="%AID%_PS-nnn" Text="" UIHint="HorizontalRuler" />
+                <ParameterSeparator Id="%AID%_PS-nnn" Text="Über- und Unterspannungsschutz" UIHint="Headline" />
+                <ParameterRefRef RefId="%AID%_UP-%TT%00035_R-%TT%0003501" HelpContext="LED-AlarmVoltage" />
+                <choose ParamRefId="%AID%_UP-%TT%00035_R-%TT%0003501">
+                  <when test="1">
+                    <ParameterRefRef RefId="%AID%_UP-%TT%00038_R-%TT%0003801" HelpContext="LED-AlarmVoltage" />
+                    <ParameterRefRef RefId="%AID%_UP-%TT%00039_R-%TT%0003901" HelpContext="LED-AlarmVoltage" />
+                    <ComObjectRefRef RefId="%AID%_O-%TT%00045_R-%TT%0004501" />
+                    <ComObjectRefRef RefId="%AID%_O-%TT%00046_R-%TT%0004601" />
+                  </when>
+                </choose>
+                <ParameterSeparator Id="%AID%_PS-nnn" Text="" UIHint="HorizontalRuler" />
+                <ParameterSeparator Id="%AID%_PS-nnn" Text="Überstromschutz" UIHint="Headline" />
+                <ParameterRefRef RefId="%AID%_UP-%TT%00037_R-%TT%0003701" HelpContext="LED-AlarmOverCurrent" />
+                <choose ParamRefId="%AID%_UP-%TT%00037_R-%TT%0003701">
+                  <when test="1">
+                    <ParameterRefRef RefId="%AID%_UP-%TT%00041_R-%TT%0004101" HelpContext="LED-AlarmOverCurrent" />
+                    <ComObjectRefRef RefId="%AID%_O-%TT%00048_R-%TT%0004801" />
+                  </when>
+                </choose>
+                <choose ParamRefId="%AID%_UP-%TT%00005_R-%TT%0000501">
+                  <when test="1">
+                    <ParameterSeparator Id="%AID%_PS-nnn" Text="" UIHint="HorizontalRuler" />
+                    <ParameterSeparator Id="%AID%_PS-nnn" Text="Temperaturschutz" UIHint="Headline" />
+                    <ParameterRefRef RefId="%AID%_UP-%TT%00036_R-%TT%0003601" HelpContext="LED-AlarmOverTemp" />
+                    <choose ParamRefId="%AID%_UP-%TT%00036_R-%TT%0003601">
+                      <when test="1">
+                        <ParameterRefRef RefId="%AID%_UP-%TT%00040_R-%TT%0004001" HelpContext="LED-AlarmOverTemp" />
+                        <ComObjectRefRef RefId="%AID%_O-%TT%00047_R-%TT%0004701" />
+                      </when>
+                    </choose>
+                  </when>
+                </choose>
+              </ParameterBlock>
+
+              <!-- ======================= Bedienfeld ======================= -->
+              <ParameterBlock Id="%AID%_PB-nnn" Name="FrontPanel" Text="Bedienfeld" Icon="button-pointer" HelpContext="LED-PageFrontPanel" ShowInComObjectTree="true">
+                <ParameterSeparator Id="%AID%_PS-nnn" Text="Bedienfeld" UIHint="Headline" />
+                <!-- Bedienfeld nur auf Platinen mit FRONT_PANEL_PRESENT (LED-DK V1.2) -->
+                <choose ParamRefId="%AID%_UP-%TT%00066_R-%TT%0006601">
+                  <when test="1 2">
+                    <ParameterSeparator Id="%AID%_PS-nnn" Text="Die LED-DK mit Hardware V1.0 hat keinen Anschluss für ein Bedienfeld. Das Bedienfeld gibt es ab Hardware V1.2." UIHint="Information" />
+                  </when>
+                  <when test="3 4">
+                    <ParameterSeparator Id="%AID%_PS-nnn" Text="Bitte wähle aus, ob ein Bedienfeld verbaut und angeschlossen ist." UIHint="Information" />
+                    <ParameterRefRef RefId="%AID%_UP-%TT%00047_R-%TT%0004701" HelpContext="LED-FrontPanelPresent" />
+                    <choose ParamRefId="%AID%_UP-%TT%00047_R-%TT%0004701">
+                      <when test="1">
+                        <ParameterRefRef RefId="%AID%_UP-%TT%00046_R-%TT%0004601" HelpContext="LED-DisplayTimeOut" />
+                        <ParameterRefRef RefId="%AID%_UP-%TT%00048_R-%TT%0004801" HelpContext="LED-FrontPanelControl" />
+                      </when>
+                    </choose>
+                  </when>
+                  <when test="5">
+                    <ParameterSeparator Id="%AID%_PS-nnn" Text="Du verwendest eine Applikationsplatine für das Reg1. Hier kann kein Bedienfeld angeschlossen werden. Die vorhandenen Funktionstasten können unter Einstellungen konfiguriert werden." UIHint="Information" />
+                  </when>
+                </choose>
+              </ParameterBlock>
+
+              <!-- ======================= Funktionstests ======================= -->
+              <ParameterBlock Id="%AID%_PB-nnn" Name="TestCenter" Text="Funktionstests" Icon="test-tube" HelpContext="LED-PageTestCenter">
+                <ParameterSeparator Id="%AID%_PS-nnn" Text="Funktionstests" UIHint="Headline" />
+                <ParameterSeparator Id="%AID%_PS-nnn" Text="Bitte wähle den entsprechenden Kanal und die Aktion. Über den Button Ausführen kannst Du die Aktion starten." UIHint="Information" />
+                <choose ParamRefId="%AID%_UP-%TT%00002_R-%TT%0000201">
+                  <when test="0"><ParameterRefRef RefId="%AID%_P-%TT%00033_R-%TT%0003301" /></when>
+                  <when test="1"><ParameterRefRef RefId="%AID%_P-%TT%00034_R-%TT%0003401" /></when>
+                  <when test="2"><ParameterRefRef RefId="%AID%_P-%TT%00049_R-%TT%0004901" /></when>
+                  <when test="3"><ParameterRefRef RefId="%AID%_P-%TT%00056_R-%TT%0005601" /></when>
+                </choose>
+                <ParameterSeparator Id="%AID%_PS-nnn" Text="" UIHint="HorizontalRuler" />
+                <choose ParamRefId="%AID%_UP-%TT%00002_R-%TT%0000201">
+                  <when test="0 2">
+                    <ParameterRefRef RefId="%AID%_P-%TT%00044_R-%TT%0004401" HelpContext="LED-FunctionTest" />
+                    <Assign TargetParamRefRef="%AID%_P-%TT%00031_R-%TT%0003101" SourceParamRefRef="%AID%_P-%TT%00044_R-%TT%0004401" />
+                  </when>
+                  <when test="1 3">
+                    <ParameterRefRef RefId="%AID%_P-%TT%00045_R-%TT%0004501" HelpContext="LED-FunctionTest" />
+                    <Assign TargetParamRefRef="%AID%_P-%TT%00031_R-%TT%0003101" SourceParamRefRef="%AID%_P-%TT%00045_R-%TT%0004501" />
+                  </when>
+                </choose>
+                <ParameterRefRef RefId="%AID%_P-%TT%00031_R-%TT%0003101" />
+                <ParameterRefRef RefId="%AID%_P-%TT%00032_R-%TT%0003201" HelpContext="LED-FunctionTest" />
+                <ParameterSeparator Id="%AID%_PS-nnn" Text="" UIHint="HorizontalRuler" />
+                <Button Id="%AID%_B-%TT%00001" Name="OnOffAction" Text="Ausführen" Icon="button-pointer" EventHandler="APP_buttonOnOffAction" EventHandlerOnline="ConnectionOriented" />
+              </ParameterBlock>
+
+              <!-- ======================= Kanalseiten ======================= -->
+              <op:include href="EK.share.xml" xpath="//Dynamic/ChannelIndependentBlock/*" prefix="EK" />
+              <op:include href="TW.share.xml" xpath="//Dynamic/ChannelIndependentBlock/*" prefix="TW" />
+              <op:include href="RGB.share.xml" xpath="//Dynamic/ChannelIndependentBlock/*" prefix="RGB" />
+            </Channel>
+          </Dynamic>
+        </ApplicationProgram>
+      </ApplicationPrograms>
+      <Baggages>
+        <Baggage TargetPath="" Name="Help_de.zip" Id="%FILE-HELP-de%"><FileInfo TimeInfo="%DATETIME%" /></Baggage>
+        <Baggage TargetPath="" Name="Icons.zip" Id="%FILE-ICONS%"><FileInfo TimeInfo="%DATETIME%" /></Baggage>
+        <Baggage TargetPath="" Name="dimcurve.png" Id="%FILE-dimcurve%"><FileInfo TimeInfo="%DATETIME%" /></Baggage>
+        <Baggage TargetPath="" Name="chan06_0.png" Id="%FILE-chan06_0%"><FileInfo TimeInfo="%DATETIME%" /></Baggage>
+        <Baggage TargetPath="" Name="chan06_1.png" Id="%FILE-chan06_1%"><FileInfo TimeInfo="%DATETIME%" /></Baggage>
+        <Baggage TargetPath="" Name="chan06_2.png" Id="%FILE-chan06_2%"><FileInfo TimeInfo="%DATETIME%" /></Baggage>
+        <Baggage TargetPath="" Name="chan06_3.png" Id="%FILE-chan06_3%"><FileInfo TimeInfo="%DATETIME%" /></Baggage>
+        <Baggage TargetPath="" Name="chan06_4.png" Id="%FILE-chan06_4%"><FileInfo TimeInfo="%DATETIME%" /></Baggage>
+        <Baggage TargetPath="" Name="chan06_5.png" Id="%FILE-chan06_5%"><FileInfo TimeInfo="%DATETIME%" /></Baggage>
+        <Baggage TargetPath="" Name="chan06_neutral.png" Id="%FILE-chan06_neutral%"><FileInfo TimeInfo="%DATETIME%" /></Baggage>
+        <Baggage TargetPath="" Name="chan12_0.png" Id="%FILE-chan12_0%"><FileInfo TimeInfo="%DATETIME%" /></Baggage>
+        <Baggage TargetPath="" Name="chan12_1.png" Id="%FILE-chan12_1%"><FileInfo TimeInfo="%DATETIME%" /></Baggage>
+        <Baggage TargetPath="" Name="chan12_2.png" Id="%FILE-chan12_2%"><FileInfo TimeInfo="%DATETIME%" /></Baggage>
+        <Baggage TargetPath="" Name="chan12_3.png" Id="%FILE-chan12_3%"><FileInfo TimeInfo="%DATETIME%" /></Baggage>
+        <Baggage TargetPath="" Name="chan12_4.png" Id="%FILE-chan12_4%"><FileInfo TimeInfo="%DATETIME%" /></Baggage>
+        <Baggage TargetPath="" Name="chan12_5.png" Id="%FILE-chan12_5%"><FileInfo TimeInfo="%DATETIME%" /></Baggage>
+        <Baggage TargetPath="" Name="chan12_neutral.png" Id="%FILE-chan12_neutral%"><FileInfo TimeInfo="%DATETIME%" /></Baggage>
+        <Baggage TargetPath="" Name="app_chan06_0.png" Id="%FILE-app_chan06_0%"><FileInfo TimeInfo="%DATETIME%" /></Baggage>
+        <Baggage TargetPath="" Name="app_chan06_1.png" Id="%FILE-app_chan06_1%"><FileInfo TimeInfo="%DATETIME%" /></Baggage>
+        <Baggage TargetPath="" Name="app_chan06_2.png" Id="%FILE-app_chan06_2%"><FileInfo TimeInfo="%DATETIME%" /></Baggage>
+        <Baggage TargetPath="" Name="app_chan06_3.png" Id="%FILE-app_chan06_3%"><FileInfo TimeInfo="%DATETIME%" /></Baggage>
+        <Baggage TargetPath="" Name="app_chan06_4.png" Id="%FILE-app_chan06_4%"><FileInfo TimeInfo="%DATETIME%" /></Baggage>
+        <Baggage TargetPath="" Name="app_chan06_5.png" Id="%FILE-app_chan06_5%"><FileInfo TimeInfo="%DATETIME%" /></Baggage>
+        <Baggage TargetPath="" Name="app_chan06_neutral.png" Id="%FILE-app_chan06_neutral%"><FileInfo TimeInfo="%DATETIME%" /></Baggage>
+        <Baggage TargetPath="" Name="app_chan12_0.png" Id="%FILE-app_chan12_0%"><FileInfo TimeInfo="%DATETIME%" /></Baggage>
+        <Baggage TargetPath="" Name="app_chan12_1.png" Id="%FILE-app_chan12_1%"><FileInfo TimeInfo="%DATETIME%" /></Baggage>
+        <Baggage TargetPath="" Name="app_chan12_2.png" Id="%FILE-app_chan12_2%"><FileInfo TimeInfo="%DATETIME%" /></Baggage>
+        <Baggage TargetPath="" Name="app_chan12_3.png" Id="%FILE-app_chan12_3%"><FileInfo TimeInfo="%DATETIME%" /></Baggage>
+        <Baggage TargetPath="" Name="app_chan12_4.png" Id="%FILE-app_chan12_4%"><FileInfo TimeInfo="%DATETIME%" /></Baggage>
+        <Baggage TargetPath="" Name="app_chan12_5.png" Id="%FILE-app_chan12_5%"><FileInfo TimeInfo="%DATETIME%" /></Baggage>
+        <Baggage TargetPath="" Name="app_chan12_neutral.png" Id="%FILE-app_chan12_neutral%"><FileInfo TimeInfo="%DATETIME%" /></Baggage>
+      </Baggages>
+    </Manufacturer>
+  </ManufacturerData>
+</KNX>

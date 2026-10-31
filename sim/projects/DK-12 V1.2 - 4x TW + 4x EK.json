@@ -1,0 +1,39 @@
+{
+ "name": "DK-12 V1.2 - 4x TW + 4x EK",
+ "board": "DK_12_V12",
+ "values": {
+  "APP_Hardware": 4,
+  "APP_OperatingModeCh12": 12,
+  "APP_FrontPanelPresent": 1,
+  "APP_TempSensorPresent": 1,
+  "APP_AlarmUseOverCurrent": 1,
+  "APP_AlarmUseOverTemp": 1,
+  "APP_Func1BtnClick": 3,
+  "APP_Func1BtnLongClick": 2,
+  "TW_1Name": "Wohnzimmer",
+  "TW_2Name": "Küche",
+  "TW_3Name": "Flur",
+  "TW_4Name": "Bad",
+  "EK_1Name": "Spiegel",
+  "EK_2Name": "Treppe",
+  "EK_3Name": "Terrasse",
+  "EK_4Name": "Keller"
+ },
+ "hw": {
+  "portW": [
+   10,
+   10,
+   8,
+   8,
+   6,
+   6,
+   9,
+   9,
+   15,
+   12,
+   20,
+   6
+  ],
+  "time": "2026-10-30 07:30"
+ }
+}
